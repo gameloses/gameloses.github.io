@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>小站</title>
+  <icon>https://www.gravatar.com/avatar/4505263839f74e5822c8f4942340f9e4</icon>
+  <subtitle>技术小站</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="https://gameloses.github.io/"/>
+  <updated>2018-11-23T12:55:44.000Z</updated>
+  <id>https://gameloses.github.io/</id>
+  
+  <author>
+    <name>stephen.sun</name>
+    <email>sunfeng80@foxmail.com</email>
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>cocos2dx引擎架构概述</title>
+    <link href="https://gameloses.github.io/2018/11/23/cocos2dx%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84%E6%A6%82%E8%BF%B0/"/>
+    <id>https://gameloses.github.io/2018/11/23/cocos2dx引擎架构概述/</id>
+    <published>2018-11-23T12:51:11.000Z</published>
+    <updated>2018-11-23T12:55:44.000Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="游戏引擎" scheme="https://gameloses.github.io/categories/%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E/"/>
+    
+      <category term="cocos2dx" scheme="https://gameloses.github.io/categories/%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E/cocos2dx/"/>
+    
+    
+      <category term="游戏引擎架构" scheme="https://gameloses.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84/"/>
+    
+      <category term="cocos2dx" scheme="https://gameloses.github.io/tags/cocos2dx/"/>
+    
+      <category term="cocos2dx游戏引擎架构" scheme="https://gameloses.github.io/tags/cocos2dx%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hello GitHub Blog</title>
+    <link href="https://gameloses.github.io/2018/11/23/hello-github-blog/"/>
+    <id>https://gameloses.github.io/2018/11/23/hello-github-blog/</id>
+    <published>2018-11-22T16:00:00.000Z</published>
+    <updated>2018-11-23T12:48:58.454Z</updated>
+    
+    <content type="html"><![CDATA[<p>打算使用github、hexo、gitbook 做一个个人的博客,记录这些年的技术积淀。从游戏客户端开发服务器开发到区块链，都是些经验之谈。权当是自己的学习笔记了。</p><h2 id="hexo-安装"><a href="#hexo-安装" class="headerlink" title="hexo 安装"></a>hexo 安装</h2><h2 id="gitbook-安装"><a href="#gitbook-安装" class="headerlink" title="gitbook 安装"></a>gitbook 安装</h2><h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;打算使用github、hexo、gitbook 做一个个人的博客,记录这些年的技术积淀。从游戏客户端开发服务器开发到区块链，都是些经验之谈。权当是自己的学习笔记了。&lt;/p&gt;
+&lt;h2 id=&quot;hexo-安装&quot;&gt;&lt;a href=&quot;#hexo-安装&quot; class=&quot;head
+      
+    
+    </summary>
+    
+      <category term="web" scheme="https://gameloses.github.io/categories/web/"/>
+    
+      <category term="hexo" scheme="https://gameloses.github.io/categories/web/hexo/"/>
+    
+    
+      <category term="hexo" scheme="https://gameloses.github.io/tags/hexo/"/>
+    
+      <category term="gitbook" scheme="https://gameloses.github.io/tags/gitbook/"/>
+    
+      <category term="github blog" scheme="https://gameloses.github.io/tags/github-blog/"/>
+    
+  </entry>
+  
+</feed>
