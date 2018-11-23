@@ -41,20 +41,19 @@
   </entry>
   
   <entry>
-    <title>Hello GitHub Blog</title>
+    <title>使用hexo在github上搭建blog</title>
     <link href="https://gameloses.github.io/2018/11/23/hello-github-blog/"/>
     <id>https://gameloses.github.io/2018/11/23/hello-github-blog/</id>
     <published>2018-11-22T16:00:00.000Z</published>
-    <updated>2018-11-23T13:59:56.316Z</updated>
+    <updated>2018-11-23T15:17:30.178Z</updated>
     
-    <content type="html"><![CDATA[<p>打算使用github、hexo、gitbook 做一个个人的博客,记录这些年的技术积淀.从游戏客户端开发服务器开发到区块2链,都是些经验之谈.权当是自己的学习笔记了.</p><h2 id="hexo-安装"><a href="#hexo-安装" class="headerlink" title="hexo 安装"></a>hexo 安装</h2><h2 id="gitbook-安装"><a href="#gitbook-安装" class="headerlink" title="gitbook 安装"></a>gitbook 安装</h2><h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2>]]></content>
+    <content type="html"><![CDATA[<p>打算在github上搭建起hexo博客和gitbook,主要记录一些技术积累.涉及游戏开前后端区块链等.解读一些开源的库.像skynet,pomelo,kbengine,coco2dx,cocos creator,ETH,goworld等.本文记录一下搭建hexo的过程纯属经验之谈.</p><h3 id="安装前提"><a href="#安装前提" class="headerlink" title="安装前提"></a>安装前提</h3><ul><li>node.js<blockquote><p>mac下注意npm对user/local的权限问题</p></blockquote></li><li>git  <blockquote><p>保证使用ssh和github进行认证测试通过：ssh -T <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>.</p></blockquote></li><li>创建github仓库<blockquote><p>例如github用户名为gameloses则仓库名为:gameloses.github.io</p></blockquote><h3 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br><span class="line">hexo init blog</span><br><span class="line">cd blog</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure></li></ul><h3 id="配置hexo"><a href="#配置hexo" class="headerlink" title="配置hexo"></a>配置hexo</h3><h4 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h4><p>在 _config.yml 中修改大部份的配置  </p><ul><li><p>配置部署参数</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repository: git@github.com:gameloses/gameloses.github.io.git</span><br><span class="line">  branch: master</span><br><span class="line">```   </span><br><span class="line">- 安装部署插件</span><br></pre></td></tr></table></figure><p>cd blog //blog为项目目录<br>npm install hexo-deployer-git –save</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- 发布上传博客  </span><br><span class="line">`hexo d -g`</span><br><span class="line">- 常见的其他命令</span><br></pre></td></tr></table></figure></li></ul><p>hexo s == hexo server   //启动本地服务<br>hexo g == hexo generate //生成<br>hexo d == hexo deploy   //发布<br>hexo n == hexo new      //新建<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#### 书写文章</span><br><span class="line">`hexo new post &quot;文章名字&quot;`  </span><br><span class="line">使用模板生成文章</span><br></pre></td></tr></table></figure></p><hr><p>title: cocos2dx引擎架构概述<br>comments: true<br>date: 2018-11-23 20:51:11<br>tags:</p><ul><li>游戏引擎架构</li><li>cocos2dx</li><li>cocos2dx游戏引擎架构<br>categories:</li><li>游戏引擎</li><li>cocos2dx</li></ul><hr><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#### 分类标签</span><br><span class="line">为了使分类标签生效需要生成两个page文件</span><br></pre></td></tr></table></figure><p>hexo new page categories<br>hexo new page tags<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#### 主题配置   </span><br><span class="line">一个模仿github样式的主题</span><br></pre></td></tr></table></figure></p><p>git clone <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>:sabrinaluo/hexo-theme-replica.git themes/replica<br><code>`</code><br>Set theme: replica in _config.yml (the one in your root folder)  </p><h4 id="QA"><a href="#QA" class="headerlink" title="QA"></a>QA</h4>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;打算使用github、hexo、gitbook 做一个个人的博客,记录这些年的技术积淀.从游戏客户端开发服务器开发到区块2链,都是些经验之谈.权当是自己的学习笔记了.&lt;/p&gt;
-&lt;h2 id=&quot;hexo-安装&quot;&gt;&lt;a href=&quot;#hexo-安装&quot; class=&quot;hea
+        &lt;p&gt;打算在github上搭建起hexo博客和gitbook,主要记录一些技术积累.涉及游戏开前后端区块链等.解读一些开源的库.像skynet,pomelo,kbengine,coco2dx,cocos creator,ETH,goworld等.本文记录一下搭建hexo的过程纯属
       
     
     </summary>
@@ -65,10 +64,6 @@
     
     
       <category term="hexo" scheme="https://gameloses.github.io/tags/hexo/"/>
-    
-      <category term="gitbook" scheme="https://gameloses.github.io/tags/gitbook/"/>
-    
-      <category term="github blog" scheme="https://gameloses.github.io/tags/github-blog/"/>
     
   </entry>
   
