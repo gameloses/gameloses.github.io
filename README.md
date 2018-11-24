@@ -2,8 +2,9 @@ blog by stephen.sun
 # 恢复博客
 1. 安装git、nodejs
 2. git clone git@github.com:gameloses/gameloses.github.io.git
-3. git checkout dev
-4. 在文件夹内执行命令:
+3. git checkout -b dev origin/dev #checout远程dev分支创建本地dev分支
+4. git checkout dev
+5. 在文件夹内执行命令:
 ```
   npm install hexo-cli -g
   npm install
