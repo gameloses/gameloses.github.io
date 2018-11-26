@@ -4,7 +4,9 @@ blog by stephen.sun
 2. git clone git@github.com:gameloses/gameloses.github.io.git
 3. git checkout -b dev origin/dev #checout远程dev分支创建本地dev分支
 4. git checkout dev
-5. 在文件夹内执行命令:
+5. git submodule init
+6. git submodule update
+7. 在文件夹内执行命令:
 ```
   npm install hexo-cli -g
   npm install
