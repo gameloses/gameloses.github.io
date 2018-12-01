@@ -39,6 +39,6 @@ disqus_username:
 #在 https://github.com/settings/applications/new 注册
 
 gitment_owner: gameloses
-gitment_repo: gameloses.github.io
+gitment_repo: Gitment
 gitment_client_id: 3d20a6f37d52d8bc99d7
 gitment_client_secret: c4efb254324463278a7b4788b14bb998aae4be54

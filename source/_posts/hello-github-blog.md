@@ -1,4 +1,3 @@
-
 ---
 title: github上搭建hexo博客
 comments: true
@@ -16,10 +15,13 @@ categories:
 
 ### 安装前提
 - node.js
+
   > mac下注意npm对user/local的权限问题
 - git  
+
   > 保证使用ssh和github进行认证测试通过：ssh -T git@github.com.
 - 创建github仓库
+
   > 例如github用户名为gameloses则仓库名为:gameloses.github.io
 
 ### 安装hexo
@@ -53,20 +55,18 @@ npm install
   hexo d == hexo deploy   //发布
   hexo n == hexo new      //新建
   ```
+
 #### 书写文章
+
 `hexo new post "文章名字"`  
 使用模板生成文章
+
 ```  
 title: cocos2dx引擎架构概述
 comments: true
 date: 2018-11-23 20:51:11
 tags:
-- 游戏引擎架构
-- cocos2dx
-- cocos2dx游戏引擎架构
 categories:
-- 游戏引擎
-- cocos2dx
 ```
 #### 分类标签
 为了使分类标签生效需要生成两个page文件
@@ -82,13 +82,13 @@ git clone git@github.com:sabrinaluo/hexo-theme-replica.git themes/replica
 
 Set theme: replica in _config.yml (the one in your root folder)     
 #### 安装插件
-- 安装rss   
+安装rss
 `npm install hero-generator-feed`
 配置如下：
+
 ```
 plugin:
 - hexo-generator-feed
-#Feed Atom
 feed:
 type: atom
 path: atom.xml
