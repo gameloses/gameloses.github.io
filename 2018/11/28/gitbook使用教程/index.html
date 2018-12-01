@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans" prefix="og: http://ogp.me/ns#" class="han-init">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <link rel="icon" href="/favicon.ico">
+  
+  <title>小峰知识库 | gitbook使用教程</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/lib/fancybox/jquery.fancybox-1.3.4.css">
+  <!--在这里倒入jquery 方便处理部分页面的jquery-->
+  <script src="https://cdn.staticfile.org/jquery/1.7/jquery.min.js" type="text/javascript"></script>
+</head></html>
+
+<body>
+	<header class="site-header navfixed-false">
+  <div class="container">
+      <h1><a href="/" title="小峰知识库"><span class="octicon octicon-mark-github"></span> 小峰知识库</a></h1>
+      <nav class="site-header-nav" role="navigation">
+        
+              
+              <a href="/" class=" site-header-nav-item hvr-underline-from-center" title="Home">Home</a>
+        
+              
+              <a href="/categories/" class=" site-header-nav-item hvr-underline-from-center" title="Category">Category</a>
+        
+              
+              <a href="/open-source/" class=" site-header-nav-item hvr-underline-from-center" title="OpenSource">OpenSource</a>
+        
+              
+              <a href="/gitbook/" class=" site-header-nav-item hvr-underline-from-center" title="MyBook">MyBook</a>
+        
+              
+              <a href="/about/" class=" site-header-nav-item hvr-underline-from-center" title="About">About</a>
+        
+      </nav>
+  </div>
+</header>
+
+	
+<section class="collection-head geopattern" data-pattern-id="gitbook使用教程">
+    <div class="container">
+        <div class="collection-title">
+            <h1 class="collection-header">
+                gitbook使用教程
+            </h1>
+            
+                <div class="collection-info">
+                    <span class="meta-info">
+                        <span class="octicon octicon-calendar"></span>
+                        <time datetime="2018-11-28T10:23:58.000Z" itemprop="datePublished">2018-11-28</time>
+                    </span>
+                    
+                        <span class="meta-info">
+                            <span class="octicon octicon-file-directory"></span>
+                            <a href="/categories/web/" title="">web</a>
+                        </span>
+                    
+                </div>
+            
+        </div>
+    </div>
+</section>
+	<section class="container">
+    <div class="columns">
+        <div class="column  three-fourths ">
+            <article class="article-content markdown-body">
+                <p>Gitbook的搭建</p>
+<p>gitbook是一个npm工具使用的是git和markdown技术支持构建多种格式的ebook.</p>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><pre><code>npm install gitbook-cli
+gitbook -V
+</code></pre><h1 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h1><p>创建一个空目录,生成README.md SUMMARY.md两个文件,使用如下命令</p>
+<p><code>gitbook init</code></p>
+<ul>
+<li>README.md —— 书籍的介绍写在这个文件里</li>
+<li>SUMMARY.md —— 书籍的目录结构在这里配置</li>
+</ul>
+<h1 id="编辑电子书"><a href="#编辑电子书" class="headerlink" title="编辑电子书"></a>编辑电子书</h1><p>目录编辑</p>
+<pre><code>* [第一章](section1/README.md)
+    * [第一节](section1/example1.md)
+    * [第二节](section1/example2.md)
+* [第二章](section2/README.md)
+    * [第一节](section2/example1.md)
+</code></pre><p>目录支持三级，目录中可以带链接.名录名+链接的方式.链接即相对md文件名字.</p>
+<h1 id="本地预览"><a href="#本地预览" class="headerlink" title="本地预览"></a>本地预览</h1><p><code>gitbook serve</code></p>
+<h1 id="发布电子书"><a href="#发布电子书" class="headerlink" title="发布电子书"></a>发布电子书</h1><p><code>gitbook build</code></p>
+<p>在本地目录生成_book静态网页电子书</p>
+<h1 id="生成电子书"><a href="#生成电子书" class="headerlink" title="生成电子书"></a>生成电子书</h1><p>安装插件calibre. <a href="https://link.jianshu.com/?t=https://calibre-ebook.com/download" target="_blank" rel="noopener">https://calibre-ebook.com/download</a></p>
+<p>添加环境变量：</p>
+<pre><code>cd ~
+vim .bash_profile
+PATH = /Applications/calibre.app/Contents/MacOS:${PATH}&quot;
+source .bash_profile
+</code></pre><p>生成电子书命令如下：</p>
+<pre><code>gitbook pdf
+gitbook mobi
+</code></pre><h1 id="部署到github"><a href="#部署到github" class="headerlink" title="部署到github"></a>部署到github</h1><p>利用gh-pages将gitbook生成的静态网页发布到github pages上.</p>
+<ol>
+<li><p>安装gh-pages <code>npm install g gh-pages</code> </p>
+</li>
+<li><p>在github上创建仓库例如cocos2dx</p>
+</li>
+<li><p>将书籍源码push到仓库的master分支</p>
+</li>
+<li><p>将_book发布到github仓库的gh-pages分支</p>
+<pre><code>gitbook build
+gh-pages -d _book
+</code></pre></li>
+</ol>
+
+            </article>
+            
+                <div class="share">
+                    <!--开启分享-->
+<div class="share-component" data-disabled="google,twitter,facebook" data-description=""></div>
+
+<script src="/js/share.min.js"></script>
+
+                </div>    
+            
+
+            
+            
+                
+<div class="comments">
+    <div id="container"></div>
+        <script src="/js/gitment.browser.js"></script>
+         <script>
+            var gitment = new Gitment({
+                id: '/2018/11/28/gitbook使用教程/',
+                owner: 'gameloses',
+                repo: 'Gitment',
+                oauth: {
+                    client_id: "3d20a6f37d52d8bc99d7",
+                    client_secret: "c4efb254324463278a7b4788b14bb998aae4be54",
+                }
+            })
+        gitment.render('container')
+        </script>
+</div>
+
+            
+
+        </div>
+        <div class="column one-fourth">
+            
+                
+                
+
+
+<h3>Post Directory</h3>
+
+<div id="post-directory-module">
+	<section class="post-directory">
+		<p><strong class="toc-title">文章目录</strong></p>
+		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#安装"><span class="toc-text">安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#初始化"><span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#编辑电子书"><span class="toc-text">编辑电子书</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#本地预览"><span class="toc-text">本地预览</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#发布电子书"><span class="toc-text">发布电子书</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#生成电子书"><span class="toc-text">生成电子书</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#部署到github"><span class="toc-text">部署到github</span></a></li></ol>
+	</section>
+</div>
+            
+        </div>
+    </div>
+</section>
+</body>
+<footer class="container">
+    <div class="site-footer" role="contentinfo">
+        <div class="copyright left mobile-block">
+                © 2018
+                <span title="yumemor">gameloses</span>
+                <a href="javascript:window.scrollTo(0,0)" class="right mobile-visible">TOP</a>
+        </div>
+
+        <ul class="site-footer-links right mobile-hidden">
+            <li>
+                <a href="javascript:window.scrollTo(0,0)">TOP</a>
+            </li>
+        </ul>
+
+        <a href="https://github.com/gameloses/" target="_blank" aria-label="view source code">
+            <span class="mega-octicon octicon-mark-github" title="GitHub"></span>
+        </a>
+
+        <ul class="site-footer-links mobile-hidden">
+            
+                  
+                  <li>
+                    <a href="/" title="Home">Home</a>
+                  </li>
+            
+                  
+                  <li>
+                    <a href="/categories/" title="Category">Category</a>
+                  </li>
+            
+                  
+                  <li>
+                    <a href="/open-source/" title="OpenSource">OpenSource</a>
+                  </li>
+            
+                  
+                  <li>
+                    <a href="/gitbook/" title="MyBook">MyBook</a>
+                  </li>
+            
+                  
+                  <li>
+                    <a href="/about/" title="About">About</a>
+                  </li>
+            
+            <li>
+                <a href="/atom.xml">
+                    <span class="octicon octicon-rss" style="color:orange;"></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</footer>
+
+		<script src="/js/geopattern.js"></script>
+		<script src="/js/highlight.pack.js"></script>
+		<script src="/lib/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+
+		
+			<script src="/js/toc.js"></script>
+		
+
+		<script src="/js/index.js"></script>
+
+		 <script src="/js/popular_repo.js"></script> 
+
+	
