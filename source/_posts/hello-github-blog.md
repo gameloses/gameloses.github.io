@@ -7,7 +7,6 @@ tags:
 - hexo
 categories:
 - web
-- hexo
 ---
 
 
