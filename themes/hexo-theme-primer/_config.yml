@@ -6,25 +6,28 @@ menus:
 		name: Category
 		link: categories/
 	- 
-		name: Open-Source
+		name: OpenSource
 		link: open-source/
 	- 
-		name: Message
-		link: message/
-
-profile:
-	location: ChengDu, China
-	github: yumemor
-	#stackoverflow: 
-		#title: yumemor
-		#href: http://stackoverflow.com/users/5662132/yumemor
-	#organization: 组织/公司
-
+	  name: MyBook
+		link: gitbook/
+	- 
+	  name: About
+	  link: about/
+#仓库配置
 github: 
-	username: yumemor
-  popular_repos: [hexo-theme-primer]
+	username: gameloses
+  popular_repos: [cocos2dx_lua_skynet_client]
 
 search: local #google｜local
+#个人信息
+profile:
+    location: ShenZhen
+    github: gameloses
+    #stackoverflow:
+        #title: 
+        #href: 
+    organization: open #组织或者公司
 
 
 # 多说已关闭 目前支持 Disqus 和 Gitmet(两者选一)
@@ -35,7 +38,7 @@ disqus_username:
 #Giemtn 是基于repo的issus的评论系统，项目地址: https://github.com/imsun/gitment
 #在 https://github.com/settings/applications/new 注册
 
-# gitment_owner: github_id
-# gitment_repo: 存放评论的repo
-# gitment_client_id: 申请的client_id
-# gitment_client_secret: 申请的client_secret
+gitment_owner: gameloses
+gitment_repo: gameloses.github.io
+gitment_client_id: 3d20a6f37d52d8bc99d7
+gitment_client_secret: c4efb254324463278a7b4788b14bb998aae4be54
