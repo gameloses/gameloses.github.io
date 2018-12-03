@@ -49,20 +49,10 @@
     
     <summary type="html">
     
-      golang开发笔记
-涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软件的解读.
-
-leaf goworld 等教程. 同时会有一些游戏demo展示.
-
-跳转链接：
-
-golang深度解析
-
-leaf解析
-
-goworld解析
-
-https://gameloses.github.io/golang/
+      
+      
+        &lt;h4 id=&quot;golang开发笔记&quot;&gt;&lt;a href=&quot;#golang开发笔记&quot; class=&quot;headerlink&quot; title=&quot;golang开发笔记&quot;&gt;&lt;/a&gt;golang开发笔记&lt;/h4&gt;&lt;p&gt;涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软
+      
     
     </summary>
     
@@ -92,29 +82,12 @@ https://gameloses.github.io/golang/
     
     <summary type="html">
     
-      Gitbook的搭建
-
-gitbook是一个npm工具使用的是git和markdown技术支持构建多种格式的ebook.
-
-安装
-npm install gitbook-cli
-gitbook -V
-
-
-初始化
-创建一个空目录,生成README.md SUMMARY.md两个文件,使用如下命令
-
-gitbook init
-
- * README.md —— 书籍的介绍写在这个文件里
- * SUMMARY.md —— 书籍的目录结构在这里配置
-
-编辑电子书
-目录编辑
-
-* [第一章](section1/README.md)
-    * [第一节](section1/example1.md)
-   
+      
+      
+        &lt;p&gt;Gitbook的搭建&lt;/p&gt;
+&lt;p&gt;gitbook是一个npm工具使用的是git和markdown技术支持构建多种格式的ebook.&lt;/p&gt;
+&lt;h4 id=&quot;安装&quot;&gt;&lt;a href=&quot;#安装&quot; class=&quot;headerlink&quot; title=&quot;安装&quot;&gt;&lt;/a&gt;安装&lt;/h4
+      
     
     </summary>
     
