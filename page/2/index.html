@@ -153,25 +153,25 @@
         
           <p>Gitbook的搭建</p>
 <p>gitbook是一个npm工具使用的是git和markdown技术支持构建多种格式的ebook.</p>
-<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><pre><code>npm install gitbook-cli
+<h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><pre><code>npm install gitbook-cli
 gitbook -V
-</code></pre><h1 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h1><p>创建一个空目录,生成README.md SUMMARY.md两个文件,使用如下命令</p>
+</code></pre><h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>创建一个空目录,生成README.md SUMMARY.md两个文件,使用如下命令</p>
 <p><code>gitbook init</code></p>
 <ul>
 <li>README.md —— 书籍的介绍写在这个文件里</li>
 <li>SUMMARY.md —— 书籍的目录结构在这里配置</li>
 </ul>
-<h1 id="编辑电子书"><a href="#编辑电子书" class="headerlink" title="编辑电子书"></a>编辑电子书</h1><p>目录编辑</p>
+<h4 id="编辑电子书"><a href="#编辑电子书" class="headerlink" title="编辑电子书"></a>编辑电子书</h4><p>目录编辑</p>
 <pre><code>* [第一章](section1/README.md)
     * [第一节](section1/example1.md)
     * [第二节](section1/example2.md)
 * [第二章](section2/README.md)
     * [第一节](section2/example1.md)
 </code></pre><p>目录支持三级，目录中可以带链接.名录名+链接的方式.链接即相对md文件名字.</p>
-<h1 id="本地预览"><a href="#本地预览" class="headerlink" title="本地预览"></a>本地预览</h1><p><code>gitbook serve</code></p>
-<h1 id="发布电子书"><a href="#发布电子书" class="headerlink" title="发布电子书"></a>发布电子书</h1><p><code>gitbook build</code></p>
+<h4 id="本地预览"><a href="#本地预览" class="headerlink" title="本地预览"></a>本地预览</h4><p><code>gitbook serve</code></p>
+<h4 id="发布电子书"><a href="#发布电子书" class="headerlink" title="发布电子书"></a>发布电子书</h4><p><code>gitbook build</code></p>
 <p>在本地目录生成_book静态网页电子书</p>
-<h1 id="生成电子书"><a href="#生成电子书" class="headerlink" title="生成电子书"></a>生成电子书</h1><p>安装插件calibre. <a href="https://link.jianshu.com/?t=https://calibre-ebook.com/download" target="_blank" rel="noopener">https://calibre-ebook.com/download</a></p>
+<h4 id="生成电子书"><a href="#生成电子书" class="headerlink" title="生成电子书"></a>生成电子书</h4><p>安装插件calibre. <a href="https://link.jianshu.com/?t=https://calibre-ebook.com/download" target="_blank" rel="noopener">https://calibre-ebook.com/download</a></p>
 <p>添加环境变量：</p>
 <pre><code>cd ~
 vim .bash_profile
@@ -180,7 +180,7 @@ source .bash_profile
 </code></pre><p>生成电子书命令如下：</p>
 <pre><code>gitbook pdf
 gitbook mobi
-</code></pre><h1 id="部署到github"><a href="#部署到github" class="headerlink" title="部署到github"></a>部署到github</h1><p>利用gh-pages将gitbook生成的静态网页发布到github pages上.</p>
+</code></pre><h4 id="部署到github"><a href="#部署到github" class="headerlink" title="部署到github"></a>部署到github</h4><p>利用gh-pages将gitbook生成的静态网页发布到github pages上.</p>
 <ol>
 <li><p>安装gh-pages <code>npm install g gh-pages</code> </p>
 </li>
@@ -231,8 +231,8 @@ gh-pages -d _book
       <div class="repo-list-description">
         
           <p>打算在github上搭建起hexo博客和gitbook,主要记录一些技术积累.涉及游戏开前后端区块链等.解读一些开源的库.像skynet,pomelo,kbengine,coco2dx,cocos creator,ETH,goworld等.本文记录一下搭建hexo的过程纯属经验之谈.</p>
-<h5 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h5>
-<h3 id="安装前提"><a href="#安装前提" class="headerlink" title="安装前提"></a>安装前提</h3><ul>
+<h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4>
+<h4 id="安装前提"><a href="#安装前提" class="headerlink" title="安装前提"></a>安装前提</h4><ul>
 <li><p>node.js</p>
 <blockquote>
 <p>mac下注意npm对user/local的权限问题</p>
@@ -249,11 +249,11 @@ gh-pages -d _book
 </blockquote>
 </li>
 </ul>
-<h3 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h3><pre><code>npm install -g hexo-cli
+<h4 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h4><pre><code>npm install -g hexo-cli
 hexo init blog
 cd blog
 npm install
-</code></pre><h3 id="配置hexo"><a href="#配置hexo" class="headerlink" title="配置hexo"></a>配置hexo</h3><h4 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h4><p>在 _config.yml 中修改大部份的配置  </p>
+</code></pre><h4 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h4><p>在 _config.yml 中修改大部份的配置  </p>
 <ul>
 <li>配置部署参数<pre><code>deploy:
   type: git
@@ -290,7 +290,9 @@ type: atom
 path: atom.xml
 limit: 20
 rss: /atom.xml
-</code></pre><h4 id="QA"><a href="#QA" class="headerlink" title="QA"></a>QA</h4><ol>
+</code></pre><h4 id="绑定域名"><a href="#绑定域名" class="headerlink" title="绑定域名"></a>绑定域名</h4><p>添加WWW和@主机记录，记录类型为CNAME.</p>
+<p> 在source目录下创建CNAME文件，文件内容为域名例如：chuangyutime.com</p>
+<h4 id="QA"><a href="#QA" class="headerlink" title="QA"></a>QA</h4><ol>
 <li>mac下node安装好之后使用npm安装全局包会出现usr/local目录权限读写问题？<br><code>sudo chown -R $USER /usr/local</code><br>修改权限之后使用ls -l /usr/local 查看权限</li>
 <li>分类标签404？<br>需要创建两个page categories、tags</li>
 <li>vscode 编写markdown回退文本之后以后存在特殊的bs字符问题？<br>显示隐藏字符 <code>&quot;editor.renderControlCharacters&quot;: true</code><br>安装插件：<code>Remove backspace control character</code><br>开启设置：<code>&quot;editor.formatOnType&quot;: true 在被设定的情况下，进行变换时;输入时启动</code></li>
