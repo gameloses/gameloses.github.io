@@ -10,10 +10,13 @@ categories:
 
 
 打算在github上搭建起hexo博客和gitbook,主要记录一些技术积累.涉及游戏开前后端区块链等.解读一些开源的库.像skynet,pomelo,kbengine,coco2dx,cocos creator,ETH,goworld等.本文记录一下搭建hexo的过程纯属经验之谈.
-### 基本流程
+
+#### 基本流程
+
 {% asset_img hexo_github.png %}
 
-### 安装前提
+#### 安装前提
+
 - node.js
 
   > mac下注意npm对user/local的权限问题
@@ -24,15 +27,16 @@ categories:
 
   > 例如github用户名为gameloses则仓库名为:gameloses.github.io
 
-### 安装hexo
+#### 安装hexo
+
 ```
 npm install -g hexo-cli
 hexo init blog
 cd blog
 npm install
 ```
-### 配置hexo   
 #### 基本配置   
+
 在 _config.yml 中修改大部份的配置  
 - 配置部署参数
   ```
@@ -96,7 +100,14 @@ limit: 20
 rss: /atom.xml
 ```
 
+#### 绑定域名
+
+添加WWW和@主机记录，记录类型为CNAME.
+
+ 在source目录下创建CNAME文件，文件内容为域名例如：chuangyutime.com
+
 #### QA     
+
 1. mac下node安装好之后使用npm安装全局包会出现usr/local目录权限读写问题？
 `sudo chown -R $USER /usr/local`
 修改权限之后使用ls -l /usr/local 查看权限
