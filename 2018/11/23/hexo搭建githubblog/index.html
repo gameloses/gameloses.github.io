@@ -69,7 +69,7 @@
         <div class="column  three-fourths ">
             <article class="article-content markdown-body">
                 <p>打算在github上搭建起hexo博客和gitbook,主要记录一些技术积累.涉及游戏开前后端区块链等.解读一些开源的库.像skynet,pomelo,kbengine,coco2dx,cocos creator,ETH,goworld等.本文记录一下搭建hexo的过程纯属经验之谈.</p>
-<h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4>
+<h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4><img src="/2018/11/23/hexo搭建githubblog/hexo_github.png" title="基本流程">
 <h4 id="安装前提"><a href="#安装前提" class="headerlink" title="安装前提"></a>安装前提</h4><ul>
 <li><p>node.js</p>
 <blockquote>
@@ -93,16 +93,35 @@ cd blog
 npm install
 </code></pre><h4 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h4><p>在 _config.yml 中修改大部份的配置  </p>
 <ul>
-<li>配置部署参数<pre><code>deploy:
+<li><p>配置部署参数</p>
+<pre><code>deploy:
   type: git
   repository: git@github.com:gameloses/gameloses.github.io.git
   branch: master
 </code></pre></li>
-<li>安装部署插件      <pre><code>cd blog
+<li><p>安装部署插件      </p>
+<pre><code>cd blog
 npm install hexo-deployer-git --save
 </code></pre></li>
-<li>发布上传博客<br><code>hexo d -g</code></li>
-<li>常见的其他命令<pre><code>hexo s == hexo server   //启动本地服务
+<li><p>安装首页文章显示插件</p>
+<p><code>npm install --save hexo-auto-excerpt</code></p>
+<p>设置显示字数：</p>
+<p>auto_excerpt:</p>
+<p>  enable: true</p>
+<p>  length: 300</p>
+</li>
+<li><p>手动添加文章描述</p>
+<p><code>npm install --save hexo-front-matter-excerpt</code></p>
+<p>在文章标题描述中添加：excerpt: xxxxxxxx 或者文章中添加 “<a id="more"></a>“</p>
+</li>
+<li><p>文章资源文件夹</p>
+<pre><code>post_asset_folder: true
+{% asset_img example.jpg This is an example image %}
+</code></pre></li>
+<li><p>发布上传博客<br><code>hexo d -g</code></p>
+</li>
+<li><p>常见的其他命令</p>
+<pre><code>hexo s == hexo server   //启动本地服务
 hexo g == hexo generate //生成
 hexo d == hexo deploy   //发布
 hexo n == hexo new      //新建
@@ -140,7 +159,7 @@ rss: /atom.xml
             
                 <div class="share">
                     <!--开启分享-->
-<div class="share-component" data-disabled="google,twitter,facebook" data-description=""></div>
+<div class="share-component" data-disabled="google,twitter,facebook" data-description="使用hexo搭建博客并且部署在github上,在过程中..."></div>
 
 <script src="/js/share.min.js"></script>
 
@@ -155,7 +174,7 @@ rss: /atom.xml
         <script src="/js/gitment.browser.js"></script>
          <script>
             var gitment = new Gitment({
-                id: '/2018/11/23/hello-github-blog/',
+                id: '/2018/11/23/hexo搭建githubblog/',
                 owner: 'gameloses',
                 repo: 'Gitment',
                 oauth: {
