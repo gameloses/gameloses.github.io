@@ -1,51 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search>
-  <entry>
-    <title><![CDATA[cocos2dx性能优化]]></title>
-    <url>%2F2018%2F12%2F03%2Fcocos2dx%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%2F</url>
-    <content type="text"><![CDATA[]]></content>
+<search> 
+  
+    
+    <entry>
+      <title>cocos2dx性能优化</title>
+      <link href="/2018/12/03/cocos2dx%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
+      <url>/2018/12/03/cocos2dx%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/</url>
+      
+        <content type="html"><![CDATA[<img src="/2018/12/03/cocos2dx性能优化/hexo_github.png" title="ceshi">]]></content>
+      
+      
       <categories>
-        <category>cocos2dx</category>
+          
+          <category> cocos2dx </category>
+          
       </categories>
-      <tags>
-        <tag>cocos2dx</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[golang服务器开发]]></title>
-    <url>%2F2018%2F11%2F30%2Fgolang%2F</url>
-    <content type="text"><![CDATA[golang开发笔记涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软件的解读. leaf goworld 等教程. 同时会有一些游戏demo展示. 跳转链接： golang深度解析 leaf解析 goworld解析 https://gameloses.github.io/golang/]]></content>
+      
+      
+        <tags>
+            
+            <tag> cocos2dx </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>golang服务器开发</title>
+      <link href="/2018/11/30/golang/"/>
+      <url>/2018/11/30/golang/</url>
+      
+        <content type="html"><![CDATA[<h4 id="golang开发笔记"><a href="#golang开发笔记" class="headerlink" title="golang开发笔记"></a>golang开发笔记</h4><p>涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软件的解读.</p><p>leaf goworld 等教程. 同时会有一些游戏demo展示.</p><blockquote><p>跳转链接：</p></blockquote><p><a href="https://gameloses.github.io/golang/">golang深度解析</a></p><p><a href="https://gameloses.github.io/golang/">leaf解析</a></p><p><a href="https://gameloses.github.io/golang/">goworld解析</a></p><p><a href="https://gameloses.github.io/golang/">https://gameloses.github.io/golang/</a></p>]]></content>
+      
+      
       <categories>
-        <category>golang</category>
+          
+          <category> golang </category>
+          
       </categories>
-      <tags>
-        <tag>golang</tag>
-        <tag>go</tag>
-        <tag>游戏服务器</tag>
-        <tag>leaf</tag>
-        <tag>goworld</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[gitbook使用]]></title>
-    <url>%2F2018%2F11%2F28%2Fgitbook%2F</url>
-    <content type="text"><![CDATA[Gitbook的搭建 gitbook是一个npm工具使用的是git和markdown技术支持构建多种格式的ebook. 安装npm install gitbook-cli gitbook -V 初始化创建一个空目录,生成README.md SUMMARY.md两个文件,使用如下命令 gitbook init README.md —— 书籍的介绍写在这个文件里 SUMMARY.md —— 书籍的目录结构在这里配置 编辑电子书目录编辑 * [第一章](section1/README.md) * [第一节](section1/example1.md) * [第二节](section1/example2.md) * [第二章](section2/README.md) * [第一节](section2/example1.md) 目录支持三级，目录中可以带链接.名录名+链接的方式.链接即相对md文件名字. 本地预览gitbook serve 发布电子书gitbook build 在本地目录生成_book静态网页电子书 生成电子书安装插件calibre. https://calibre-ebook.com/download 添加环境变量： cd ~ vim .bash_profile PATH = /Applications/calibre.app/Contents/MacOS:${PATH}&quot; source .bash_profile 生成电子书命令如下： gitbook pdf gitbook mobi 部署到github利用gh-pages将gitbook生成的静态网页发布到github pages上. 安装gh-pages npm install g gh-pages 在github上创建仓库例如cocos2dx 将书籍源码push到仓库的master分支 将_book发布到github仓库的gh-pages分支 gitbook build gh-pages -d _book]]></content>
+      
+      
+        <tags>
+            
+            <tag> golang </tag>
+            
+            <tag> go </tag>
+            
+            <tag> 游戏服务器 </tag>
+            
+            <tag> leaf </tag>
+            
+            <tag> goworld </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>gitbook使用</title>
+      <link href="/2018/11/28/gitbook/"/>
+      <url>/2018/11/28/gitbook/</url>
+      
+        <content type="html"><![CDATA[<p>Gitbook的搭建</p><p>gitbook是一个npm工具使用的是git和markdown技术支持构建多种格式的ebook.</p><h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><pre><code>npm install gitbook-cligitbook -V</code></pre><h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>创建一个空目录,生成README.md SUMMARY.md两个文件,使用如下命令</p><p><code>gitbook init</code></p><ul><li>README.md —— 书籍的介绍写在这个文件里</li><li>SUMMARY.md —— 书籍的目录结构在这里配置</li></ul><h4 id="编辑电子书"><a href="#编辑电子书" class="headerlink" title="编辑电子书"></a>编辑电子书</h4><p>目录编辑</p><pre><code>* [第一章](section1/README.md)    * [第一节](section1/example1.md)    * [第二节](section1/example2.md)* [第二章](section2/README.md)    * [第一节](section2/example1.md)</code></pre><p>目录支持三级，目录中可以带链接.名录名+链接的方式.链接即相对md文件名字.</p><h4 id="本地预览"><a href="#本地预览" class="headerlink" title="本地预览"></a>本地预览</h4><p><code>gitbook serve</code></p><h4 id="发布电子书"><a href="#发布电子书" class="headerlink" title="发布电子书"></a>发布电子书</h4><p><code>gitbook build</code></p><p>在本地目录生成_book静态网页电子书</p><h4 id="生成电子书"><a href="#生成电子书" class="headerlink" title="生成电子书"></a>生成电子书</h4><p>安装插件calibre. <a href="https://link.jianshu.com/?t=https://calibre-ebook.com/download" target="_blank" rel="noopener">https://calibre-ebook.com/download</a></p><p>添加环境变量：</p><pre><code>cd ~vim .bash_profilePATH = /Applications/calibre.app/Contents/MacOS:${PATH}&quot;source .bash_profile</code></pre><p>生成电子书命令如下：</p><pre><code>gitbook pdfgitbook mobi</code></pre><h4 id="部署到github"><a href="#部署到github" class="headerlink" title="部署到github"></a>部署到github</h4><p>利用gh-pages将gitbook生成的静态网页发布到github pages上.</p><ol><li><p>安装gh-pages <code>npm install g gh-pages</code> </p></li><li><p>在github上创建仓库例如cocos2dx</p></li><li><p>将书籍源码push到仓库的master分支</p></li><li><p>将_book发布到github仓库的gh-pages分支</p><pre><code>gitbook buildgh-pages -d _book</code></pre></li></ol>]]></content>
+      
+      
       <categories>
-        <category>web</category>
+          
+          <category> web </category>
+          
       </categories>
-      <tags>
-        <tag>Gitbook</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[github上搭建hexo博客]]></title>
-    <url>%2F2018%2F11%2F23%2Fhexo%E6%90%AD%E5%BB%BAgithubblog%2F</url>
-    <content type="text"><![CDATA[打算在github上搭建起hexo博客和gitbook,主要记录一些技术积累.涉及游戏开前后端区块链等.解读一些开源的库.像skynet,pomelo,kbengine,coco2dx,cocos creator,ETH,goworld等.本文记录一下搭建hexo的过程纯属经验之谈. 基本流程 安装前提 node.js mac下注意npm对user/local的权限问题 git 保证使用ssh和github进行认证测试通过：ssh -T git@github.com. 创建github仓库 例如github用户名为gameloses则仓库名为:gameloses.github.io 安装hexonpm install -g hexo-cli hexo init blog cd blog npm install 基本配置在 _config.yml 中修改大部份的配置 配置部署参数 deploy: type: git repository: git@github.com:gameloses/gameloses.github.io.git branch: master 安装部署插件 cd blog npm install hexo-deployer-git --save 安装首页文章显示插件 npm install --save hexo-auto-excerpt 设置显示字数： auto_excerpt: enable: true length: 300 手动添加文章描述 npm install --save hexo-front-matter-excerpt 在文章标题描述中添加：excerpt: xxxxxxxx 或者文章中添加 ““ 文章资源文件夹 post_asset_folder: true {% asset_img example.jpg This is an example image %} 发布上传博客hexo d -g 常见的其他命令 hexo s == hexo server //启动本地服务 hexo g == hexo generate //生成 hexo d == hexo deploy //发布 hexo n == hexo new //新建 书写文章hexo new post &quot;文章名字&quot;使用模板生成文章 title: cocos2dx引擎架构概述 comments: true date: 2018-11-23 20:51:11 tags: categories: 分类标签为了使分类标签生效需要生成两个page文件 hexo new page categories hexo new page tags 主题配置一个模仿github样式的主题 git clone git@github.com:sabrinaluo/hexo-theme-replica.git themes/replica Set theme: replica in _config.yml (the one in your root folder) 安装插件安装rssnpm install hero-generator-feed配置如下： plugin: - hexo-generator-feed feed: type: atom path: atom.xml limit: 20 rss: /atom.xml 绑定域名添加WWW和@主机记录，记录类型为CNAME. 在source目录下创建CNAME文件，文件内容为域名例如：chuangyutime.com QA mac下node安装好之后使用npm安装全局包会出现usr/local目录权限读写问题？sudo chown -R $USER /usr/local修改权限之后使用ls -l /usr/local 查看权限 分类标签404？需要创建两个page categories、tags vscode 编写markdown回退文本之后以后存在特殊的bs字符问题？显示隐藏字符 &quot;editor.renderControlCharacters&quot;: true安装插件：Remove backspace control character开启设置：&quot;editor.formatOnType&quot;: true 在被设定的情况下，进行变换时;输入时启动]]></content>
+      
+      
+        <tags>
+            
+            <tag> Gitbook </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>github上搭建hexo博客</title>
+      <link href="/2018/11/23/hexo%E6%90%AD%E5%BB%BAgithubblog/"/>
+      <url>/2018/11/23/hexo%E6%90%AD%E5%BB%BAgithubblog/</url>
+      
+        <content type="html"><![CDATA[<p>打算在github上搭建起hexo博客和gitbook,主要记录一些技术积累.涉及游戏开前后端区块链等.解读一些开源的库.像skynet,pomelo,kbengine,coco2dx,cocos creator,ETH,goworld等.本文记录一下搭建hexo的过程纯属经验之谈.</p><h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4><img src="/2018/11/23/hexo搭建githubblog/hexo_github.png" title="基本流程"><h4 id="安装前提"><a href="#安装前提" class="headerlink" title="安装前提"></a>安装前提</h4><ul><li><p>node.js</p><blockquote><p>mac下注意npm对user/local的权限问题</p></blockquote></li><li><p>git  </p><blockquote><p>保证使用ssh和github进行认证测试通过：ssh -T <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>.</p></blockquote></li><li><p>创建github仓库</p><blockquote><p>例如github用户名为gameloses则仓库名为:gameloses.github.io</p></blockquote></li></ul><h4 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h4><pre><code>npm install -g hexo-clihexo init blogcd blognpm install</code></pre><h4 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h4><p>在 _config.yml 中修改大部份的配置  </p><ul><li><p>配置部署参数</p><pre><code>deploy:  type: git  repository: git@github.com:gameloses/gameloses.github.io.git  branch: master</code></pre></li><li><p>安装部署插件      </p><pre><code>cd blognpm install hexo-deployer-git --save</code></pre></li><li><p>安装首页文章显示插件</p><p><code>npm install --save hexo-auto-excerpt</code></p><p>设置显示字数：</p><p>auto_excerpt:</p><p>  enable: true</p><p>  length: 300</p></li><li><p>手动添加文章描述</p><p><code>npm install --save hexo-front-matter-excerpt</code></p><p>在文章标题描述中添加：excerpt: xxxxxxxx 或者文章中添加 “<a id="more"></a>“</p></li><li><p>文章资源文件夹</p><pre><code>post_asset_folder: true{% asset_img example.jpg This is an example image %}</code></pre></li><li><p>发布上传博客<br><code>hexo d -g</code></p></li><li><p>常见的其他命令</p><pre><code>hexo s == hexo server   //启动本地服务hexo g == hexo generate //生成hexo d == hexo deploy   //发布hexo n == hexo new      //新建</code></pre></li></ul><h4 id="书写文章"><a href="#书写文章" class="headerlink" title="书写文章"></a>书写文章</h4><p><code>hexo new post &quot;文章名字&quot;</code><br>使用模板生成文章</p><pre><code>title: cocos2dx引擎架构概述comments: truedate: 2018-11-23 20:51:11tags:categories:</code></pre><h4 id="分类标签"><a href="#分类标签" class="headerlink" title="分类标签"></a>分类标签</h4><p>为了使分类标签生效需要生成两个page文件</p><pre><code>hexo new page categorieshexo new page tags</code></pre><h4 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h4><p>一个模仿github样式的主题</p><pre><code>git clone git@github.com:sabrinaluo/hexo-theme-replica.git themes/replica</code></pre><p>Set theme: replica in _config.yml (the one in your root folder)     </p><h4 id="安装插件"><a href="#安装插件" class="headerlink" title="安装插件"></a>安装插件</h4><p>安装rss<br><code>npm install hero-generator-feed</code><br>配置如下：</p><pre><code>plugin:- hexo-generator-feedfeed:type: atompath: atom.xmllimit: 20rss: /atom.xml</code></pre><h4 id="绑定域名"><a href="#绑定域名" class="headerlink" title="绑定域名"></a>绑定域名</h4><p>添加WWW和@主机记录，记录类型为CNAME.</p><p> 在source目录下创建CNAME文件，文件内容为域名例如：chuangyutime.com</p><h4 id="QA"><a href="#QA" class="headerlink" title="QA"></a>QA</h4><ol><li>mac下node安装好之后使用npm安装全局包会出现usr/local目录权限读写问题？<br><code>sudo chown -R $USER /usr/local</code><br>修改权限之后使用ls -l /usr/local 查看权限</li><li>分类标签404？<br>需要创建两个page categories、tags</li><li>vscode 编写markdown回退文本之后以后存在特殊的bs字符问题？<br>显示隐藏字符 <code>&quot;editor.renderControlCharacters&quot;: true</code><br>安装插件：<code>Remove backspace control character</code><br>开启设置：<code>&quot;editor.formatOnType&quot;: true 在被设定的情况下，进行变换时;输入时启动</code></li></ol>]]></content>
+      
+      
       <categories>
-        <category>web</category>
+          
+          <category> web </category>
+          
       </categories>
-      <tags>
-        <tag>hexo</tag>
-      </tags>
-  </entry>
+      
+      
+        <tags>
+            
+            <tag> hexo </tag>
+            
+        </tags>
+      
+    </entry>
+    
+  
+  
 </search>
