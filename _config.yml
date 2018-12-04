@@ -3,12 +3,12 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 小峰知识库
-subtitle: 小峰知识库
-description: 所学所思所想
+title: 小工知识库
+subtitle: coding wiki
+description: just do it
 keywords:
 author: stephen.sun
-language: zh-CN
+language: zh-Hans
 timezone: Asia/Shanghai
 
 # URL
@@ -25,7 +25,7 @@ tag_dir: tags
 archive_dir: archives
 category_dir: categories
 code_dir: downloads/code
-i18n_dir: lang
+i18n_dir: :lang
 skip_render:
 
 # Writing
@@ -83,25 +83,13 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: hexo-theme-primer
+theme: next
 
 search:
   path: search.xml
   field: post
-#RSS订阅
-plugin:
-- hexo-generator-feed
-#Feed Atom
-feed:
-type: atom
-path: atom.xml
-limit: 40
-rss: /atom.xml
-
-auto_excerpt:
-  enable: true
-  length: 300
-
+  format: html
+  limit: 10000
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:

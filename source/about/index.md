@@ -1,5 +1,5 @@
 ---
-title: about me
+title: 关于我
 layout: post
 share: false
 toc: false
