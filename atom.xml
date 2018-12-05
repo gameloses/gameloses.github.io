@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://gameloses.github.io/"/>
-  <updated>2018-12-05T11:54:44.041Z</updated>
+  <updated>2018-12-05T12:25:15.853Z</updated>
   <id>https://gameloses.github.io/</id>
   
   <author>
@@ -17,17 +17,39 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>lua表访问跟踪</title>
+    <link href="https://gameloses.github.io/2018/12/05/lua%E8%A1%A8%E8%AE%BF%E9%97%AE%E8%B7%9F%E8%B8%AA/"/>
+    <id>https://gameloses.github.io/2018/12/05/lua表访问跟踪/</id>
+    <published>2018-12-05T12:21:39.000Z</published>
+    <updated>2018-12-05T12:25:15.853Z</updated>
+    
+    <content type="html"><![CDATA[<p>当访问一个 table 或者更新 table 中的某个元素时，lua 首先会在 table 查找是否存在该元素，如果没有，就会查找 table 是否存在 <strong>index(访问) 或者 </strong>newindex(更新) 原方法。以访问为例，首先在 table 中查找某个字段，如果不存在，解释器会去查找 <strong>index 这个原方法，如果仍然没有，返回 nil。所以说，</strong>index 和 __newindex 是在 table 中没有所需访问的 index 时才发挥作用的。    </p><p>根据上面这种思路，如果我们想跟踪一个 table 的操作行为，那么<strong>需要一个空表</strong>，每次对这个空表操作的时候，就会使用 <strong>index 或者 </strong>newindex 这些元方法，在元方法中对原始 table 进行访问和操作，并打印跟踪信息。而之前创建的那个空表，就是代理。</p><pre><code>---------------------------------------------print &quot;跟踪单个表&quot;local _t = {}local mt = {    __newindex = function(t, name, value)        print(&quot;__newindex&quot;, name, value)        --rawset(_t, name, value) --原始访问 不访问原表        _t[name] = value    end,    __index = function(t, name)        print(&quot;__index&quot;, name, value)        --return rawget(_t, name) --原始访问 不访问原表        return _t[name]    end}--a.__index = alocal a = {}   setmetatable(a, mt)a.x = 1print(a.x)---------------------------------------------print &quot;跟踪多个表&quot;local index = {}    --  创建私有索引，即原表在代理表中特殊字段local mt = {    __index = function (t, k)        print(&quot;__index &quot; .. tostring(k))        return t[index][k]    end,    __newindex = function (t, k, v)        print(&quot;__newindex &quot; .. tostring(k) .. &quot; to &quot; .. tostring(v))        t[index][k] = v    end}function track (t)    local proxy = {}    proxy[index] = t    setmetatable(proxy, mt)    return proxyendlocal ori_table = {} --在其他地方创建的原表，对他进行跟踪local _o = track(ori_table)_o[2] = &quot;lua&quot;print(_o[2])</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      lua表问跟踪器,使用一个代理器通过——index和newindex特性记录表的访问.跟踪lua表的赋值和取值table.key table.key = value会被跟踪.
+    
+    </summary>
+    
+      <category term="lua" scheme="https://gameloses.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://gameloses.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
     <title>lua高级特性</title>
     <link href="https://gameloses.github.io/2018/12/05/lua%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7/"/>
     <id>https://gameloses.github.io/2018/12/05/lua高级特性/</id>
     <published>2018-12-05T11:52:56.000Z</published>
-    <updated>2018-12-05T11:54:44.041Z</updated>
+    <updated>2018-12-05T12:14:22.986Z</updated>
     
     <content type="html"><![CDATA[<h4 id="原表"><a href="#原表" class="headerlink" title="原表"></a>原表</h4>]]></content>
     
     <summary type="html">
     
-      涉及lua原表、尾递归、弱引用表、luastate、gc、源码解析等
+      涉及lua原表、尾递归、弱引用表、luastate、gc、源码解析、记录lua表访问赋值、lua面向对象等
     
     </summary>
     
@@ -65,9 +87,9 @@
     <link href="https://gameloses.github.io/2018/12/05/git%E9%87%8D%E7%82%B9%E7%94%A8%E6%B3%95/"/>
     <id>https://gameloses.github.io/2018/12/05/git重点用法/</id>
     <published>2018-12-05T05:46:52.000Z</published>
-    <updated>2018-12-05T11:50:59.914Z</updated>
+    <updated>2018-12-05T12:12:59.103Z</updated>
     
-    <content type="html"><![CDATA[<h4 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h4><img src="/2018/12/05/git重点用法/gitflow.png" title="git flow"><p>Workspace：工作区<br>Index / Stage：暂存区<br>Repository：仓库区（或本地仓库）<br>Remote：远程仓库</p><h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><ul><li><p>放入暂存区<br><code>git add .</code><br><code>git add file</code></p></li><li><p>提交到仓库<br><code>git commit -m &#39;log&#39;</code></p></li><li><p>撤销工作区修改<br><code>git checkout -- file</code><br><code>git checkout .</code></p></li><li><p>暂存区回退到工作区<br><code>git reset HEAD file</code></p></li><li><p>Reset回退commit<br>回滚commit,工作区暂存区也改变<br><code>git reset --hard  commitid</code><br>只回滚commit,工作区暂存区代码没有改变<br><code>git reset --soft commitid</code><br>回滚commit,暂存区改变,工作区不变<br><code>git reset -mixed commitid</code> 等同 <code>git reset commitid</code></p></li><li><p>revert回退commit</p><p><code>git revert commit</code></p><p>但是会生成一次新的提交，需要填写提交注释，以前的历史记录都在.</p><p>而reset是指将HEAD指针指到指定提交,历史记录中不会出现放弃的提交记录.</p></li><li><p>commit id查看<br><code>git log</code><br><code>git reflog</code></p></li><li><p>git push<br><code>git push &lt;远程主机名&gt; &lt;本地分支名&gt;:&lt;远程分支名&gt;</code><br>推送本地master分支到远程origin主机的master分支，后者不存在就创建<br><code>git push origin master</code> 省略了远程分支名</p></li><li><p>git pull<br><code>git pull &lt;远程主机名&gt; &lt;远程分支名&gt;:&lt;本地分支名&gt;</code><br>远程主机origin的master分支拉取过来，与本地的brantest分支合并:<br><code>git pull origin master:brantest</code><br>将远程origin主机的master分支拉取过来和本地的当前分支进行合并<br><code>git pull origin master</code></p><h4 id="远程操作"><a href="#远程操作" class="headerlink" title="远程操作"></a>远程操作</h4></li><li>本地代码回滚到commitid<br><code>git reset --hard commitid</code></li><li>远程代码回回滚<br>方法1：<br>回滚后强制推送本地到远程<br><code>git reset --hard commitid</code><br><code>git push origin branch -f</code><br>方法2：<br>且分支在分支上reset然后删除远程分支，使用本地分支重新远程分支<pre><code>git checkout the_branchgit branch bkgit pullgit reset --hard th_commit_idgit push origin :the_branch 删除远程then_branchgit push origin the_branch</code></pre></li></ul><h4 id="特殊操作"><a href="#特殊操作" class="headerlink" title="特殊操作"></a>特殊操作</h4><ul><li><p>删除某次提交</p><p><code>git rebase -i commitid^</code></p><p>在命令编辑里边把某次提交之前的内容改为drop.退出交互模式,就会删除相应commit.之后强制推送就ok.</p></li><li><p>修改某次提交</p><p><code>git rebase -i commitid^</code></p><p>在编辑框中把需要修改的某次提交所在commit之前的pick改为edit然后保存退出.之后做出修改,完成之后执行如下命令：</p><pre><code>git add .git commit --amendgit rebase --continue</code></pre></li></ul><h4 id="子仓库"><a href="#子仓库" class="headerlink" title="子仓库"></a>子仓库</h4><p>主要用于工程中以来的第三方库，第三方库是独立的git仓库可以自行管理.</p><ul><li><p>添加submodule</p><p><code>git submodule add 仓库地址 localpath</code></p><p>会在.gitmodules和.git/config中添加submodule路径和对应的仓库库地址</p></li><li><p>clone父仓库之后更新子仓库</p><pre><code>git submodule initgit submodule update</code></pre></li><li><p>submodule修改后再localpath中 add commit push</p></li><li><p>删除submodule</p><p>删除.gitmodules和.git.config中的submodule信息;git rm –cached localpath.  </p><h4 id="合并代码"><a href="#合并代码" class="headerlink" title="合并代码"></a>合并代码</h4></li><li><p>git merge</p><p>$ git merge issueFix</p><p>如果没有冲突的话，merge完成。有冲突的话，git会提示那个文件中有冲突，比如有如下冲突：</p><p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD:test.c</p><p>printf (“test1″);</p><p>=======</p><p>printf (“test2″);</p><p>>&gt;&gt;&gt;&gt;&gt;&gt; issueFix:test.c</p><p>可以看到 ======= 隔开的上半部分，是 HEAD（即 master 分支，在运行 merge 命令时检出的分支）中的内容，下半部分是在 issueFix 分支中的内容。解决冲突的办法无非是二者选其一或者由你亲自整合到一起。比如你可以通过把这段内容替换为下面这样来解决：</p><p>printf (“test2″);</p><p>这个解决方案各采纳了两个分支中的一部分内容，而且删除了 &lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，和&gt;&gt;&gt;&gt;&gt;&gt;&gt; 这些行。在解决了所有文件里的所有冲突后，运行 git add 将把它们标记为已解决（resolved）。</p></li></ul><h3 id="分支操作"><a href="#分支操作" class="headerlink" title="分支操作"></a>分支操作</h3><ul><li><p>创建分支</p><p><code>git branch bname</code></p></li><li><p>切换分支</p><p>git checkout bname</p></li><li><p>创建并切分支</p><p>git checkout -b bname</p></li><li><p>git checkout -b 本地分支名x origin/远程分支名x</p><p><code>git checkout -b dev origin/dev</code></p><p>远程分支dev切分支到本地dev分支</p></li><li><p>查看分支</p><p>git branch -av</p></li></ul>]]></content>
+    <content type="html"><![CDATA[<h4 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h4><img src="/2018/12/05/git重点用法/gitflow.png" title="git flow"><p>Workspace：工作区<br>Index / Stage：暂存区<br>Repository：仓库区（或本地仓库）<br>Remote：远程仓库</p><h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><ul><li><p>放入暂存区<br><code>git add .</code><br><code>git add file</code></p></li><li><p>提交到仓库<br><code>git commit -m &#39;log&#39;</code></p></li><li><p>撤销工作区修改<br><code>git checkout -- file</code><br><code>git checkout .</code></p></li><li><p>暂存区回退到工作区<br><code>git reset HEAD file</code></p></li><li><p>Reset回退commit<br>回滚commit,工作区暂存区也改变<br><code>git reset --hard  commitid</code><br>只回滚commit,工作区暂存区代码没有改变<br><code>git reset --soft commitid</code><br>回滚commit,暂存区改变,工作区不变<br><code>git reset -mixed commitid</code> 等同 <code>git reset commitid</code></p></li><li><p>revert回退commit</p><p><code>git revert commit</code></p><p>但是会生成一次新的提交，需要填写提交注释，以前的历史记录都在.</p><p>而reset是指将HEAD指针指到指定提交,历史记录中不会出现放弃的提交记录.</p></li><li><p>commit id查看<br><code>git log</code><br><code>git reflog</code></p></li><li><p>git push<br><code>git push &lt;远程主机名&gt; &lt;本地分支名&gt;:&lt;远程分支名&gt;</code><br>推送本地master分支到远程origin主机的master分支，后者不存在就创建<br><code>git push origin master</code> 省略了远程分支名</p></li><li><p>git pull<br><code>git pull &lt;远程主机名&gt; &lt;远程分支名&gt;:&lt;本地分支名&gt;</code><br>远程主机origin的master分支拉取过来，与本地的brantest分支合并:<br><code>git pull origin master:brantest</code><br>将远程origin主机的master分支拉取过来和本地的当前分支进行合并<br><code>git pull origin master</code></p><h4 id="远程操作"><a href="#远程操作" class="headerlink" title="远程操作"></a>远程操作</h4></li><li>本地代码回滚到commitid<br><code>git reset --hard commitid</code></li><li>远程代码回回滚<br>方法1：<br>回滚后强制推送本地到远程<br><code>git reset --hard commitid</code><br><code>git push origin branch -f</code><br>方法2：<br>且分支在分支上reset然后删除远程分支，使用本地分支重新远程分支<pre><code>git checkout the_branchgit branch bkgit pullgit reset --hard th_commit_idgit push origin :the_branch 删除远程then_branchgit push origin the_branch</code></pre></li></ul><h4 id="特殊操作"><a href="#特殊操作" class="headerlink" title="特殊操作"></a>特殊操作</h4><ul><li><p>删除某次提交</p><p><code>git rebase -i commitid^</code></p><p>在命令编辑里边把某次提交之前的内容改为drop.退出交互模式,就会删除相应commit.之后强制推送就ok.</p></li><li><p>修改某次提交</p><p><code>git rebase -i commitid^</code></p><p>在编辑框中把需要修改的某次提交所在commit之前的pick改为edit然后保存退出.之后做出修改,完成之后执行如下命令：</p><pre><code>git add .git commit --amendgit rebase --continue</code></pre></li></ul><h4 id="子仓库"><a href="#子仓库" class="headerlink" title="子仓库"></a>子仓库</h4><p>主要用于工程中以来的第三方库，第三方库是独立的git仓库可以自行管理.</p><ul><li><p>添加submodule</p><p><code>git submodule add 仓库地址 localpath</code></p><p>会在.gitmodules和.git/config中添加submodule路径和对应的仓库库地址</p></li><li><p>clone父仓库之后更新子仓库</p><pre><code>git submodule initgit submodule update</code></pre></li><li><p>submodule修改后再localpath中 add commit push</p></li><li><p>删除submodule</p><p>删除.gitmodules和.git.config中的submodule信息;git rm –cached localpath.  </p><h4 id="合并代码"><a href="#合并代码" class="headerlink" title="合并代码"></a>合并代码</h4></li><li><p>git merge</p><p>$ git merge issueFix</p><p>如果没有冲突的话，merge完成。有冲突的话，git会提示那个文件中有冲突，比如有如下冲突：</p><p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD:test.c</p><p>printf (“test1″);</p><p>=======</p><p>printf (“test2″);</p><p>>&gt;&gt;&gt;&gt;&gt;&gt; issueFix:test.c</p><p>可以看到 ======= 隔开的上半部分，是 HEAD（即 master 分支，在运行 merge 命令时检出的分支）中的内容，下半部分是在 issueFix 分支中的内容。解决冲突的办法无非是二者选其一或者由你亲自整合到一起。比如你可以通过把这段内容替换为下面这样来解决：</p><p>printf (“test2″);</p><p>这个解决方案各采纳了两个分支中的一部分内容，而且删除了 &lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，和&gt;&gt;&gt;&gt;&gt;&gt;&gt; 这些行。在解决了所有文件里的所有冲突后，运行 git add 将把它们标记为已解决（resolved）。</p></li></ul><h4 id="分支操作"><a href="#分支操作" class="headerlink" title="分支操作"></a>分支操作</h4><ul><li><p>创建分支</p><p><code>git branch bname</code></p></li><li><p>切换分支</p><p>git checkout bname</p></li><li><p>创建并切分支</p><p>git checkout -b bname</p></li><li><p>git checkout -b 本地分支名x origin/远程分支名x</p><p><code>git checkout -b dev origin/dev</code></p><p>远程分支dev切分支到本地dev分支</p></li><li><p>查看分支</p><p>git branch -av</p></li></ul>]]></content>
     
     <summary type="html">
     
