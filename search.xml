@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[git重点用法]]></title>
+    <url>%2F2018%2F12%2F05%2Fgit%E9%87%8D%E7%82%B9%E7%94%A8%E6%B3%95%2F</url>
+    <content type="text"><![CDATA[流程 Workspace：工作区Index / Stage：暂存区Repository：仓库区（或本地仓库）Remote：远程仓库 基本操作 放入暂存区git add .git add file 提交到仓库git commit -m &#39;log&#39; 撤销工作区修改git checkout -- filegit checkout . 暂存区回退到工作区git reset HEAD file Reset回退commit回滚commit,工作区暂存区也改变git reset --hard commitid只回滚commit,工作区暂存区代码没有改变git reset --soft commitid回滚commit,暂存区改变,工作区不变git reset -mixed commitid 等同 git reset commitid revert回退commit git revert commit 但是会生成一次新的提交，需要填写提交注释，以前的历史记录都在. 而reset是指将HEAD指针指到指定提交,历史记录中不会出现放弃的提交记录. commit id查看git loggit reflog git pushgit push &lt;远程主机名&gt; &lt;本地分支名&gt;:&lt;远程分支名&gt;推送本地master分支到远程origin主机的master分支，后者不存在就创建git push origin master 省略了远程分支名 git pullgit pull &lt;远程主机名&gt; &lt;远程分支名&gt;:&lt;本地分支名&gt;远程主机origin的master分支拉取过来，与本地的brantest分支合并:git pull origin master:brantest将远程origin主机的master分支拉取过来和本地的当前分支进行合并git pull origin master 远程操作 本地代码回滚到commitidgit reset --hard commitid 远程代码回回滚方法1：回滚后强制推送本地到远程git reset --hard commitidgit push origin branch -f方法2：且分支在分支上reset然后删除远程分支，使用本地分支重新远程分支git checkout the_branch git branch bk git pull git reset --hard th_commit_id git push origin :the_branch 删除远程then_branch git push origin the_branch 特殊操作 删除某次提交 git rebase -i commitid^ 在命令编辑里边把某次提交之前的内容改为drop.退出交互模式,就会删除相应commit.之后强制推送就ok. 修改某次提交 git rebase -i commitid^ 在编辑框中把需要修改的某次提交所在commit之前的pick改为edit然后保存退出.之后做出修改,完成之后执行如下命令： git add . git commit --amend git rebase --continue 子仓库主要用于工程中以来的第三方库，第三方库是独立的git仓库可以自行管理. 添加submodule git submodule add 仓库地址 localpath 会在.gitmodules和.git/config中添加submodule路径和对应的仓库库地址 clone父仓库之后更新子仓库 git submodule init git submodule update submodule修改后再localpath中 add commit push 删除submodule 删除.gitmodules和.git.config中的submodule信息;git rm –cached localpath. 合并代码 git merge $ git merge issueFix 如果没有冲突的话，merge完成。有冲突的话，git会提示那个文件中有冲突，比如有如下冲突： &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD:test.c printf (“test1″); ======= printf (“test2″); >&gt;&gt;&gt;&gt;&gt;&gt; issueFix:test.c 可以看到 ======= 隔开的上半部分，是 HEAD（即 master 分支，在运行 merge 命令时检出的分支）中的内容，下半部分是在 issueFix 分支中的内容。解决冲突的办法无非是二者选其一或者由你亲自整合到一起。比如你可以通过把这段内容替换为下面这样来解决： printf (“test2″); 这个解决方案各采纳了两个分支中的一部分内容，而且删除了 &lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，和&gt;&gt;&gt;&gt;&gt;&gt;&gt; 这些行。在解决了所有文件里的所有冲突后，运行 git add 将把它们标记为已解决（resolved）。 分支操作 创建分支 git branch bname 切换分支 git checkout bname 创建并切分支 git checkout -b bname git checkout -b 本地分支名x origin/远程分支名x git checkout -b dev origin/dev 远程分支dev切分支到本地dev分支 查看分支 git branch -av]]></content>
+      <categories>
+        <category>git</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[cocos2dx性能优化]]></title>
     <url>%2F2018%2F12%2F03%2Fcocos2dx%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%2F</url>
     <content type="text"><![CDATA[]]></content>
