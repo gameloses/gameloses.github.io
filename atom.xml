@@ -105,35 +105,13 @@
   </entry>
   
   <entry>
-    <title>cocos2dx性能优化</title>
-    <link href="https://bytemode.github.io/2018/12/03/cocos2dx%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
-    <id>https://bytemode.github.io/2018/12/03/cocos2dx性能优化/</id>
-    <published>2018-12-03T08:14:02.000Z</published>
-    <updated>2018-12-03T08:33:50.766Z</updated>
-    
-    <content type="html"><![CDATA[<img src="/2018/12/03/cocos2dx性能优化/hexo_github.png" title="ceshi">]]></content>
-    
-    <summary type="html">
-    
-      cocos2dx性能优化,主要是针对帧率、内存、drawcall优化.
-    
-    </summary>
-    
-      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
-    
-    
-      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
-    
-  </entry>
-  
-  <entry>
     <title>golang服务器开发</title>
     <link href="https://bytemode.github.io/2018/11/30/golang/"/>
     <id>https://bytemode.github.io/2018/11/30/golang/</id>
     <published>2018-11-30T07:55:25.000Z</published>
     <updated>2018-12-03T08:36:36.632Z</updated>
     
-    <content type="html"><![CDATA[<h4 id="golang开发笔记"><a href="#golang开发笔记" class="headerlink" title="golang开发笔记"></a>golang开发笔记</h4><p>涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软件的解读.</p><p>leaf goworld 等教程. 同时会有一些游戏demo展示.</p><blockquote><p>跳转链接：</p></blockquote><p><a href="https://gameloses.github.io/golang/">golang深度解析</a></p><p><a href="https://gameloses.github.io/golang/">leaf解析</a></p><p><a href="https://gameloses.github.io/golang/">goworld解析</a></p><p><a href="https://gameloses.github.io/golang/">https://gameloses.github.io/golang/</a></p>]]></content>
+    <content type="html"><![CDATA[<h4 id="golang开发笔记"><a href="#golang开发笔记" class="headerlink" title="golang开发笔记"></a>golang开发笔记</h4><p>涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软件的解读.</p><p>leaf goworld 等教程. 同时会有一些游戏demo展示.</p><blockquote><p>跳转链接：</p></blockquote><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">golang深度解析</a></p><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">leaf解析</a></p><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">goworld解析</a></p><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">https://gameloses.github.io/golang/</a></p>]]></content>
     
     <summary type="html">
     

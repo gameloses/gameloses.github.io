@@ -45,17 +45,6 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[cocos2dx性能优化]]></title>
-    <url>%2F2018%2F12%2F03%2Fcocos2dx%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%2F</url>
-    <content type="text"><![CDATA[]]></content>
-      <categories>
-        <category>cocos2dx</category>
-      </categories>
-      <tags>
-        <tag>cocos2dx</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[golang服务器开发]]></title>
     <url>%2F2018%2F11%2F30%2Fgolang%2F</url>
     <content type="text"><![CDATA[golang开发笔记涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软件的解读. leaf goworld 等教程. 同时会有一些游戏demo展示. 跳转链接： golang深度解析 leaf解析 goworld解析 https://gameloses.github.io/golang/]]></content>
