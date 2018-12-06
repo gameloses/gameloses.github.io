@@ -5,15 +5,15 @@
 # Site
 title: 小工知识库
 subtitle: coding wiki
-description: just do it
-keywords:
-author: stephen.sun
+description: 所用所学所想
+keywords: “bytemode, 小工知识库”
+author: bytemode
 language: zh-Hans
 timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://gameloses.github.io/
+url: https://bytemode.github.io/
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -94,5 +94,5 @@ search:
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repository: git@github.com:gameloses/gameloses.github.io.git
+  repository: git@github.com:bytemode/bytemode.github.io.git
   branch: master
