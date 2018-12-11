@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://bytemode.github.io/"/>
-  <updated>2018-12-10T15:28:57.443Z</updated>
+  <updated>2018-12-11T10:44:21.077Z</updated>
   <id>https://bytemode.github.io/</id>
   
   <author>
@@ -15,6 +15,206 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>lua类的实现</title>
+    <link href="https://bytemode.github.io/2018/12/11/lua%E7%B1%BB%E7%9A%84%E5%AE%9E%E7%8E%B0/"/>
+    <id>https://bytemode.github.io/2018/12/11/lua类的实现/</id>
+    <published>2018-12-11T10:10:12.000Z</published>
+    <updated>2018-12-11T10:44:21.077Z</updated>
+    
+    <content type="html"><![CDATA[<p>子类在定义时复制所有基类的方法，在实例化时将该类作为metatable的__index赋值给实例。这就是cocos2dx里面的lua class的实现。</p><pre><code>function class(classname, super)​     local cls = {}​     if super then --复制基类方法​        cls = {}​        for k,v in pairs(super) do cls[k] = v end​        cls.super = super​    else​        cls = {ctor = function() end}​    end​    cls.__cname = classname​    cls.__index = cls​    function cls.new(...) --实例化​        local instance = setmetatable({}, cls)​        instance.class = cls​        instance:ctor(...)​        return instance​    end​    return clsend</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;子类在定义时复制所有基类的方法，在实例化时将该类作为metatable的__index赋值给实例。这就是cocos2dx里面的lua class的实现。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;function class(classname, super)
+​     local 
+      
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>lua垃圾回收</title>
+    <link href="https://bytemode.github.io/2018/12/11/lua%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/"/>
+    <id>https://bytemode.github.io/2018/12/11/lua垃圾回收/</id>
+    <published>2018-12-11T10:09:53.000Z</published>
+    <updated>2018-12-11T10:18:57.480Z</updated>
+    
+    <content type="html"><![CDATA[<p>采用垃圾回收机制对所有的lua对象(GCObject)进行管理。Lua虚拟机会定期运行GC，释放掉已经不再被被引用到的lua对象。</p><p>基本算法【标记清除】</p><p>基本的垃圾回收算法被称为”mark-and-sweep”算法。算法本身其实很简单。</p><p>1.系统管理着所有已经创建了的对象。每个对象都有对其他对象的引用。</p><p>2.root集合代表着已知的系统级别的对象引用。</p><p>3.从root集合出发，就可以访问到系统引用到的所有对象。而没有被访问到的对象就是垃圾对象，需要被销毁。</p><p>我们可以将所有对象分成三个状态：</p><ol><li>White状态，也就是待访问状态。表示对象还没有被垃圾回收的标记过程访问到。</li><li>Gray状态，也就是待扫描状态。表示对象已经被垃圾回收访问到了，但是对象本身对于其他对象的引用还没有进行遍历访问。</li><li>Black状态，也就是已扫描状态。表示对象已经被访问到了，并且也已经遍历了对象本身对其他对象的引用。</li></ol><p>基本的算法可以描述如下：</p><ol><li>当前所有对象都是White状态;  </li><li>将root集合引用到的对象从White设置成Gray，并放到Gray集合中;  </li><li>while(Gray集合不为空)  </li><li>{  </li><li>​    从Gray集合中移除一个对象O，并将O设置成Black状态;  </li><li>​    for(O中每一个引用到的对象O1) {  </li><li>​        if(O1在White状态) {  </li><li>​            将O1从White设置成Gray，并放到到Gray集合中；  </li><li>​        }  </li><li>​    }  </li><li>}  </li><li>for(任意一个对象O){  </li><li>​    if(O在White状态)  </li><li>​        销毁对象O;  </li><li>​    else  </li><li>​        将O设置成White状态;  </li><li>}  </li></ol><p>Incremental Garbage Collection</p><p>上面的算法如果一次性执行，在对象很多的情况下，会执行很长时间，严重影响程序本身的响应速度。其中一个解决办法就是，可以将上面的算法分步执行，这样每个步骤所耗费的时间就比较小了。我们可以将上述算法改为以下下几个步骤。</p><p>首先标识所有的root对象：</p><ol><li>当前所有对象都是White状态;  </li><li>将root集合引用到的对象从White设置成Gray，并放到Gray集合中;  </li></ol><p>遍历访问所有的gray对象。如果超出了本次计算量上限，退出等待下一次遍历:</p><ol><li>while(Gray集合不为空,并且没有超过本次计算量的上限){  </li><li>​    从Gray集合中移除一个对象O，并将O设置成Black状态;  </li><li>​    for(O中每一个引用到的对象O1) {  </li><li>​        if(O1在White状态) {  </li><li>​            将O1从White设置成Gray，并放到到Gray集合中；  </li><li>​        }  </li><li>​    }  </li><li>}  </li></ol><p>销毁垃圾对象：</p><ol><li>for(任意一个对象O){  </li><li>​    if(O在White状态)  </li><li>​        销毁对象O;  </li><li>​    else  </li><li>​        将O设置成White状态;  </li><li>}  </li></ol><p>在每个步骤之间，由于程序可以正常执行，所以会破坏当前对象之间的引用关系。black对象表示已经被扫描的对象，所以他应该不可能引用到一个white对象。当程序的改变使得一个black对象引用到一个white对象时，就会造成错误。解决这个问题的办法就是设置barrier。barrier在程序正常运行过程中，监控所有的引用改变。如果一个black对象需要引用一个white对象，存在两种处理办法：</p><ol><li>将white对象设置成gray，并添加到gray列表中等待扫描。这样等于帮助整个GC的标识过程向前推进了一步。</li><li>将black对象该回成gray，并添加到gray列表中等待扫描。这样等于使整个GC的标识过程后退了一步。</li></ol><p>这种垃圾回收方式被称为”Incremental Garbage Collection”(简称为”IGC”，Lua所采用的就是这种方法。使用”IGC”并不是没有代价的。IGC所检测出来的垃圾对象集合比实际的集合要小，也就是说，有些在GC过程中变成垃圾的对象，有可能在本轮GC中检测不到。不过，这些残余的垃圾对象一定会在下一轮GC被检测出来，不会造成泄露。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;采用垃圾回收机制对所有的lua对象(GCObject)进行管理。Lua虚拟机会定期运行GC，释放掉已经不再被被引用到的lua对象。&lt;/p&gt;
+&lt;p&gt;基本算法【标记清除】&lt;/p&gt;
+&lt;p&gt;基本的垃圾回收算法被称为”mark-and-sweep”算法。算法本身其实很简单。&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>lua元表</title>
+    <link href="https://bytemode.github.io/2018/12/11/lua%E5%8E%9F%E8%A1%A8/"/>
+    <id>https://bytemode.github.io/2018/12/11/lua原表/</id>
+    <published>2018-12-11T10:09:14.000Z</published>
+    <updated>2018-12-11T10:55:10.192Z</updated>
+    
+    <content type="html"><![CDATA[<p>在 Lua table 中我们可以访问对应的key来得到value值，但是却无法对两个 table 进行操作。</p><p>因此 Lua 提供了元表(Metatable)，允许我们改变table的行为，每个行为关联了对应的元方法。</p><p>例如，使用元表我们可以定义Lua如何计算两个table的相加操作a+b。</p><p>当Lua试图对两个表进行相加时，先检查两者之一是否有元表，之后检查是否有一个叫”<strong>add”的字段，若找到，则调用对应的值。”</strong>add”等即时字段，其对应的值（往往是一个函数或是table）就是”元方法”。</p><p>有两个很重要的函数来处理元表：</p><p><strong>setmetatable(table,metatable):</strong>对指定table设置元表(metatable)，如果元表(metatable)中存在__metatable键值，setmetatable会失败 。</p><p><strong>getmetatable(table):</strong>返回对象的元表(metatable)。</p><p><strong>__index 元方法</strong></p><p>这是 metatable 最常用的键。</p><p>当你通过键来访问 table 的时候，如果这个键没有值，那么Lua就会寻找该table的metatable（假定有metatable）中的<strong>index 键。如果</strong>index包含一个表格，Lua会在表格中查找相应的键。</p><p>Lua查找一个表元素时的规则，其实就是如下3个步骤:</p><p>1.在表中查找，如果找到，返回该元素，找不到则继续</p><p>2.判断该表是否有元表，如果没有元表，返回nil，有元表则继续。</p><p>3.判断元表有没有<strong>index方法，如果</strong>index方法为nil，则返回nil；如果<strong>index方法是一个表，则重复1、2、3；如果</strong>index方法是一个函数，则返回该函数的返回值。</p><p><strong>__newindex 元方法</strong></p><p><strong>newindex 元方法用来对表更新，</strong>index则用来对表访问 。</p><p>当你给表的一个缺少的索引赋值，解释器就会查找__newindex 元方法：如果存在则调用这个函数而不进行赋值操作。</p><p><strong>__call 元方法</strong></p><p>__call 元方法在 Lua 调用一个值时调用。</p><p><strong>__tostring 元方法</strong></p><p>__tostring 元方法用于修改表的输出行为。</p><p>table存在两种行为：查询和修改（赋值），通过元方法<strong>index和</strong>newindex来改变table的这两种行为。</p><p>__index主要用于table的查询</p><p>table[key] 的访问过程，首先检查table表中是否存在key的字段，如果有则返回，否则检查是否有__index的元方法，没有返回nil,有则查找元方法。</p><p>__index元方法可以是一个函数，还可以是一个table。如果是一个函数，则以table和不存在的key作为参数方位该函数，</p><p>例如：__index = function(t,key)</p><p>如果是一个table时，就以相同的方式来访问这个table（即传入key访问元方法的table，如果存在则放回值，反之返回nil）</p><p>例如：__index = tab –此时会返回tab[key]的值</p><p>__index可以很好的实现具有默认值的table</p><pre><code>function setDefaultValues(t,d)​    local mt = {__index = function() return d end}​    setmetatable(t, mt)endtab = {x=10,y=20}print(tab.x ,tab.y,tab.z)    --由于没有设置元方法则为nilsetDefaultValues(tab,100)    --设置默认值（设置__index元方法）print(tab.z)            --检查到有__index的元方法则返回默认值</code></pre><p>__newindex主要用于table的更新</p><p>当对table中不存在的索引赋值时，解释器就会查找__newindex元方法。如果有这个元方法，就调用这个元方法，而不是执行赋值。如果这个元方法是一个table，解释器就在table中进行赋值，而不是对原来的table。</p><pre><code>local k = {}local mt = {​    __newindex = k}local t = {}setmetatable(t, mt)print(&quot;赋值前：&quot;)for k,v in pairs(k) do​    print(k ,v)endt[1] = 20print(&quot;赋值后：t表中的值:&quot;)for k,v in pairs(t) do​    print(k ,v)endprint(&quot;赋值后：k表中的值:&quot;)for k,v in pairs(k) do​    print(k ,v)end</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;在 Lua table 中我们可以访问对应的key来得到value值，但是却无法对两个 table 进行操作。&lt;/p&gt;
+&lt;p&gt;因此 Lua 提供了元表(Metatable)，允许我们改变table的行为，每个行为关联了对应的元方法。&lt;/p&gt;
+&lt;p&gt;例如，使用元表我们可以定义
+      
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>lua易错点</title>
+    <link href="https://bytemode.github.io/2018/12/11/lua%E5%9D%91%E7%82%B9/"/>
+    <id>https://bytemode.github.io/2018/12/11/lua坑点/</id>
+    <published>2018-12-11T04:19:37.000Z</published>
+    <updated>2018-12-11T10:08:55.030Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="table-remove-删除时导致的错？"><a href="#table-remove-删除时导致的错？" class="headerlink" title="table.remove 删除时导致的错？"></a>table.remove 删除时导致的错？</h4><p>正确的删除方案：先记录要删除的表记录的k(位置)，然后反向遍历记录逐个删除。</p><p>删除1~10中的4,5,6,7,8. Table.remove 删除表时后面的元素会自动向前与移动导致隔一个删除一个.</p><img src="/2018/12/11/lua坑点/table.png" title="test code"><img src="/2018/12/11/lua坑点/table1.png" title="test code"><h4 id="table长度"><a href="#table长度" class="headerlink" title="table长度"></a>table长度</h4><p>table当字数组来用时获取的是正确的长度，当map来用时# 和table.getn获取的都是不是争取的长度，需要自行使用 for k，v in pairs获取长度. # 和 table.getn遇到v为nil时会返回长度.</p><h4 id="字符串链接"><a href="#字符串链接" class="headerlink" title="字符串链接"></a>字符串链接</h4><p>尽量使用table.concat连接字符串</p><ol><li><p>使用运算符..<br> 每次拼接都需要申请新的空间，旧的result对应的空间会在某时刻被Lua的垃圾回收期GC，且随着result不断增长，越往后会开辟更多新的空间，并进行拷贝操作，产生更多需要被GC的空间，所以性能降低。</p></li><li><p>使用table.concat (table [, sep [, start [, end]]])函数<br> table.concat 底层拼接字符串的方式也是使用运算符.. ，但是其使用算法减少了使用运算符..的次数，减少了GC，从而提高效率</p><h4 id="pairs-和-ipairs区别"><a href="#pairs-和-ipairs区别" class="headerlink" title="pairs 和 ipairs区别"></a>pairs 和 ipairs区别</h4></li><li>pairs: 迭代 table，可以遍历表中所有的 key 可以返回 nil</li><li>ipairs: 迭代数组，不能返回 nil,如果遇到 nil 则退出<h4 id="function定义的两种方式"><a href="#function定义的两种方式" class="headerlink" title="function定义的两种方式"></a>function定义的两种方式</h4>local function func() .. end<br>local func = function()  … end<br>第一种方法定义是可以做递归的第二种是不行的，第二种定义必须待函数体定义之后才能调用自己</li></ol><h4 id="a-and-b-or-c-当b为nil时总是返回c"><a href="#a-and-b-or-c-当b为nil时总是返回c" class="headerlink" title="a and b or c 当b为nil时总是返回c?"></a>a and b or c 当b为nil时总是返回c?</h4><p>a and b :当a为真时返回b为假时返回a</p><p>a or b: a为true返回a 为false返回b</p><pre><code>\&gt; true and true or 1true\&gt; true and false or 11\&gt; false and true or 11\&gt; false and false or 11\&gt; 2 and true or 1true\&gt; (true and false) or 11\&gt; (1 and false) or 11\&gt; (a and {b} or {c})[1]nil\&gt; (1 and {false} or {2})[1]false\&gt; </code></pre><p>解决方式：if else 另外就是(a and {b} or {c})[1]</p><h4 id="弱引用表"><a href="#弱引用表" class="headerlink" title="弱引用表"></a>弱引用表</h4><p>1.弱引用</p><p>元表 __mode字段来设置表k,v是弱引用，被弱引用table引用，垃圾回收时可回收，只要k,v被回收，整个条目会删除。</p><p>Lua采用了基于垃圾收集的内存管理机制，当某个table对象被存放在容器中，而容器的外部不再有任何变量引用该对象，对于这样的对象，Lua的垃圾收集器是不会清理的，因为容器对象仍然引用着他。见如下代码：</p><pre><code>1 a = {} 2 key = {} 3 a[key] = 1 4 key = {} 5 a[key] = 2 6collectgarbage() 7for k,v inpairs(a) do 8print(v) 9end</code></pre><p>​    在执行垃圾收集之后，table a中的两个key都无法被清理，但是对value等于1的key而言，如果后面的逻辑不会遍历table a的话，那么我们就可以认为该对象内存泄露了。在Lua中提供了一种被称为弱引用table的机制，可以提示垃圾收集器，如果某个对象，如上面代码中的第一个table key，只是被弱引用table引用，那么在执行垃圾收集时可以将其清理。</p><p>​    Lua中的弱引用表提供了3中弱引用模式，即key是弱引用、value是弱引用，以及key和value均是弱引用。不论是哪种类型的弱引用table，只要有一个key或value被回收，那么它们所在的整个条目都会从table中删除。</p><p>​    一个table的弱引用类型是通过其元表的__mode字段来决定的。如果该值为包含字符”k”，那么table就是key弱引用，如果包含”v”，则是value若引用，如果两个字符均存在，就是key/value弱引用。见如下代码：</p><pre><code>1 a = {} 2 b = {__mode = &quot;k&quot;} 3setmetatable(a,b) 4 key = {} 5 a[key] = 1 6 key = {} 7 a[key] = 2 8collectgarbage() 9for k,v inpairs(a) do10print(v)11end12--仅仅输出2</code></pre><p>​    在上面的代码示例中，第一个key在被存放到table a之后，就被第二个key的定义所覆盖，因此它的唯一引用来自key弱引用表。事实上，这种机制在Java中也同样存在，Java在1.5之后的版本中也提供了一组弱引用容器，其语义和Lua的弱引用table相似。</p><p>​    最后需要说明的是，Lua中的弱引用表只是作用于table类型的变量，对于其他类型的变量，如数值和字符串等，弱引用表并不起任何作用。</p><h4 id="尾递归"><a href="#尾递归" class="headerlink" title="尾递归"></a>尾递归</h4><p>什么是尾递归</p><p>尾递归的写法只是具备了使当前函数在调用下一个函数前把当前占有的栈销毁，但是会不会真的这样做，是要具体看编译器是否最终这样做。</p><p>什么是尾递归呢?(tail recursion), 顾名思议，就是一种“不一样的”递归，说到它的不一样，就得先说说一般的递归。对于一般的递归，比如下面的求阶乘，教科书上会告诉我们，如果这个函数调用的深度太深，很容易会有爆栈的危险。</p><pre><code>// 先不考虑溢出问题int func(int n) {        if (n &lt;= 1) return 1;          return (n * func(n-1)); }</code></pre><p>原因很多人的都知道，让我们先回顾一下函数调用的大概过程：</p><p>1）调用开始前，调用方（或函数本身）会往栈上压相关的数据，参数，返回地址，局部变量等。</p><p>2）执行函数。</p><p>3）清理栈上相关的数据，返回。</p><p>因此，在函数 A 执行的时候，如果在第二步中，它又调用了另一个函数 B，B 又调用 C…. 栈就会不断地增长不断地装入数据，当这个调用链很深的时候，栈很容易就满 了，这就是一般递归函数所容易面临的大问题。</p><p>而尾递归在某些语言的实现上，能避免上述所说的问题，注意是某些语言上，尾递归本身并不能消除函数调用栈过长的问题，那什么是尾递归呢？在上面写的一般递归函数 func() 中，我们可以看到，func(n)  是依赖于 func(n-1) 的，func(n) 只有在得到 func(n-1) 的结果之后，才能计算它自己的返回值，因此理论上，在 func(n-1) 返回之前，func(n)，不能结束返回。因此func(n)就必须保留它在栈上的数据，直到func(n-1)先返回，而尾递归的实现则可以在编译器的帮助下，消除这个限制：</p><pre><code>// 先不考虑溢出int tail_func(int n, int res) {     if (n &lt;= 1) return res;    return tail_func(n - 1, n * res); }  // 像下面这样调用 tail_func(10000000000, 1);</code></pre><p>从上可以看到尾递归把返回结果放到了调用的参数里。这个细小的变化导致，tail_func(n, res)不必像以前一样，非要等到拿到了tail_func(n-1, n<em>res)的返回值，才能计算它自己的返回结果 – 它完全就等于tail_func(n-1, n</em>res)的返回值。因此理论上：tail_func(n)在调用tail_func(n-1)前，完全就可以先销毁自己放在栈上的东西。</p><p>这就是为什么尾递归如果在得到编译器的帮助下，是完全可以避免爆栈的原因：每一个函数在调用下一个函数之前，都能做到先把当前自己占用的栈给先释放了，尾递归的调用链上可以做到只有一个函数在使用栈，因此可以无限地调用！</p><p>所谓尾调用，就是一个函数返回另一个函数的返回值：</p><pre><code>function f()…return g()end</code></pre><p>因为调用g()后，f()中不再执行任何代码，所以不需要保留f()的调用桟信息；Lua做了这样的优化，称为”尾调用消除”，g()返回后，控制点直接返回到调用f()的地方。</p><p>这种优化对尾递归非常有益，通常递归意味着调用桟的不断增长，甚至可能造成堆栈溢出；而尾递归提供了优化条件，编译器可以优化掉调用桟</p><img src="/2018/12/11/lua坑点/diguitail.png" title="code test">]]></content>
+    
+    <summary type="html">
+    
+      lua常见的问题包括table.remove,pairs,尾递归，弱引用表，三目运算符、字符串连接
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>lua实现continue</title>
+    <link href="https://bytemode.github.io/2018/12/11/lua%E5%AE%9E%E7%8E%B0continue/"/>
+    <id>https://bytemode.github.io/2018/12/11/lua实现continue/</id>
+    <published>2018-12-11T04:11:32.000Z</published>
+    <updated>2018-12-11T04:18:17.543Z</updated>
+    
+    <content type="html"><![CDATA[<pre><code>for i = 1， 10 do   repeat     if i == 5 then        break     end   until trueendfor i= 1， 10 do   while true do           break   endend</code></pre><p>满足条件时会跳出repeat的内层循环，继续外层循环相当于continue.</p>]]></content>
+    
+    <summary type="html">
+    
+      实现continue,在repeat untile true 中break,实现continue的功能
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>lua用法</title>
+    <link href="https://bytemode.github.io/2018/12/11/lua%E7%94%A8%E6%B3%95/"/>
+    <id>https://bytemode.github.io/2018/12/11/lua用法/</id>
+    <published>2018-12-11T04:04:33.000Z</published>
+    <updated>2018-12-11T04:06:04.903Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="loadstring-load"><a href="#loadstring-load" class="headerlink" title="loadstring load"></a>loadstring load</h1><p>从给定的字符串得到块(函数)。lua5.3使用load()替换loadstring(). </p><p>一般如下用法：<br><code>assert(loadstring(script))()</code><br><code>f = loadstring(&quot;a = 1&quot;)</code><br>语义上相当于：<br><code>f = loadstring(&quot;function() a = 1 end&quot;)</code><br>复杂用法如下：<br>下面是动态加载字符串，并执行，结果为一个table       </p><pre><code>local script = &quot;localee={[0]={id=0,lv=5,text=&#39;yy&#39;},[1]={id=1,lv=3,text=&#39;zz&#39;}}  return ee&quot;  local tb=assert(loadstring(script))()  print(tb[0].text)  </code></pre><p>下面是动态加载字符串，并执行，结果为方法</p><pre><code>local addscript=&quot;function dadd(a,b) return a+b  end&quot;  assert(loadstring(addscript))()  print(tostring(dadd(2,3)))  </code></pre><pre><code>local f = load(&quot;a=1+2&quot;)print(type(f))  --function</code></pre><h1 id="loadfile"><a href="#loadfile" class="headerlink" title="loadfile"></a>loadfile</h1><p>loadfile 编译Lua外部代码块，但不会运行代码，将会以函数的形式返回编译结果.返回编译结果函数.</p><pre><code>local f = laodfile(&quot;a.lua&quot;)print(type(f)) --function</code></pre><h1 id="dofile"><a href="#dofile" class="headerlink" title="dofile"></a>dofile</h1><p>dofile 直接编译运行Lua外部代码块，并不返回任何结果。编译错误会返回nil.  </p><pre><code>function dofile(filename)    local func = assert(loadfile(filename))    func()end</code></pre><h1 id="load"><a href="#load" class="headerlink" title="load"></a>load</h1><p><code>load (chunk [, chunkname [, mode [, env]]])</code><br>加载一个代码块。<br>如果 chunk 是一个字符串，代码块指这个字符串。 如果 chunk 是一个函数， load 不断地调用它获取代码块的片断。 每次对 chunk 的调用都必须返回一个字符串紧紧连接在上次调用的返回串之后。 当返回空串、nil、或是不返回值时，都表示代码块结束。</p><p>如果结果函数有上值， env 被设为第一个上值。 若不提供此参数，将全局环境替代它。<br>chunkname 在错误消息和调试消息中，用于代码块的名字。<br>字符串 mode 用于控制代码块是文本还是二进制（即预编译代码块）。 它可以是字符串 “b” （只能是二进制代码块）， “t” （只能是文本代码块）， 或 “bt” （可以是二进制也可以是文本）。 默认值为 “bt”。       </p><h1 id="ENV"><a href="#ENV" class="headerlink" title="_ENV"></a>_ENV</h1><p>引用一个叫 var 的自由名字在句法上都被翻译为 _ENV.var 。 此外，每个被编译的 Lua 代码块都会有一个外部的局部变量叫 _ENV。</p><p> 这里特别指出，你可以定义一个新变量或指定一个参数叫这个名字。    当编译器在转译自由名字时所用到的 _ENV ， 指的是你的程序在那个点上可见的那个名为 _ENV 的变量<br>被 _ENV 用于值的那张表被称为 环境。   </p><p>Lua保有一个被称为 全局环境 特别环境。它被保存在 C 注册表的一个特别索引下。<br>在 Lua 中，全局变量 _G 被初始化为这个值。 </p><p>当 Lua 加载一个代码块，_ENV 这个上值的默认值就是这个全局环境。         因此，在默认情况下，Lua 代码中提及的自由名字都指的全局环境中的相关项        （它们也被称为 全局变量 ）。<br>此外，所有的标准库都被加载入全局环境，一些函数也针对这个环境做操作。 你可以用 load （或 loadfile）加载代码块，并赋予它们不同的环境。 （在 C 里，当你加载一个代码块后，可以通过改变它的第一个上值来改变它的环境。）    </p><h1 id="select"><a href="#select" class="headerlink" title="select"></a>select</h1><p>如果 index 是个数字， 那么返回参数中第 index 个之后的部分； 负的数字会从后向前索引（-1 指最后一个参数）。 否则，index 必须是字符串 “#”， 此时 select 返回参数的个数。 </p><pre><code>do      function foo(...)          for i = 1, select(&#39;#&#39;, ...) do //get the count of the params              local arg = select(i, ...);//select the param              print(&quot;arg&quot;, arg);          end      end      foo(1, 2, 3, 4);  end</code></pre><h1 id="next"><a href="#next" class="headerlink" title="next"></a>next</h1><p><code>next (table [, index])</code><br>允许程序遍历表的所有字段。它的第一个参数是一个表，它的第二个参数是该表的索引。接下来返回表及其关联值的一个索引。</p><pre><code>local tee = {1, 3, 4, 6, 8}t = {3,7,10,17, pi=3.14159, banana=&quot;yellow&quot;}for key,value in next,t,nil do print(key,value)endfunction pairs (t)    return next, t, nilendfor k, v in pairs(t) do    print(k, v)end</code></pre><h1 id="pcall"><a href="#pcall" class="headerlink" title="pcall"></a>pcall</h1><p><code>pcall (f [, arg1, ···])</code></p><p>传入参数，以 保护模式 调用函数 f 。 这意味着 f 中的任何错误不会抛出； 取而代之的是，pcall 会将错误捕获到，并返回一个状态码。 第一个返回值是状态码（一个布尔量）， 当没有错误时，其为真。 此时，pcall 同样会在状态码后返回所有调用的结果。 在有错误时，pcall 返回 false 加错误消息。</p><p><code>local ret, msg = pcall(function(i) print(i) end, 33)</code></p><h1 id="xpcall"><a href="#xpcall" class="headerlink" title="xpcall"></a>xpcall</h1><p><code>xpcall (f, msgh [, arg1, ···])</code><br>这个函数和 pcall 类似。 不过它可以额外设置一个消息处理器 msgh。</p><pre><code>local function __TRACKBACK__(errmsg)    local track_text = debug.traceback(tostring(errmsg), 6);    print(track_text, &quot;LUA ERROR&quot;);    return false;endlocal function trycall(func, ...)    local args = { ... };    return xpcall(function() func(unpack(args)) end, __TRACKBACK__);endlocal function test(aaa)    print(&quot;#&quot;..aaa)endtrycall(test, nil)</code></pre><h1 id="多行文本"><a href="#多行文本" class="headerlink" title="多行文本"></a>多行文本</h1><p>使用[[ sun feng sunfeng ]]  定义多行文本。</p>]]></content>
+    
+    <summary type="html">
+    
+      lua的一些用法例如：loadstring loadfile load dofile
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>lua调用so</title>
+    <link href="https://bytemode.github.io/2018/12/11/lua%E8%B0%83%E7%94%A8so/"/>
+    <id>https://bytemode.github.io/2018/12/11/lua调用so/</id>
+    <published>2018-12-11T03:49:06.000Z</published>
+    <updated>2018-12-11T03:54:49.082Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="lua5-1动态库"><a href="#lua5-1动态库" class="headerlink" title="lua5.1动态库"></a>lua5.1动态库</h1><h2 id="c-so"><a href="#c-so" class="headerlink" title="c so"></a>c so</h2><pre><code>#include &lt;stdio.h&gt;#include &quot;./src/lua.h&quot;#include &quot;./src/lualib.h&quot;#include &quot;./src/lauxlib.h&quot;static int add(lua_State *L){    int a,b,c;    a = lua_tonumber(L,1);    b = lua_tonumber(L,2);    c = a+b;    lua_pushnumber(L,c);    printf(&quot;test hello!!!\r\n&quot;);    return 1;}static const struct luaL_Reg lib[] ={    {&quot;testadd&quot;, add},    {NULL,NULL}};int luaopen_testlib_core(lua_State *L)  // 注意这里的函数写法{    //luaL_register(L,&quot;testlib&quot;,lib);   // 1    luaL_openlib(L,&quot;testlib&quot;,lib,0);    // 2    return 1;}</code></pre><h2 id="lua调用脚本"><a href="#lua调用脚本" class="headerlink" title="lua调用脚本"></a>lua调用脚本</h2><pre><code>require(&quot;testlib.core&quot;)    // 注意这里的调用,和上面的函数写法是相关联的c = testlib.testadd(15,25)print(&quot;The result is &quot;,c);</code></pre><h1 id="lua5-3"><a href="#lua5-3" class="headerlink" title="lua5.3"></a>lua5.3</h1><h2 id="c-so-1"><a href="#c-so-1" class="headerlink" title="c so"></a>c so</h2><pre><code>static intlnow(lua_State *L) {    uint64_t ti = skynet_now();    lua_pushinteger(L, ti);    return 1;}intluaopen_skynet_core(lua_State *L) {    luaL_checkversion(L);    luaL_Reg l[] = {        { &quot;send&quot; , lsend },        { &quot;genid&quot;, lgenid },        { &quot;redirect&quot;, lredirect },        { &quot;command&quot; , lcommand },        { &quot;intcommand&quot;, lintcommand },        { &quot;error&quot;, lerror },        { &quot;tostring&quot;, ltostring },        { &quot;harbor&quot;, lharbor },        { &quot;pack&quot;, luaseri_pack },        { &quot;unpack&quot;, luaseri_unpack },        { &quot;packstring&quot;, lpackstring },        { &quot;trash&quot; , ltrash },        { &quot;callback&quot;, lcallback },        { &quot;now&quot;, lnow },        { NULL, NULL },    };    luaL_newlibtable(L, l);    lua_getfield(L, LUA_REGISTRYINDEX, &quot;skynet_context&quot;);    struct skynet_context *ctx = lua_touserdata(L,-1);    if (ctx == NULL) {        return luaL_error(L, &quot;Init skynet context first&quot;);    }    luaL_setfuncs(L,l,1);    return 1;}</code></pre><p>编译so直接<br><code>local c = require &quot;skynet.core&quot;</code></p>]]></content>
+    
+    <summary type="html">
+    
+      lua5.1和lua5.3调用调用动态库里的函数的方法,动态库的制作方法.luaL_openlib和luaL_newlibtable、lua_setfuncs构建动态库的方法,通过lua_toXXXX和lua_pushXXX从lua_state中取出放入参数实现参数返回值传递（c&lt;&gt;lua）,lua_state实现了c和lua的通信机制
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>lua模块定义</title>
+    <link href="https://bytemode.github.io/2018/12/11/lua%E6%A8%A1%E5%9D%97%E5%AE%9A%E4%B9%89/"/>
+    <id>https://bytemode.github.io/2018/12/11/lua模块定义/</id>
+    <published>2018-12-11T03:45:30.000Z</published>
+    <updated>2018-12-11T03:46:17.296Z</updated>
+    
+    <content type="html"><![CDATA[<p>lua5.1中提供的module方法在lua5.3中已经放弃使用，推荐使用的模块儿定义方式如下</p><ol><li>require table 方式定义模块</li></ol><pre><code>-- square.lualocal _M = {}           -- 局部的变量_M._VERSION = &#39;1.0&#39;     -- 模块版本local mt = { __index = _M }function _M.new(self, width, height)    return setmetatable({ width=width, height=height }, mt)endfunction _M.get_square(self)    return self.width * self.heightendfunction _M.get_circumference(self)    return (self.width + self.height) * 2endreturn _M引用示例代码：local square = require &quot;square&quot; local s1 = square:new(1, 2)print(s1:get_square())          --output: 2print(s1:get_circumference())   --output: 6</code></pre><ol start="2"><li>module 方式定义模块<br><code>`</code><br>module （“moduleA”) </li></ol><p>–相当于执行如下代码<br>local name = “moduleA”<br>local M = {}<br>_G[name] = M<br>package.loaded[modname] = M<br>setfenv(1,M)  –设置一个函数的环境当第一个参数为一个数字时，为1代表当前函数</p><p>module (…, package.seeall)<br>t = {}<br>function f()<br> –todo<br>end<br><code>`</code></p><p>module会导致当前环境压栈，module之后全局变量都不在可见。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;lua5.1中提供的module方法在lua5.3中已经放弃使用，推荐使用的模块儿定义方式如下&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;require table 方式定义模块&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;-- square.lua
+local _M = {}      
+      
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
   
   <entry>
     <title>lua沙盒</title>
@@ -72,50 +272,6 @@
     <summary type="html">
     
       lua表问跟踪器,使用一个代理器通过——index和newindex特性记录表的访问.跟踪lua表的赋值和取值table.key table.key = value会被跟踪.
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua高级特性</title>
-    <link href="https://bytemode.github.io/2018/12/05/lua%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7/"/>
-    <id>https://bytemode.github.io/2018/12/05/lua高级特性/</id>
-    <published>2018-12-05T11:52:56.000Z</published>
-    <updated>2018-12-05T12:37:33.841Z</updated>
-    
-    <content type="html"><![CDATA[<ol><li>条件表达式</li></ol><p>实现类似c++中a?b:c的效果。</p><p>a and b or c  – a 为true则返回b or c, a为false则返回false</p><p>(a and b)or c – a 为true则返回</p><ol start="2"><li>弱引用</li></ol><p>元表 __mode字段来设置表k,v是弱引用，被弱引用table引用，垃圾回收时可回收，只要k,v被回收，整个条目会删除。</p><p>Lua采用了基于垃圾收集的内存管理机制，当某个table对象被存放在容器中，而容器的外部不再有任何变量引用该对象，对于这样的对象，Lua的垃圾收集器是不会清理的，因为容器对象仍然引用着他。见如下代码：</p><pre><code>a = {}key = {}a[key] = 1key = {}a[key] = 2collectgarbage()for k,v inpairs(a) do print(v) end --输出1 2</code></pre><p><img src="http://note.youdao.com/src/5DE9982C6F844B22841E66D43A96E67E" alt="复制代码"></p><p>​    在执行垃圾收集之后，table a中的两个key都无法被清理，但是对value等于1的key而言，如果后面的逻辑不会遍历table a的话，那么我们就可以认为该对象内存泄露了。在Lua中提供了一种被称为弱引用table的机制，可以提示垃圾收集器，如果某个对象，如上面代码中的第一个table key，只是被弱引用table引用，那么在执行垃圾收集时可以将其清理。</p><p>​    Lua中的弱引用表提供了3中弱引用模式，即key是弱引用、value是弱引用，以及key和value均是弱引用。不论是哪种类型的弱引用table，只要有一个key或value被回收，那么它们所在的整个条目都会从table中删除。</p><p>​    一个table的弱引用类型是通过其元表的__mode字段来决定的。如果该值为包含字符”k”，那么table就是key弱引用，如果包含”v”，则是value若引用，如果两个字符均存在，就是key/value弱引用。见如下代码：</p><p> 1 a = {}</p><p> 2 b = {__mode = “k”}</p><p> 3setmetatable(a,b)</p><p> 4 key = {}</p><p> 5 a[key] = 1</p><p> 6 key = {}</p><p> 7 a[key] = 2</p><p> 8collectgarbage()</p><p> 9for k,v inpairs(a) do</p><p>10print(v)</p><p>11end</p><p>12–仅仅输出2</p><p><img src="http://note.youdao.com/src/5DE9982C6F844B22841E66D43A96E67E" alt="复制代码"></p><p>​    在上面的代码示例中，第一个key在被存放到table a之后，就被第二个key的定义所覆盖，因此它的唯一引用来自key弱引用表。事实上，这种机制在Java中也同样存在，Java在1.5之后的版本中也提供了一组弱引用容器，其语义和Lua的弱引用table相似。</p><p>​    最后需要说明的是，Lua中的弱引用表只是作用于table类型的变量，对于其他类型的变量，如数值和字符串等，弱引用表并不起任何作用。</p><p><img src="http://note.youdao.com/src/3D93E1809F1242B98CB49B56896F7F36" alt="img"></p><p><img src="http://note.youdao.com/src/0EEB7D1771464F09AB998AE5C04D31EC" alt="img"></p><p><img src="http://note.youdao.com/src/0CB44C0AD62A43568F0D6E138877BD8C" alt="img"></p><p><img src="http://note.youdao.com/src/78D8E70FC09A44B987325BADE5349886" alt="img"></p><p><img src="http://note.youdao.com/src/7D22CEC95D2848599A731E5703DAEB01" alt="img"></p><p>2.尾递归</p><p>什么是尾递归</p><p>尾递归的写法只是具备了使当前函数在调用下一个函数前把当前占有的栈销毁，但是会不会真的这样做，是要具体看编译器是否最终这样做。</p><p>什么是尾递归呢?(tail recursion), 顾名思议，就是一种“不一样的”递归，说到它的不一样，就得先说说一般的递归。对于一般的递归，比如下面的求阶乘，教科书上会告诉我们，如果这个函数调用的深度太深，很容易会有爆栈的危险。</p><p><img src="http://note.youdao.com/src/E929234E8981423EAFC2A2A5B0969336" alt="复制代码"></p><p>// 先不考虑溢出问题int func(int n) {     if (n &lt;= 1) return1;      return (n * func(n-1)); }</p><p><img src="http://note.youdao.com/src/E929234E8981423EAFC2A2A5B0969336" alt="复制代码"></p><p>原因很多人的都知道，让我们先回顾一下函数调用的大概过程：</p><p>1）调用开始前，调用方（或函数本身）会往栈上压相关的数据，参数，返回地址，局部变量等。</p><p>2）执行函数。</p><p>3）清理栈上相关的数据，返回。</p><p>因此，在函数 A 执行的时候，如果在第二步中，它又调用了另一个函数 B，B 又调用 C…. 栈就会不断地增长不断地装入数据，当这个调用链很深的时候，栈很容易就满 了，这就是一般递归函数所容易面临的大问题。</p><p>而尾递归在某些语言的实现上，能避免上述所说的问题，注意是某些语言上，尾递归本身并不能消除函数调用栈过长的问题，那什么是尾递归呢？在上面写的一般递归函数 func() 中，我们可以看到，func(n)  是依赖于 func(n-1) 的，func(n) 只有在得到 func(n-1) 的结果之后，才能计算它自己的返回值，因此理论上，在 func(n-1) 返回之前，func(n)，不能结束返回。因此func(n)就必须保留它在栈上的数据，直到func(n-1)先返回，而尾递归的实现则可以在编译器的帮助下，消除这个限制：</p><p><img src="http://note.youdao.com/src/E929234E8981423EAFC2A2A5B0969336" alt="复制代码"></p><p>// 先不考虑溢出int tail_func(int n, int res) {      if (n &lt;= 1) return res;       return tail_func(n - 1, n * res); }  // 像下面这样调用 tail_func(10000000000, 1);</p><p><img src="http://note.youdao.com/src/E929234E8981423EAFC2A2A5B0969336" alt="复制代码"></p><p>从上可以看到尾递归把返回结果放到了调用的参数里。这个细小的变化导致，tail_func(n, res)不必像以前一样，非要等到拿到了tail_func(n-1, n<em>res)的返回值，才能计算它自己的返回结果 – 它完全就等于tail_func(n-1, n</em>res)的返回值。因此理论上：tail_func(n)在调用tail_func(n-1)前，完全就可以先销毁自己放在栈上的东西。</p><p>这就是为什么尾递归如果在得到编译器的帮助下，是完全可以避免爆栈的原因：每一个函数在调用下一个函数之前，都能做到先把当前自己占用的栈给先释放了，尾递归的调用链上可以做到只有一个函数在使用栈，因此可以无限地调用！</p><p>所谓尾调用，就是一个函数返回另一个函数的返回值：</p><p>复制代码代码如下:</p><p>function f()</p><p>…</p><p>return g()</p><p>end</p><p>因为调用g()后，f()中不再执行任何代码，所以不需要保留f()的调用桟信息；Lua做了这样的优化，称为”尾调用消除”，g()返回后，控制点直接返回到调用f()的地方。</p><p>这种优化对尾递归非常有益，通常递归意味着调用桟的不断增长，甚至可能造成堆栈溢出；而尾递归提供了优化条件，编译器可以优化掉调用桟</p><p><img src="http://note.youdao.com/src/0ED3D9C5EDFC4F01A2DFB30A52209CCF" alt="img"></p><p>3.元表相关</p><p>table存在两种行为：查询和修改（赋值），通过元方法<strong>index和</strong>newindex来改变table的这两种行为。</p><p>__index主要用于table的查询</p><p>table[key] 的访问过程，首先检查table表中是否存在key的字段，如果有则返回，否则检查是否有__index的元方法，没有返回nil,有则查找元方法。</p><p>__index元方法可以是一个函数，还可以是一个table。如果是一个函数，则以table和不存在的key作为参数方位该函数，</p><p>例如：__index = function(t,key)</p><p>如果是一个table时，就以相同的方式来访问这个table（即传入key访问元方法的table，如果存在则放回值，反之返回nil）</p><p>例如：__index = tab –此时会返回tab[key]的值</p><p>__index可以很好的实现具有默认值的table</p><p>function setDefaultValues(t,d)</p><p>​    local mt = {__index = function() return d end}</p><p>​    setmetatable(t, mt)</p><p>end</p><p>tab = {x=10,y=20}</p><p>print(tab.x ,tab.y,tab.z)    –由于没有设置元方法则为nil</p><p>setDefaultValues(tab,100)    –设置默认值（设置__index元方法）</p><p>print(tab.z)            –检查到有__index的元方法则返回默认值</p><p>__newindex主要用于table的更新</p><p>当对table中不存在的索引赋值时，解释器就会查找__newindex元方法。如果有这个元方法，就调用这个元方法，而不是执行复制。如果这个元方法是一个table，解释器就在table中进行赋值，而不是对原来的table。</p><p>local k = {}</p><p>local mt = {</p><p>​    __newindex = k</p><p>}</p><p>local t = {}</p><p>setmetatable(t, mt)</p><p>print(“赋值前：”)</p><p>for k,v in pairs(k) do</p><p>​    print(k ,v)</p><p>end</p><p>t[1] = 20</p><p>print(“赋值后：t表中的值:”)</p><p>for k,v in pairs(t) do</p><p>​    print(k ,v)</p><p>end</p><p>print(“赋值后：k表中的值:”)</p><p>for k,v in pairs(k) do</p><p>​    print(k ,v)</p><p>end</p><p>4.class的实现</p><p>子类在定义时复制所有基类的方法，在实例化时将该类作为metatable的__index赋值给实例。这就是cocos2dx里面的lua class的实现。</p><p>function class(classname, super)</p><p>​     local cls = {}</p><p>​     if super then –复制基类方法</p><p>​        cls = {}</p><p>​        for k,v in pairs(super) do cls[k] = v end</p><p>​        cls.super = super</p><p>​    else</p><p>​        cls = {ctor = function() end}</p><p>​    end</p><p>​    cls.__cname = classname</p><p>​    cls.__index = cls</p><p>​    function cls.new(…) –实例化</p><p>​        local instance = setmetatable({}, cls)</p><p>​        instance.class = cls</p><p>​        instance:ctor(…)</p><p>​        return instance</p><p>​    end</p><p>​    return cls</p><p>end</p><p>5.闭包实现</p><p>Lua使用闭包的扁平表示:</p><p>GC头部包含了垃圾回收信息；</p><p>闭包包含了一个指向原型的指针，原型包含了函数的所有静态信息：主要部分是函数编译之后的代码，其余包括参数个数、调试信息和其他类似的数据;</p><p>闭包还包含0个或多个指向upvalue的指针，每个upvalue表示一个由闭包使用的非局部变量.</p><p><img src="http://note.youdao.com/src/FF6FBB6589004740A5B86749709A7A3E" alt="img"></p><p> Lua闭包实现的核心部件是upvalue结构，它表示了一个闭包和一个变量的连接.</p><p> 用于访问upvalue的虚拟机指令有2条：GETUPVALUE将一个upvalue的值复制到寄存器；SETUPVALUE将一个寄存器的值复制到upvalue。</p><p>　一个upvalue有两种状态：open和closed。当一个upvalue被创建时，它是open的，并且它的指针指向Lua栈中对应的变量。当Lua关闭了一个upvalue，upvalue指向的值被复制到upvalue结构内部，并且指针也相应进行调整</p><p>6.table，string的实现</p><p><img src="http://note.youdao.com/src/F989FAE3253F481F82FC84C8284ADBE7" alt="img"></p><p>lua中对基础数据类型使用统一的数据结构TValue表示，value_表示值，tt_表示数据类型。由此可知Value是一个union结构</p><p>对于nil,boolean,lightuserdata,number,cfunction这些数据类型的值都是直接存放在TValue中，其他类型的数据都用GCObject来表示，TValue中只是保存GCObject结构的指针</p><p>TString</p><ol><li>/* </li><li>** creates a new string object </li><li>*/  </li><li>static TString <em>createstrobj (lua_State </em>L, const char *str, size_t l,  </li><li>​                              int tag, unsigned int h, GCObject **list) {  </li><li>TString *ts;  </li><li>size_t totalsize;  /<em> total size of TString object </em>/  </li><li>totalsize = sizeof(TString) + ((l + 1) * sizeof(char));  </li><li>ts = &amp;luaC_newobj(L, tag, totalsize, list, 0)-&gt;ts;  </li><li>ts-&gt;tsv.len = l;  </li><li>ts-&gt;tsv.hash = h;  </li><li>ts-&gt;tsv.extra = 0;  </li><li>memcpy(ts+1, str, l*sizeof(char));  </li><li>((char <em>)(ts+1))[l] = ‘\0’;  /</em> ending 0 */  </li><li>return ts;  </li><li>}  </li></ol><p><img src="http://note.youdao.com/src/EC2292CD831B47AD975575C6691C41EB" alt="img"></p><p>​                                      图1-2</p><p>   从代码可以看出，字符串在lua的内存分配结构，如图1-2所示。lua字符串都自动加上结束符。</p><p>C代码  </p><ol><li>/* </li><li>** new string (with explicit length) </li><li>*/  </li><li>TString <em>luaS_newlstr (lua_State </em>L, const char *str, size_t l) {  </li><li>if (l &lt;= LUAI_MAXSHORTLEN)  /<em> short string? </em>/  </li><li>​    return internshrstr(L, str, l);  </li><li>else {  </li><li>​    if (l + 1 &gt; (MAX_SIZET - sizeof(TString))/sizeof(char))  </li><li>​      luaM_toobig(L);  </li><li>​    return createstrobj(L, str, l, LUA_TLNGSTR, G(L)-&gt;seed, NULL);  </li><li>}  </li><li>}  </li></ol><p>​    在实际中对字符串的使用大部分都是很短的，所以lua保存字符串分为短字符串和长字符串，短字符串都保存在全局的字符串hash表中，长字符串则放在全局的可gc对象列表中。</p><p>   static TString <em>internshrstr (lua_State </em>L, const char *str, size_t l) {  </p><ol><li>GCObject *o;  </li><li>global_State *g = G(L);  </li><li>unsigned int h = luaS_hash(str, l, g-&gt;seed);  </li><li>for (o = g-&gt;strt.hash[lmod(h, g-&gt;strt.size)];  </li><li>​       o != NULL;  </li><li>​       o = gch(o)-&gt;next) {  </li><li>​    TString *ts = rawgco2ts(o);  </li><li>​    if (h == ts-&gt;tsv.hash &amp;&amp;  </li><li>​        l == ts-&gt;tsv.len &amp;&amp;  </li><li>​        (memcmp(str, getstr(ts), l * sizeof(char)) == 0)) {  </li><li>​      if (isdead(G(L), o))  /<em> string is dead (but was not collected yet)? </em>/  </li><li>​        changewhite(o);  /<em> resurrect it </em>/  </li><li>​      return ts;  </li><li>​    }  </li><li>}  </li><li>return newshrstr(L, str, l, h);  /<em> not found; create a new string </em>/  </li><li>}  </li></ol><p>​    短字符串的hash表采用开放寻址hash算法，在处理一个短字符串的时候对首先判断字符串在hash表中是否已存在，存在则直接返回其地址；不存在则创建该字符串，并求出其hash值。长字符串则都重新分配内存保存。因此在对比两个字符串是否相等时，短字符串只要比较地址是否相等就行了，而对于长字符串则需要对比所有字符。由此可见lua中对于短字符串的处理很高效，一般用于字符串的比较，或者用作table的key。</p><p>  Table</p><p><img src="http://note.youdao.com/src/16471361C7A045F88883BCA7216834EE" alt="img"></p><p>lua中的table是key-value的形式来存放数据的，table分为两部分：数组部分array和hash部分。array和sizearray为数组部分，node，lastfree，lsizenode为hash部分。</p><p>数组段和 hash 段两个部分。数字 key 一般放在数组段中，没有初始化过的 key 值全部设置为 nil 。当数字 key 过于离散的时候，部分较大的数字 key 会被移到 hash段中去。</p><p>key为你init</p><p>当key小于数组长度时，则直接返回数组中的值，否则计算key的hash值，从表的hash部分查找key的值。</p><p>当key为string</p><p>统一调用mainposition获取其hash值对应的散列地址.</p><p>当给table的key赋值的时候，会先查找key是否存在，如果存在则对value重新赋值，如果不存在则表示key也不存在，会调用luaH_newkey创建key，然后再对value赋值。在创建key的时候如果table的大小不够会触发rehash对表进行扩大。</p><p>7.gc相关</p><p>采用垃圾回收机制对所有的lua对象(GCObject)进行管理。Lua虚拟机会定期运行GC，释放掉已经不再被被引用到的lua对象。</p><p>基本算法【标记清除】</p><p>基本的垃圾回收算法被称为”mark-and-sweep”算法。算法本身其实很简单。</p><p>1.系统管理着所有已经创建了的对象。每个对象都有对其他对象的引用。</p><p>2.root集合代表着已知的系统级别的对象引用。</p><p>3.从root集合出发，就可以访问到系统引用到的所有对象。而没有被访问到的对象就是垃圾对象，需要被销毁。</p><p>我们可以将所有对象分成三个状态：</p><ol><li>White状态，也就是待访问状态。表示对象还没有被垃圾回收的标记过程访问到。</li><li>Gray状态，也就是待扫描状态。表示对象已经被垃圾回收访问到了，但是对象本身对于其他对象的引用还没有进行遍历访问。</li><li>Black状态，也就是已扫描状态。表示对象已经被访问到了，并且也已经遍历了对象本身对其他对象的引用。</li></ol><p>基本的算法可以描述如下：</p><ol><li>当前所有对象都是White状态;  </li><li>将root集合引用到的对象从White设置成Gray，并放到Gray集合中;  </li><li>while(Gray集合不为空)  </li><li>{  </li><li>​    从Gray集合中移除一个对象O，并将O设置成Black状态;  </li><li>​    for(O中每一个引用到的对象O1) {  </li><li>​        if(O1在White状态) {  </li><li>​            将O1从White设置成Gray，并放到到Gray集合中；  </li><li>​        }  </li><li>​    }  </li><li>}  </li><li>for(任意一个对象O){  </li><li>​    if(O在White状态)  </li><li>​        销毁对象O;  </li><li>​    else  </li><li>​        将O设置成White状态;  </li><li>}  </li></ol><p>Incremental Garbage Collection</p><p>上面的算法如果一次性执行，在对象很多的情况下，会执行很长时间，严重影响程序本身的响应速度。其中一个解决办法就是，可以将上面的算法分步执行，这样每个步骤所耗费的时间就比较小了。我们可以将上述算法改为以下下几个步骤。</p><p>首先标识所有的root对象：</p><ol><li>当前所有对象都是White状态;  </li><li>将root集合引用到的对象从White设置成Gray，并放到Gray集合中;  </li></ol><p>遍历访问所有的gray对象。如果超出了本次计算量上限，退出等待下一次遍历:</p><ol><li>while(Gray集合不为空,并且没有超过本次计算量的上限){  </li><li>​    从Gray集合中移除一个对象O，并将O设置成Black状态;  </li><li>​    for(O中每一个引用到的对象O1) {  </li><li>​        if(O1在White状态) {  </li><li>​            将O1从White设置成Gray，并放到到Gray集合中；  </li><li>​        }  </li><li>​    }  </li><li>}  </li></ol><p>销毁垃圾对象：</p><ol><li>for(任意一个对象O){  </li><li>​    if(O在White状态)  </li><li>​        销毁对象O;  </li><li>​    else  </li><li>​        将O设置成White状态;  </li><li>}  </li></ol><p>在每个步骤之间，由于程序可以正常执行，所以会破坏当前对象之间的引用关系。black对象表示已经被扫描的对象，所以他应该不可能引用到一个white对象。当程序的改变使得一个black对象引用到一个white对象时，就会造成错误。解决这个问题的办法就是设置barrier。barrier在程序正常运行过程中，监控所有的引用改变。如果一个black对象需要引用一个white对象，存在两种处理办法：</p><ol><li>将white对象设置成gray，并添加到gray列表中等待扫描。这样等于帮助整个GC的标识过程向前推进了一步。</li><li>将black对象该回成gray，并添加到gray列表中等待扫描。这样等于使整个GC的标识过程后退了一步。</li></ol><p>这种垃圾回收方式被称为”Incremental Garbage Collection”(简称为”IGC”，Lua所采用的就是这种方法。使用”IGC”并不是没有代价的。IGC所检测出来的垃圾对象集合比实际的集合要小，也就是说，有些在GC过程中变成垃圾的对象，有可能在本轮GC中检测不到。不过，这些残余的垃圾对象一定会在下一轮GC被检测出来，不会造成泄露。</p>]]></content>
-    
-    <summary type="html">
-    
-      涉及lua原表、尾递归、弱引用表、luastate、gc、源码解析、记录lua表访问赋值、lua面向对象等
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua和c交互原理</title>
-    <link href="https://bytemode.github.io/2018/12/05/lua%E5%92%8Cc%E4%BA%A4%E4%BA%92/"/>
-    <id>https://bytemode.github.io/2018/12/05/lua和c交互/</id>
-    <published>2018-12-05T11:20:11.000Z</published>
-    <updated>2018-12-05T11:52:34.908Z</updated>
-    
-    <content type="html"><![CDATA[<p>luastate</p>]]></content>
-    
-    <summary type="html">
-    
-      lua和c语言的交互,两者相互调用的原理.
     
     </summary>
     
