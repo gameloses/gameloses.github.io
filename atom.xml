@@ -44,6 +44,33 @@
   </entry>
   
   <entry>
+    <title>lua错误跟踪</title>
+    <link href="https://bytemode.github.io/2018/12/12/lua%E9%94%99%E8%AF%AF%E8%B7%9F%E8%B8%AA/"/>
+    <id>https://bytemode.github.io/2018/12/12/lua错误跟踪/</id>
+    <published>2018-12-12T13:35:21.000Z</published>
+    <updated>2018-12-12T14:47:33.220Z</updated>
+    
+    <content type="html"><![CDATA[<p>pcall() xpcall()  debug.traceback() debug.debug() assert()</p><p>错误</p><p>Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要尽可能的防止错误的发生，Lua经常作为扩展语言嵌入在别的应用中，所以不能当错误发生时简单的崩溃或者退出。相反，当错误发生时Lua结束当前的chunk并返回到应用中。</p><p>当Lua遇到不期望的情况时就会抛出错误，比如：两个非数字进行相加；调用一个非函数的变量；访问表中不存在的值等（可以通过metatables修改这种行为，后面介绍）。你也可以通过调用error函数显式地抛出错误，error的参数是要抛出的错误信息。</p><p>print “enter a number:”</p><p>n = io.read(“*number”)</p><p>if not n then error(“invalid input”) end</p><p>Lua提供了专门的内置函数assert来完成上面类似的功能：</p><p>print “enter a number:”</p><p>n = assert(io.read(“*number”), “invalid input”)</p><p>assert首先检查第一个参数，若没问题，assert不做任何事情；否则，assert以第二个参数作为错误信息抛出。第二个参数是可选的。注意，assert会首先处理两个参数，然后才调用函数，所以下面代码，无论n是否为数字，字符串连接操作总会执行：</p><p>n = io.read()</p><p>assert(tonumber(n), “invalid input: “ .. n .. “ is not a number”)</p><p>当函数遇到异常有两个基本的动作：返回错误代码或者抛出错误。选择哪一种方式，没有固定的规则，不过基本的原则是：对于程序逻辑上能够避免的异常，以抛出错误的方式处理之，否则返回错误代码。</p><p>例如sin函数，假定我们让sin碰到错误时返回错误代码，则使用sin的代码可能变为：</p><p>local res = math.sin(x)</p><p>if not res then      – error</p><p>​    …</p><p>当然，我们也可以在调用sin前检查x是否为数字：</p><p>if not tonumber(x) then     – error: x is not a number</p><p>​    …</p><p>而事实上，我们既不是检查参数也不是检查返回结果，因为参数错误可能意味着我们的程序某个地方存在问题，这种情况下，处理异常最简单最实际的方式是抛出错误并且终止代码的运行。</p><p>再来看一个例子。io.open函数用于打开文件，如果文件不存在，结果会如何？很多系统中，我们通过“试着去打开文件”来判断文件是否存在。所以如果io.open不能打开文件（由于文件不存在或者没有权限），函数返回nil和错误信息。依据这种方式，我们可以通过与用户交互（比如：是否要打开另一个文件）合理地处理问题：</p><pre><code>local file, msgrepeat    print &quot;enter a file name:&quot;    local name = io.read()    if not name then return end     -- no input    file, msg = io.open(name, &quot;r&quot;)    if not file then print(msg) enduntil file</code></pre><p>如果你想偷懒不想处理这些情况，又想代码安全的运行，可以使用assert：</p><p>file = assert(io.open(name, “r”))</p><p>Lua中有一个习惯：如果io.open失败，assert将抛出错误。</p><p>file = assert(io.open(“no-file”, “r”))</p><p>​       –&gt; stdin:1: no-file: No such file or directory</p><p>注意：io.open返回的第二个结果（错误信息）会作为assert的第二个参数。</p><p>虽然你可以使用任何类型的值作为错误信息，通常情况下，我们使用字符串来描述遇到的错误。如果遇到内部错误（比如对一个非table的值使用索引下标访问）Lua将自己产生错误信息，否则Lua使用传递给error函数的参数作为错误信息。不管在什么情况下，Lua都尽可能清楚的描述问题发生的缘由。</p><p>local status, err = pcall(function () a = ‘a’+1 end)</p><p>print(err)</p><p>–&gt; stdin:1: attempt to perform arithmetic on a string value</p><p>local status, err = pcall(function () error(“my error”) end)</p><p>print(err)</p><p>–&gt; stdin:1: my error</p><p>例子中错误信息给出了文件名（stdin）与行号。</p><p>函数error还可以有第二个参数，表示错误发生的层级。比如，你写了一个函数用来检查“error是否被正确调用”：</p><pre><code>function foo (str)    if type(str) ~= &quot;string&quot; then       error(&quot;string expected&quot;)    end    ...end</code></pre><p>可有人这样调用此函数：</p><p>foo({x=1})</p><p>Lua会指出发生错误的是foo而不是error，实际上，错误是调用error时产生的。为了纠正这个问题，修改前面的代码让error报告错误发生在第二级（你自己的函数是第一级）如下：</p><pre><code>function foo (str)    if type(str) ~= &quot;string&quot; then       error(&quot;string expected&quot;, 2)    end    ...end</code></pre><p>当错误发生的时候，我们常常希望了解详细的信息，而不仅是错误发生的位置。若能了解到“错误发生时的栈信息”就好了，但pcall返回错误信息时，已经释放了保存错误发生情况的栈信息。因此，若想得到tracebacks，我们必须在pcall返回以前获取。Lua提供了xpcall来实现这个功能，xpcall接受两个参数：调用函数、错误处理函数。当错误发生时，Lua会在栈释放以前调用错误处理函数，因此可以使用debug库收集错误相关信息。有两个常用的debug处理函数：debug.debug和debug.traceback，前者给出Lua的提示符，你可以自己动手察看错误发生时的情况；后者通过traceback创建更多的错误信息，也是控制台解释器用来构建错误信息的函数。你可以在任何时候调用debug.traceback获取当前运行的traceback信息：</p><p>print(debug.traceback())</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;pcall() xpcall()  debug.traceback() debug.debug() assert()&lt;/p&gt;
+&lt;p&gt;错误&lt;/p&gt;
+&lt;p&gt;Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要尽可能的防止错误的发生，Lua经常作为扩展语言
+      
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
     <title>lua用法2</title>
     <link href="https://bytemode.github.io/2018/12/12/lua%E7%94%A8%E6%B3%952/"/>
     <id>https://bytemode.github.io/2018/12/12/lua用法2/</id>
@@ -57,6 +84,32 @@
       
       
         &lt;h1 id=&quot;loadstring-load&quot;&gt;&lt;a href=&quot;#loadstring-load&quot; class=&quot;headerlink&quot; title=&quot;loadstring load&quot;&gt;&lt;/a&gt;loadstring load&lt;/h1&gt;&lt;p&gt;从给定的字符串得到块(函数)。lua
+      
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>lua版本变化</title>
+    <link href="https://bytemode.github.io/2018/12/12/lua%E7%89%88%E6%9C%AC%E5%8F%98%E5%8C%96/"/>
+    <id>https://bytemode.github.io/2018/12/12/lua版本变化/</id>
+    <published>2018-12-12T13:31:21.000Z</published>
+    <updated>2018-12-12T14:47:58.254Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="从-Lua-5-1-迁移到-5-2"><a href="#从-Lua-5-1-迁移到-5-2" class="headerlink" title="从 Lua 5.1 迁移到 5.2"></a>从 Lua 5.1 迁移到 5.2</h4><ul><li><p>5.2中抛弃module，建议使用require进行加载， 可能是考虑到Module定义对全局表的污染</p></li><li><p>在5.1版本，可以理解为每个<a href="https://www.lua.org/pil/1.1.html" target="_blank" rel="noopener">chunk</a>都具有自己的环境表，然后通过setfenv/getfenv进行设置和操作。Lua5.2开始取消了环境表的概念，取消setfenv/getfenv方法，增加了_Env来管理。</p></li><li><p>_G 和 _Env*</p></li></ul><p>_G 是放在注册表LUA_RIDX_GLOBALS中，初始化时核心的库都放在_G中；_Env 是chunk闭包的第一个upvalue，load时默认为_G, 然后后面定义的变量都会在编译时加上_ENV.前缀，以此传递下去，当然也可以修改</p><ul><li>全局注册表</li></ul><p>在5.2中已经移除了LUA_GLOBALSINDEX,去而带之的是注册表。5.2以后中上面两个函数都是使用的注册标中的LUA_RIDX_GLOBAS伪索引（索引注册表的全局环境）。处理 lua和C交互API的时候需要注意</p><ul><li>luaL_register</li></ul><p>Lua5.2 以后取消了这个接口，不过可以通过luaL_setfunc方法看来实现</p><p>#undef luaL_register #define luaL_register(L,n,f) \     { if ((n) == NULL) luaL_setfuncs(L,f,0); else luaL_newlib(L,f); } #endif</p><h4 id="从-Lua-5-2-迁移到-5-3"><a href="#从-Lua-5-2-迁移到-5-3" class="headerlink" title="从 Lua 5.2 迁移到 5.3"></a>从 Lua 5.2 迁移到 5.3</h4><ul><li>整数 (默认 64 位)，32 位整数的官方支持</li><li>位操作符</li><li>基本的 utf-8 支持</li><li>值的打包及解包函数</li><li>整数除法</li><li>ipairs 以及表处理库都会考虑元方法</li><li>新函数 string.pack</li><li>新函数 string.unpack</li><li>新函数 string.packsize</li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;从-Lua-5-1-迁移到-5-2&quot;&gt;&lt;a href=&quot;#从-Lua-5-1-迁移到-5-2&quot; class=&quot;headerlink&quot; title=&quot;从 Lua 5.1 迁移到 5.2&quot;&gt;&lt;/a&gt;从 Lua 5.1 迁移到 5.2&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;5
       
     
     </summary>
@@ -442,66 +495,6 @@ local _M = {}
     
     
       <category term="git" scheme="https://bytemode.github.io/tags/git/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>cocos2dx性能优化</title>
-    <link href="https://bytemode.github.io/2018/12/03/cocos2dx%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
-    <id>https://bytemode.github.io/2018/12/03/cocos2dx性能优化/</id>
-    <published>2018-12-03T08:14:02.000Z</published>
-    <updated>2018-12-10T13:49:48.276Z</updated>
-    
-    <content type="html"><![CDATA[<p>游戏性能应该在设计编码时就需要认真对待,在按照常规处理之后需要使用工具查找游戏性能瓶颈，之后针对处理.</p><p>主要的性能问题所在基本是GPU,CPU.经常涉及到游戏逻辑优化,优化效果的指标：帧率、内存、drawcall.</p><h4 id="查找-GPU-性能瓶颈的工具"><a href="#查找-GPU-性能瓶颈的工具" class="headerlink" title="查找 GPU 性能瓶颈的工具"></a>查找 GPU 性能瓶颈的工具</h4><ol><li><p>使用 Xcode OpenGL ES Profiler。</p><p><a href="https://github.com/rstrahl/rudistrahl.me/blob/master/entries/Debugging-OpenGL-ES-With-Xcode-Profile-Tools.md" target="_blank" rel="noopener">文档链接地址</a></p><p>如果你想 profiling 特定 GPU 的移动设备的图形性能，我们可以使用这些 GPU 制造商提供的工具：</p></li><li><p>对于 ARM Mali GPU，可以使用 mali graphics debugger: </p><p><a href="http://malideveloper.arm.com/resources/tools/mali-graphics-debugger/" target="_blank" rel="noopener">http://malideveloper.arm.com/resources/tools/mali-graphics-debugger/</a></p></li><li><p>对于 Imagination PowerVR GPU，可以使用 PVRTune: </p><p><a href="https://community.imgtec.com/developers/powervr/tools/pvrtune/" target="_blank" rel="noopener">https://community.imgtec.com/developers/powervr/tools/pvrtune/</a></p></li><li><p>对于 Qualcomm Adreno GPU，可以使用 adreno GPU profiler: </p><p><a href="https://developer.qualcomm.com/software/adreno-gpu-profiler" target="_blank" rel="noopener">https://developer.qualcomm.com/software/adreno-gpu-profiler</a></p></li></ol><p>使用工具查看图形渲染管线哪个阶段遇到瓶颈了，是顶点处理阶段，还是像素着色阶段。</p><h4 id="查找-CPU-性能瓶颈的工具"><a href="#查找-CPU-性能瓶颈的工具" class="headerlink" title="查找 CPU 性能瓶颈的工具"></a>查找 CPU 性能瓶颈的工具</h4><ol><li><p>Mac 平台可以使用 Xcode 的 Time Profiler 工具：</p><p><a href="https://developer.apple.com/library/ios/documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/MeasuringCPUUse.html" target="_blank" rel="noopener">https://developer.apple.com/library/ios/documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/MeasuringCPUUse.html</a></p></li><li><p>Windows 平台可以使用 Visual Studio 的 CPU profiler：</p><p><a href="https://blogs.msdn.microsoft.com/visualstudioalm/2015/10/29/profile-your-cpu-in-the-debugger-in-visual-studio-2015/" target="_blank" rel="noopener">https://blogs.msdn.microsoft.com/visualstudioalm/2015/10/29/profile-your-cpu-in-the-debugger-in-visual-studio-2015/</a></p></li><li><p>Cocos Creator 的用户，可以使用 Chrome 自带的 timeline 工具和 CPU profile 工具。</p></li></ol><h4 id="熟悉你的移动设备和你使用的游戏引擎"><a href="#熟悉你的移动设备和你使用的游戏引擎" class="headerlink" title="熟悉你的移动设备和你使用的游戏引擎"></a>熟悉你的移动设备和你使用的游戏引擎</h4><p>熟悉你的移动设备使用的 GPU 和 CPU 的型号， Android 手机可以安装一个应用“GPU-Z”可以非常方便地查看到这些信息，而到目前为止iOS 设备统一使用的都是 PowerVR 的 GPU。如果你在测试游戏的过程中，发现其它手机都没有问题，但是某些具有同种类型的GPU 的设备性能表现都不佳，此时你可能需要留意一下针对特定 GPU 的优化技巧了.</p><p>同样的，了解你所使用的游戏引擎的局限也是非常重要的。你需要清楚地知道你所使用的游戏引擎是如何组织图形渲染命令的，这些命令又是如何处理 Batch Draw 的。以及，我们需要如何组织我们的纹理和游戏节点对象，这样才能最大限度地利用引擎提供的自动批处理功能。</p><p>如果你知道这些内容，那么你就可以避免一些常见的性能瓶颈。</p><h4 id="常见的优化技巧"><a href="#常见的优化技巧" class="headerlink" title="常见的优化技巧"></a>常见的优化技巧</h4><ol><li><p>对于资源在能满足效果的前提下需要使用省资源和计算的方式实现</p><p>例如像素格式为RGBA4444可以达到效果就不要使用RGBA8888;不带通道的图片使用jpg而非png;使用压缩纹理和多级纹理;声音可以采纳较低采样率和单通道;使用九宫图等</p></li><li><p>关于CPU瓶颈一般跟Draw call 数量和你的游戏循环的复杂度相关</p></li></ol><ul><li>降低你的游戏的 Draw call 数量，最大限度地利用批次渲染来减少 Draw call 数量。 Cocos2d-x 3.x 包含了自动批处理功能，但是它需要你合图，并且生成的图形渲染命令必须相邻，且有相同的 material id。</li><li>对于游戏中出现的大量对象,可以使用对象缓存池来避免对象生成的消耗的时间</li><li>对于外部资源例如纹理声音文字等,尽量采用预加载避免游戏循环中出现大量IO操作</li><li>对于复杂UI的实现如listview等,里面重复的item可以使用clone的方法</li><li>避免在游戏循环做复杂运算,对于系统更新可以分系统选择不同的更新频率,特别是AI有些事不用每帧更新。</li></ul><ol start="3"><li><p>GPU 瓶颈通常局限于Overdraw和 Bandwidth</p><p>Overdraw 这个问题会导致你的 GPU 很容易碰到带宽的瓶颈,从而降低你的图形性能.所谓 Overdraw，指的是在图形渲染管线中,很多像素的着色对于最终显示在屏幕上的颜色没有帮助,这些多余的计算和处理是浪费的，最重要的就是浪费带宽，因为它们需要从主存中采样纹理坐标。 Cocos2d-x 引擎总是按照从后往前的顺序去提交图形渲染命令的，因为在 2D 里面，大量的图片都是带有透明像素的，为了保证 blending 的正确性，就必须保持这种顺序的渲染命令提交。即使按照这种顺序去提交渲染命令，PowerVR 的 HSR 也可以在片断着色之前剔除掉不需要计算的像素。这也是为什么同样的 Cocos2d-x 游戏在很垃圾的 iPod 上面性能也不错，但是在某些 Android 旗舰机上面性能却表现得一团糟的原因。</p><p>注意: 通过使用工具， 预先将 2D 图片三角化，可以提高 Fillrate。具体做法可以参考 TexturePacker 作者写的文章： <a href="https://www.codeandweb.com/texturepacker/tutorials/cocos2d-x-performance-optimization" target="_blank" rel="noopener">https://www.codeandweb.com/texturepacker/tutorials/cocos2d-x-performance-optimization</a></p></li></ol><h4 id="cocos2dx优化方案"><a href="#cocos2dx优化方案" class="headerlink" title="cocos2dx优化方案"></a>cocos2dx优化方案</h4><ol><li>尽可能地使用批次渲染（Batch Draw）</li><li>控制Draw 数量尽量少</li><li>减少 32 位未压缩纹理的使用，尽量使用 16 位且压缩过的纹理格式。</li><li>尽可能地使用支持硬件解码的压缩纹理：比如 iOS 平台使用 PVRTC 纹理， 在安卓平台上面使用 ETC格式的纹理。</li><li>请使用对象缓存池和预加载技术来避免临时创建耗时导致卡顿。</li><li>使用 armeabi-v7a 架构来编译 Android 的 SO，因为在此架构下面 Cocos2d-x 会启用 neon 指令集，矩阵运算的效率会大大提高。</li><li>避免在 pixel shader 里面做非常复杂的计算</li><li>避免在 pixel shader 里面使用 discard 和 alpha test，因为这样会破坏 GPU 自身的 depth testing 优化，比如 PowerVR 的 HSR。</li></ol>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;游戏性能应该在设计编码时就需要认真对待,在按照常规处理之后需要使用工具查找游戏性能瓶颈，之后针对处理.&lt;/p&gt;
-&lt;p&gt;主要的性能问题所在基本是GPU,CPU.经常涉及到游戏逻辑优化,优化效果的指标：帧率、内存、drawcall.&lt;/p&gt;
-&lt;h4 id=&quot;查找-GPU-性能瓶
-      
-    
-    </summary>
-    
-      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
-    
-    
-      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>golang服务器开发</title>
-    <link href="https://bytemode.github.io/2018/11/30/golang/"/>
-    <id>https://bytemode.github.io/2018/11/30/golang/</id>
-    <published>2018-11-30T07:55:25.000Z</published>
-    <updated>2018-12-03T08:36:36.632Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="golang开发笔记"><a href="#golang开发笔记" class="headerlink" title="golang开发笔记"></a>golang开发笔记</h4><p>涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软件的解读.</p><p>leaf goworld 等教程. 同时会有一些游戏demo展示.</p><blockquote><p>跳转链接：</p></blockquote><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">golang深度解析</a></p><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">leaf解析</a></p><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">goworld解析</a></p><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">https://gameloses.github.io/golang/</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h4 id=&quot;golang开发笔记&quot;&gt;&lt;a href=&quot;#golang开发笔记&quot; class=&quot;headerlink&quot; title=&quot;golang开发笔记&quot;&gt;&lt;/a&gt;golang开发笔记&lt;/h4&gt;&lt;p&gt;涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软
-      
-    
-    </summary>
-    
-      <category term="golang" scheme="https://bytemode.github.io/categories/golang/"/>
-    
-    
-      <category term="golang" scheme="https://bytemode.github.io/tags/golang/"/>
-    
-      <category term="go" scheme="https://bytemode.github.io/tags/go/"/>
-    
-      <category term="游戏服务器" scheme="https://bytemode.github.io/tags/%E6%B8%B8%E6%88%8F%E6%9C%8D%E5%8A%A1%E5%99%A8/"/>
-    
-      <category term="leaf" scheme="https://bytemode.github.io/tags/leaf/"/>
-    
-      <category term="goworld" scheme="https://bytemode.github.io/tags/goworld/"/>
     
   </entry>
   
