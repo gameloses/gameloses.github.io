@@ -1,183 +1,383 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search>
-  <entry>
-    <title><![CDATA[lua类的实现]]></title>
-    <url>%2F2018%2F12%2F11%2Flua%E7%B1%BB%E7%9A%84%E5%AE%9E%E7%8E%B0%2F</url>
-    <content type="text"><![CDATA[子类在定义时复制所有基类的方法，在实例化时将该类作为metatable的__index赋值给实例。这就是cocos2dx里面的lua class的实现。 function class(classname, super) ​ local cls = {} ​ if super then --复制基类方法 ​ cls = {} ​ for k,v in pairs(super) do cls[k] = v end ​ cls.super = super ​ else ​ cls = {ctor = function() end} ​ end ​ cls.__cname = classname ​ cls.__index = cls ​ function cls.new(...) --实例化 ​ local instance = setmetatable({}, cls) ​ instance.class = cls ​ instance:ctor(...) ​ return instance ​ end ​ return cls end]]></content>
+<search> 
+  
+    
+    <entry>
+      <title>lua类的实现</title>
+      <link href="/2018/12/11/lua%E7%B1%BB%E7%9A%84%E5%AE%9E%E7%8E%B0/"/>
+      <url>/2018/12/11/lua%E7%B1%BB%E7%9A%84%E5%AE%9E%E7%8E%B0/</url>
+      
+        <content type="html"><![CDATA[<p>子类在定义时复制所有基类的方法，在实例化时将该类作为metatable的__index赋值给实例。这就是cocos2dx里面的lua class的实现。</p><pre><code>function class(classname, super)​     local cls = {}​     if super then --复制基类方法​        cls = {}​        for k,v in pairs(super) do cls[k] = v end​        cls.super = super​    else​        cls = {ctor = function() end}​    end​    cls.__cname = classname​    cls.__index = cls​    function cls.new(...) --实例化​        local instance = setmetatable({}, cls)​        instance.class = cls​        instance:ctor(...)​        return instance​    end​    return clsend</code></pre>]]></content>
+      
+      
       <categories>
-        <category>lua</category>
+          
+          <category> lua </category>
+          
       </categories>
-      <tags>
-        <tag>lua</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[lua垃圾回收]]></title>
-    <url>%2F2018%2F12%2F11%2Flua%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%2F</url>
-    <content type="text"><![CDATA[采用垃圾回收机制对所有的lua对象(GCObject)进行管理。Lua虚拟机会定期运行GC，释放掉已经不再被被引用到的lua对象。 基本算法【标记清除】 基本的垃圾回收算法被称为”mark-and-sweep”算法。算法本身其实很简单。 1.系统管理着所有已经创建了的对象。每个对象都有对其他对象的引用。 2.root集合代表着已知的系统级别的对象引用。 3.从root集合出发，就可以访问到系统引用到的所有对象。而没有被访问到的对象就是垃圾对象，需要被销毁。 我们可以将所有对象分成三个状态： White状态，也就是待访问状态。表示对象还没有被垃圾回收的标记过程访问到。 Gray状态，也就是待扫描状态。表示对象已经被垃圾回收访问到了，但是对象本身对于其他对象的引用还没有进行遍历访问。 Black状态，也就是已扫描状态。表示对象已经被访问到了，并且也已经遍历了对象本身对其他对象的引用。 基本的算法可以描述如下： 当前所有对象都是White状态; 将root集合引用到的对象从White设置成Gray，并放到Gray集合中; while(Gray集合不为空) { ​ 从Gray集合中移除一个对象O，并将O设置成Black状态; ​ for(O中每一个引用到的对象O1) { ​ if(O1在White状态) { ​ 将O1从White设置成Gray，并放到到Gray集合中； ​ } ​ } } for(任意一个对象O){ ​ if(O在White状态) ​ 销毁对象O; ​ else ​ 将O设置成White状态; } Incremental Garbage Collection 上面的算法如果一次性执行，在对象很多的情况下，会执行很长时间，严重影响程序本身的响应速度。其中一个解决办法就是，可以将上面的算法分步执行，这样每个步骤所耗费的时间就比较小了。我们可以将上述算法改为以下下几个步骤。 首先标识所有的root对象： 当前所有对象都是White状态; 将root集合引用到的对象从White设置成Gray，并放到Gray集合中; 遍历访问所有的gray对象。如果超出了本次计算量上限，退出等待下一次遍历: while(Gray集合不为空,并且没有超过本次计算量的上限){ ​ 从Gray集合中移除一个对象O，并将O设置成Black状态; ​ for(O中每一个引用到的对象O1) { ​ if(O1在White状态) { ​ 将O1从White设置成Gray，并放到到Gray集合中； ​ } ​ } } 销毁垃圾对象： for(任意一个对象O){ ​ if(O在White状态) ​ 销毁对象O; ​ else ​ 将O设置成White状态; } 在每个步骤之间，由于程序可以正常执行，所以会破坏当前对象之间的引用关系。black对象表示已经被扫描的对象，所以他应该不可能引用到一个white对象。当程序的改变使得一个black对象引用到一个white对象时，就会造成错误。解决这个问题的办法就是设置barrier。barrier在程序正常运行过程中，监控所有的引用改变。如果一个black对象需要引用一个white对象，存在两种处理办法： 将white对象设置成gray，并添加到gray列表中等待扫描。这样等于帮助整个GC的标识过程向前推进了一步。 将black对象该回成gray，并添加到gray列表中等待扫描。这样等于使整个GC的标识过程后退了一步。 这种垃圾回收方式被称为”Incremental Garbage Collection”(简称为”IGC”，Lua所采用的就是这种方法。使用”IGC”并不是没有代价的。IGC所检测出来的垃圾对象集合比实际的集合要小，也就是说，有些在GC过程中变成垃圾的对象，有可能在本轮GC中检测不到。不过，这些残余的垃圾对象一定会在下一轮GC被检测出来，不会造成泄露。]]></content>
+      
+      
+        <tags>
+            
+            <tag> lua </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>lua垃圾回收</title>
+      <link href="/2018/12/11/lua%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/"/>
+      <url>/2018/12/11/lua%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/</url>
+      
+        <content type="html"><![CDATA[<p>采用垃圾回收机制对所有的lua对象(GCObject)进行管理。Lua虚拟机会定期运行GC，释放掉已经不再被被引用到的lua对象。</p><p>基本算法【标记清除】</p><p>基本的垃圾回收算法被称为”mark-and-sweep”算法。算法本身其实很简单。</p><p>1.系统管理着所有已经创建了的对象。每个对象都有对其他对象的引用。</p><p>2.root集合代表着已知的系统级别的对象引用。</p><p>3.从root集合出发，就可以访问到系统引用到的所有对象。而没有被访问到的对象就是垃圾对象，需要被销毁。</p><p>我们可以将所有对象分成三个状态：</p><ol><li>White状态，也就是待访问状态。表示对象还没有被垃圾回收的标记过程访问到。</li><li>Gray状态，也就是待扫描状态。表示对象已经被垃圾回收访问到了，但是对象本身对于其他对象的引用还没有进行遍历访问。</li><li>Black状态，也就是已扫描状态。表示对象已经被访问到了，并且也已经遍历了对象本身对其他对象的引用。</li></ol><p>基本的算法可以描述如下：</p><ol><li>当前所有对象都是White状态;  </li><li>将root集合引用到的对象从White设置成Gray，并放到Gray集合中;  </li><li>while(Gray集合不为空)  </li><li>{  </li><li>​    从Gray集合中移除一个对象O，并将O设置成Black状态;  </li><li>​    for(O中每一个引用到的对象O1) {  </li><li>​        if(O1在White状态) {  </li><li>​            将O1从White设置成Gray，并放到到Gray集合中；  </li><li>​        }  </li><li>​    }  </li><li>}  </li><li>for(任意一个对象O){  </li><li>​    if(O在White状态)  </li><li>​        销毁对象O;  </li><li>​    else  </li><li>​        将O设置成White状态;  </li><li>}  </li></ol><p>Incremental Garbage Collection</p><p>上面的算法如果一次性执行，在对象很多的情况下，会执行很长时间，严重影响程序本身的响应速度。其中一个解决办法就是，可以将上面的算法分步执行，这样每个步骤所耗费的时间就比较小了。我们可以将上述算法改为以下下几个步骤。</p><p>首先标识所有的root对象：</p><ol><li>当前所有对象都是White状态;  </li><li>将root集合引用到的对象从White设置成Gray，并放到Gray集合中;  </li></ol><p>遍历访问所有的gray对象。如果超出了本次计算量上限，退出等待下一次遍历:</p><ol><li>while(Gray集合不为空,并且没有超过本次计算量的上限){  </li><li>​    从Gray集合中移除一个对象O，并将O设置成Black状态;  </li><li>​    for(O中每一个引用到的对象O1) {  </li><li>​        if(O1在White状态) {  </li><li>​            将O1从White设置成Gray，并放到到Gray集合中；  </li><li>​        }  </li><li>​    }  </li><li>}  </li></ol><p>销毁垃圾对象：</p><ol><li>for(任意一个对象O){  </li><li>​    if(O在White状态)  </li><li>​        销毁对象O;  </li><li>​    else  </li><li>​        将O设置成White状态;  </li><li>}  </li></ol><p>在每个步骤之间，由于程序可以正常执行，所以会破坏当前对象之间的引用关系。black对象表示已经被扫描的对象，所以他应该不可能引用到一个white对象。当程序的改变使得一个black对象引用到一个white对象时，就会造成错误。解决这个问题的办法就是设置barrier。barrier在程序正常运行过程中，监控所有的引用改变。如果一个black对象需要引用一个white对象，存在两种处理办法：</p><ol><li>将white对象设置成gray，并添加到gray列表中等待扫描。这样等于帮助整个GC的标识过程向前推进了一步。</li><li>将black对象该回成gray，并添加到gray列表中等待扫描。这样等于使整个GC的标识过程后退了一步。</li></ol><p>这种垃圾回收方式被称为”Incremental Garbage Collection”(简称为”IGC”，Lua所采用的就是这种方法。使用”IGC”并不是没有代价的。IGC所检测出来的垃圾对象集合比实际的集合要小，也就是说，有些在GC过程中变成垃圾的对象，有可能在本轮GC中检测不到。不过，这些残余的垃圾对象一定会在下一轮GC被检测出来，不会造成泄露。</p>]]></content>
+      
+      
       <categories>
-        <category>lua</category>
+          
+          <category> lua </category>
+          
       </categories>
-      <tags>
-        <tag>lua</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[lua元表]]></title>
-    <url>%2F2018%2F12%2F11%2Flua%E5%8E%9F%E8%A1%A8%2F</url>
-    <content type="text"><![CDATA[在 Lua table 中我们可以访问对应的key来得到value值，但是却无法对两个 table 进行操作。 因此 Lua 提供了元表(Metatable)，允许我们改变table的行为，每个行为关联了对应的元方法。 例如，使用元表我们可以定义Lua如何计算两个table的相加操作a+b。 当Lua试图对两个表进行相加时，先检查两者之一是否有元表，之后检查是否有一个叫”add”的字段，若找到，则调用对应的值。”add”等即时字段，其对应的值（往往是一个函数或是table）就是”元方法”。 有两个很重要的函数来处理元表： setmetatable(table,metatable):对指定table设置元表(metatable)，如果元表(metatable)中存在__metatable键值，setmetatable会失败 。 getmetatable(table):返回对象的元表(metatable)。 __index 元方法 这是 metatable 最常用的键。 当你通过键来访问 table 的时候，如果这个键没有值，那么Lua就会寻找该table的metatable（假定有metatable）中的index 键。如果index包含一个表格，Lua会在表格中查找相应的键。 Lua查找一个表元素时的规则，其实就是如下3个步骤: 1.在表中查找，如果找到，返回该元素，找不到则继续 2.判断该表是否有元表，如果没有元表，返回nil，有元表则继续。 3.判断元表有没有index方法，如果index方法为nil，则返回nil；如果index方法是一个表，则重复1、2、3；如果index方法是一个函数，则返回该函数的返回值。 __newindex 元方法 newindex 元方法用来对表更新，index则用来对表访问 。 当你给表的一个缺少的索引赋值，解释器就会查找__newindex 元方法：如果存在则调用这个函数而不进行赋值操作。 __call 元方法 __call 元方法在 Lua 调用一个值时调用。 __tostring 元方法 __tostring 元方法用于修改表的输出行为。 table存在两种行为：查询和修改（赋值），通过元方法index和newindex来改变table的这两种行为。 __index主要用于table的查询 table[key] 的访问过程，首先检查table表中是否存在key的字段，如果有则返回，否则检查是否有__index的元方法，没有返回nil,有则查找元方法。 __index元方法可以是一个函数，还可以是一个table。如果是一个函数，则以table和不存在的key作为参数方位该函数， 例如：__index = function(t,key) 如果是一个table时，就以相同的方式来访问这个table（即传入key访问元方法的table，如果存在则放回值，反之返回nil） 例如：__index = tab –此时会返回tab[key]的值 __index可以很好的实现具有默认值的table function setDefaultValues(t,d) ​ local mt = {__index = function() return d end} ​ setmetatable(t, mt) end tab = {x=10,y=20} print(tab.x ,tab.y,tab.z) --由于没有设置元方法则为nil setDefaultValues(tab,100) --设置默认值（设置__index元方法） print(tab.z) --检查到有__index的元方法则返回默认值 __newindex主要用于table的更新 当对table中不存在的索引赋值时，解释器就会查找__newindex元方法。如果有这个元方法，就调用这个元方法，而不是执行赋值。如果这个元方法是一个table，解释器就在table中进行赋值，而不是对原来的table。 local k = {} local mt = { ​ __newindex = k } local t = {} setmetatable(t, mt) print(&quot;赋值前：&quot;) for k,v in pairs(k) do ​ print(k ,v) end t[1] = 20 print(&quot;赋值后：t表中的值:&quot;) for k,v in pairs(t) do ​ print(k ,v) end print(&quot;赋值后：k表中的值:&quot;) for k,v in pairs(k) do ​ print(k ,v) end]]></content>
+      
+      
+        <tags>
+            
+            <tag> lua </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>lua元表</title>
+      <link href="/2018/12/11/lua%E5%8E%9F%E8%A1%A8/"/>
+      <url>/2018/12/11/lua%E5%8E%9F%E8%A1%A8/</url>
+      
+        <content type="html"><![CDATA[<p>在 Lua table 中我们可以访问对应的key来得到value值，但是却无法对两个 table 进行操作。</p><p>因此 Lua 提供了元表(Metatable)，允许我们改变table的行为，每个行为关联了对应的元方法。</p><p>例如，使用元表我们可以定义Lua如何计算两个table的相加操作a+b。</p><p>当Lua试图对两个表进行相加时，先检查两者之一是否有元表，之后检查是否有一个叫”<strong>add”的字段，若找到，则调用对应的值。”</strong>add”等即时字段，其对应的值（往往是一个函数或是table）就是”元方法”。</p><p>有两个很重要的函数来处理元表：</p><p><strong>setmetatable(table,metatable):</strong>对指定table设置元表(metatable)，如果元表(metatable)中存在__metatable键值，setmetatable会失败 。</p><p><strong>getmetatable(table):</strong>返回对象的元表(metatable)。</p><p><strong>__index 元方法</strong></p><p>这是 metatable 最常用的键。</p><p>当你通过键来访问 table 的时候，如果这个键没有值，那么Lua就会寻找该table的metatable（假定有metatable）中的<strong>index 键。如果</strong>index包含一个表格，Lua会在表格中查找相应的键。</p><p>Lua查找一个表元素时的规则，其实就是如下3个步骤:</p><p>1.在表中查找，如果找到，返回该元素，找不到则继续</p><p>2.判断该表是否有元表，如果没有元表，返回nil，有元表则继续。</p><p>3.判断元表有没有<strong>index方法，如果</strong>index方法为nil，则返回nil；如果<strong>index方法是一个表，则重复1、2、3；如果</strong>index方法是一个函数，则返回该函数的返回值。</p><p><strong>__newindex 元方法</strong></p><p><strong>newindex 元方法用来对表更新，</strong>index则用来对表访问 。</p><p>当你给表的一个缺少的索引赋值，解释器就会查找__newindex 元方法：如果存在则调用这个函数而不进行赋值操作。</p><p><strong>__call 元方法</strong></p><p>__call 元方法在 Lua 调用一个值时调用。</p><p><strong>__tostring 元方法</strong></p><p>__tostring 元方法用于修改表的输出行为。</p><p>table存在两种行为：查询和修改（赋值），通过元方法<strong>index和</strong>newindex来改变table的这两种行为。</p><p>__index主要用于table的查询</p><p>table[key] 的访问过程，首先检查table表中是否存在key的字段，如果有则返回，否则检查是否有__index的元方法，没有返回nil,有则查找元方法。</p><p>__index元方法可以是一个函数，还可以是一个table。如果是一个函数，则以table和不存在的key作为参数方位该函数，</p><p>例如：__index = function(t,key)</p><p>如果是一个table时，就以相同的方式来访问这个table（即传入key访问元方法的table，如果存在则放回值，反之返回nil）</p><p>例如：__index = tab –此时会返回tab[key]的值</p><p>__index可以很好的实现具有默认值的table</p><pre><code>function setDefaultValues(t,d)​    local mt = {__index = function() return d end}​    setmetatable(t, mt)endtab = {x=10,y=20}print(tab.x ,tab.y,tab.z)    --由于没有设置元方法则为nilsetDefaultValues(tab,100)    --设置默认值（设置__index元方法）print(tab.z)            --检查到有__index的元方法则返回默认值</code></pre><p>__newindex主要用于table的更新</p><p>当对table中不存在的索引赋值时，解释器就会查找__newindex元方法。如果有这个元方法，就调用这个元方法，而不是执行赋值。如果这个元方法是一个table，解释器就在table中进行赋值，而不是对原来的table。</p><pre><code>local k = {}local mt = {​    __newindex = k}local t = {}setmetatable(t, mt)print(&quot;赋值前：&quot;)for k,v in pairs(k) do​    print(k ,v)endt[1] = 20print(&quot;赋值后：t表中的值:&quot;)for k,v in pairs(t) do​    print(k ,v)endprint(&quot;赋值后：k表中的值:&quot;)for k,v in pairs(k) do​    print(k ,v)end</code></pre>]]></content>
+      
+      
       <categories>
-        <category>lua</category>
+          
+          <category> lua </category>
+          
       </categories>
-      <tags>
-        <tag>lua</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[lua易错点]]></title>
-    <url>%2F2018%2F12%2F11%2Flua%E5%9D%91%E7%82%B9%2F</url>
-    <content type="text"><![CDATA[table.remove 删除时导致的错？正确的删除方案：先记录要删除的表记录的k(位置)，然后反向遍历记录逐个删除。 删除1~10中的4,5,6,7,8. Table.remove 删除表时后面的元素会自动向前与移动导致隔一个删除一个. table长度table当字数组来用时获取的是正确的长度，当map来用时# 和table.getn获取的都是不是争取的长度，需要自行使用 for k，v in pairs获取长度. # 和 table.getn遇到v为nil时会返回长度. 字符串链接尽量使用table.concat连接字符串 使用运算符.. 每次拼接都需要申请新的空间，旧的result对应的空间会在某时刻被Lua的垃圾回收期GC，且随着result不断增长，越往后会开辟更多新的空间，并进行拷贝操作，产生更多需要被GC的空间，所以性能降低。 使用table.concat (table [, sep [, start [, end]]])函数 table.concat 底层拼接字符串的方式也是使用运算符.. ，但是其使用算法减少了使用运算符..的次数，减少了GC，从而提高效率 pairs 和 ipairs区别 pairs: 迭代 table，可以遍历表中所有的 key 可以返回 nil ipairs: 迭代数组，不能返回 nil,如果遇到 nil 则退出function定义的两种方式local function func() .. endlocal func = function() … end第一种方法定义是可以做递归的第二种是不行的，第二种定义必须待函数体定义之后才能调用自己 a and b or c 当b为nil时总是返回c?a and b :当a为真时返回b为假时返回a a or b: a为true返回a 为false返回b \&gt; true and true or 1 true \&gt; true and false or 1 1 \&gt; false and true or 1 1 \&gt; false and false or 1 1 \&gt; 2 and true or 1 true \&gt; (true and false) or 1 1 \&gt; (1 and false) or 1 1 \&gt; (a and {b} or {c})[1] nil \&gt; (1 and {false} or {2})[1] false \&gt; 解决方式：if else 另外就是(a and {b} or {c})[1] 弱引用表1.弱引用 元表 __mode字段来设置表k,v是弱引用，被弱引用table引用，垃圾回收时可回收，只要k,v被回收，整个条目会删除。 Lua采用了基于垃圾收集的内存管理机制，当某个table对象被存放在容器中，而容器的外部不再有任何变量引用该对象，对于这样的对象，Lua的垃圾收集器是不会清理的，因为容器对象仍然引用着他。见如下代码： 1 a = {} 2 key = {} 3 a[key] = 1 4 key = {} 5 a[key] = 2 6collectgarbage() 7for k,v inpairs(a) do 8print(v) 9end ​ 在执行垃圾收集之后，table a中的两个key都无法被清理，但是对value等于1的key而言，如果后面的逻辑不会遍历table a的话，那么我们就可以认为该对象内存泄露了。在Lua中提供了一种被称为弱引用table的机制，可以提示垃圾收集器，如果某个对象，如上面代码中的第一个table key，只是被弱引用table引用，那么在执行垃圾收集时可以将其清理。 ​ Lua中的弱引用表提供了3中弱引用模式，即key是弱引用、value是弱引用，以及key和value均是弱引用。不论是哪种类型的弱引用table，只要有一个key或value被回收，那么它们所在的整个条目都会从table中删除。 ​ 一个table的弱引用类型是通过其元表的__mode字段来决定的。如果该值为包含字符”k”，那么table就是key弱引用，如果包含”v”，则是value若引用，如果两个字符均存在，就是key/value弱引用。见如下代码： 1 a = {} 2 b = {__mode = &quot;k&quot;} 3setmetatable(a,b) 4 key = {} 5 a[key] = 1 6 key = {} 7 a[key] = 2 8collectgarbage() 9for k,v inpairs(a) do 10print(v) 11end 12--仅仅输出2 ​ 在上面的代码示例中，第一个key在被存放到table a之后，就被第二个key的定义所覆盖，因此它的唯一引用来自key弱引用表。事实上，这种机制在Java中也同样存在，Java在1.5之后的版本中也提供了一组弱引用容器，其语义和Lua的弱引用table相似。 ​ 最后需要说明的是，Lua中的弱引用表只是作用于table类型的变量，对于其他类型的变量，如数值和字符串等，弱引用表并不起任何作用。 尾递归什么是尾递归 尾递归的写法只是具备了使当前函数在调用下一个函数前把当前占有的栈销毁，但是会不会真的这样做，是要具体看编译器是否最终这样做。 什么是尾递归呢?(tail recursion), 顾名思议，就是一种“不一样的”递归，说到它的不一样，就得先说说一般的递归。对于一般的递归，比如下面的求阶乘，教科书上会告诉我们，如果这个函数调用的深度太深，很容易会有爆栈的危险。 // 先不考虑溢出问题 int func(int n) { if (n &lt;= 1) return 1; return (n * func(n-1)); } 原因很多人的都知道，让我们先回顾一下函数调用的大概过程： 1）调用开始前，调用方（或函数本身）会往栈上压相关的数据，参数，返回地址，局部变量等。 2）执行函数。 3）清理栈上相关的数据，返回。 因此，在函数 A 执行的时候，如果在第二步中，它又调用了另一个函数 B，B 又调用 C…. 栈就会不断地增长不断地装入数据，当这个调用链很深的时候，栈很容易就满 了，这就是一般递归函数所容易面临的大问题。 而尾递归在某些语言的实现上，能避免上述所说的问题，注意是某些语言上，尾递归本身并不能消除函数调用栈过长的问题，那什么是尾递归呢？在上面写的一般递归函数 func() 中，我们可以看到，func(n) 是依赖于 func(n-1) 的，func(n) 只有在得到 func(n-1) 的结果之后，才能计算它自己的返回值，因此理论上，在 func(n-1) 返回之前，func(n)，不能结束返回。因此func(n)就必须保留它在栈上的数据，直到func(n-1)先返回，而尾递归的实现则可以在编译器的帮助下，消除这个限制： // 先不考虑溢出 int tail_func(int n, int res) { if (n &lt;= 1) return res; return tail_func(n - 1, n * res); } // 像下面这样调用 tail_func(10000000000, 1); 从上可以看到尾递归把返回结果放到了调用的参数里。这个细小的变化导致，tail_func(n, res)不必像以前一样，非要等到拿到了tail_func(n-1, nres)的返回值，才能计算它自己的返回结果 – 它完全就等于tail_func(n-1, nres)的返回值。因此理论上：tail_func(n)在调用tail_func(n-1)前，完全就可以先销毁自己放在栈上的东西。 这就是为什么尾递归如果在得到编译器的帮助下，是完全可以避免爆栈的原因：每一个函数在调用下一个函数之前，都能做到先把当前自己占用的栈给先释放了，尾递归的调用链上可以做到只有一个函数在使用栈，因此可以无限地调用！ 所谓尾调用，就是一个函数返回另一个函数的返回值： function f() … return g() end 因为调用g()后，f()中不再执行任何代码，所以不需要保留f()的调用桟信息；Lua做了这样的优化，称为”尾调用消除”，g()返回后，控制点直接返回到调用f()的地方。 这种优化对尾递归非常有益，通常递归意味着调用桟的不断增长，甚至可能造成堆栈溢出；而尾递归提供了优化条件，编译器可以优化掉调用桟]]></content>
+      
+      
+        <tags>
+            
+            <tag> lua </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>lua易错点</title>
+      <link href="/2018/12/11/lua%E5%9D%91%E7%82%B9/"/>
+      <url>/2018/12/11/lua%E5%9D%91%E7%82%B9/</url>
+      
+        <content type="html"><![CDATA[<h4 id="table-remove-删除时导致的错？"><a href="#table-remove-删除时导致的错？" class="headerlink" title="table.remove 删除时导致的错？"></a>table.remove 删除时导致的错？</h4><p>正确的删除方案：先记录要删除的表记录的k(位置)，然后反向遍历记录逐个删除。</p><p>删除1~10中的4,5,6,7,8. Table.remove 删除表时后面的元素会自动向前与移动导致隔一个删除一个.</p><img src="/2018/12/11/lua坑点/table.png" title="test code"><img src="/2018/12/11/lua坑点/table1.png" title="test code"><h4 id="table长度"><a href="#table长度" class="headerlink" title="table长度"></a>table长度</h4><p>table当字数组来用时获取的是正确的长度，当map来用时# 和table.getn获取的都是不是争取的长度，需要自行使用 for k，v in pairs获取长度. # 和 table.getn遇到v为nil时会返回长度.</p><h4 id="字符串链接"><a href="#字符串链接" class="headerlink" title="字符串链接"></a>字符串链接</h4><p>尽量使用table.concat连接字符串</p><ol><li><p>使用运算符..<br> 每次拼接都需要申请新的空间，旧的result对应的空间会在某时刻被Lua的垃圾回收期GC，且随着result不断增长，越往后会开辟更多新的空间，并进行拷贝操作，产生更多需要被GC的空间，所以性能降低。</p></li><li><p>使用table.concat (table [, sep [, start [, end]]])函数<br> table.concat 底层拼接字符串的方式也是使用运算符.. ，但是其使用算法减少了使用运算符..的次数，减少了GC，从而提高效率</p><h4 id="pairs-和-ipairs区别"><a href="#pairs-和-ipairs区别" class="headerlink" title="pairs 和 ipairs区别"></a>pairs 和 ipairs区别</h4></li><li>pairs: 迭代 table，可以遍历表中所有的 key 可以返回 nil</li><li>ipairs: 迭代数组，不能返回 nil,如果遇到 nil 则退出<h4 id="function定义的两种方式"><a href="#function定义的两种方式" class="headerlink" title="function定义的两种方式"></a>function定义的两种方式</h4>local function func() .. end<br>local func = function()  … end<br>第一种方法定义是可以做递归的第二种是不行的，第二种定义必须待函数体定义之后才能调用自己</li></ol><h4 id="a-and-b-or-c-当b为nil时总是返回c"><a href="#a-and-b-or-c-当b为nil时总是返回c" class="headerlink" title="a and b or c 当b为nil时总是返回c?"></a>a and b or c 当b为nil时总是返回c?</h4><p>a and b :当a为真时返回b为假时返回a</p><p>a or b: a为true返回a 为false返回b</p><pre><code>\&gt; true and true or 1true\&gt; true and false or 11\&gt; false and true or 11\&gt; false and false or 11\&gt; 2 and true or 1true\&gt; (true and false) or 11\&gt; (1 and false) or 11\&gt; (a and {b} or {c})[1]nil\&gt; (1 and {false} or {2})[1]false\&gt; </code></pre><p>解决方式：if else 另外就是(a and {b} or {c})[1]</p><h4 id="弱引用表"><a href="#弱引用表" class="headerlink" title="弱引用表"></a>弱引用表</h4><p>1.弱引用</p><p>元表 __mode字段来设置表k,v是弱引用，被弱引用table引用，垃圾回收时可回收，只要k,v被回收，整个条目会删除。</p><p>Lua采用了基于垃圾收集的内存管理机制，当某个table对象被存放在容器中，而容器的外部不再有任何变量引用该对象，对于这样的对象，Lua的垃圾收集器是不会清理的，因为容器对象仍然引用着他。见如下代码：</p><pre><code>1 a = {} 2 key = {} 3 a[key] = 1 4 key = {} 5 a[key] = 2 6collectgarbage() 7for k,v inpairs(a) do 8print(v) 9end</code></pre><p>​    在执行垃圾收集之后，table a中的两个key都无法被清理，但是对value等于1的key而言，如果后面的逻辑不会遍历table a的话，那么我们就可以认为该对象内存泄露了。在Lua中提供了一种被称为弱引用table的机制，可以提示垃圾收集器，如果某个对象，如上面代码中的第一个table key，只是被弱引用table引用，那么在执行垃圾收集时可以将其清理。</p><p>​    Lua中的弱引用表提供了3中弱引用模式，即key是弱引用、value是弱引用，以及key和value均是弱引用。不论是哪种类型的弱引用table，只要有一个key或value被回收，那么它们所在的整个条目都会从table中删除。</p><p>​    一个table的弱引用类型是通过其元表的__mode字段来决定的。如果该值为包含字符”k”，那么table就是key弱引用，如果包含”v”，则是value若引用，如果两个字符均存在，就是key/value弱引用。见如下代码：</p><pre><code>1 a = {} 2 b = {__mode = &quot;k&quot;} 3setmetatable(a,b) 4 key = {} 5 a[key] = 1 6 key = {} 7 a[key] = 2 8collectgarbage() 9for k,v inpairs(a) do10print(v)11end12--仅仅输出2</code></pre><p>​    在上面的代码示例中，第一个key在被存放到table a之后，就被第二个key的定义所覆盖，因此它的唯一引用来自key弱引用表。事实上，这种机制在Java中也同样存在，Java在1.5之后的版本中也提供了一组弱引用容器，其语义和Lua的弱引用table相似。</p><p>​    最后需要说明的是，Lua中的弱引用表只是作用于table类型的变量，对于其他类型的变量，如数值和字符串等，弱引用表并不起任何作用。</p><h4 id="尾递归"><a href="#尾递归" class="headerlink" title="尾递归"></a>尾递归</h4><p>什么是尾递归</p><p>尾递归的写法只是具备了使当前函数在调用下一个函数前把当前占有的栈销毁，但是会不会真的这样做，是要具体看编译器是否最终这样做。</p><p>什么是尾递归呢?(tail recursion), 顾名思议，就是一种“不一样的”递归，说到它的不一样，就得先说说一般的递归。对于一般的递归，比如下面的求阶乘，教科书上会告诉我们，如果这个函数调用的深度太深，很容易会有爆栈的危险。</p><pre><code>// 先不考虑溢出问题int func(int n) {        if (n &lt;= 1) return 1;          return (n * func(n-1)); }</code></pre><p>原因很多人的都知道，让我们先回顾一下函数调用的大概过程：</p><p>1）调用开始前，调用方（或函数本身）会往栈上压相关的数据，参数，返回地址，局部变量等。</p><p>2）执行函数。</p><p>3）清理栈上相关的数据，返回。</p><p>因此，在函数 A 执行的时候，如果在第二步中，它又调用了另一个函数 B，B 又调用 C…. 栈就会不断地增长不断地装入数据，当这个调用链很深的时候，栈很容易就满 了，这就是一般递归函数所容易面临的大问题。</p><p>而尾递归在某些语言的实现上，能避免上述所说的问题，注意是某些语言上，尾递归本身并不能消除函数调用栈过长的问题，那什么是尾递归呢？在上面写的一般递归函数 func() 中，我们可以看到，func(n)  是依赖于 func(n-1) 的，func(n) 只有在得到 func(n-1) 的结果之后，才能计算它自己的返回值，因此理论上，在 func(n-1) 返回之前，func(n)，不能结束返回。因此func(n)就必须保留它在栈上的数据，直到func(n-1)先返回，而尾递归的实现则可以在编译器的帮助下，消除这个限制：</p><pre><code>// 先不考虑溢出int tail_func(int n, int res) {     if (n &lt;= 1) return res;    return tail_func(n - 1, n * res); }  // 像下面这样调用 tail_func(10000000000, 1);</code></pre><p>从上可以看到尾递归把返回结果放到了调用的参数里。这个细小的变化导致，tail_func(n, res)不必像以前一样，非要等到拿到了tail_func(n-1, n<em>res)的返回值，才能计算它自己的返回结果 – 它完全就等于tail_func(n-1, n</em>res)的返回值。因此理论上：tail_func(n)在调用tail_func(n-1)前，完全就可以先销毁自己放在栈上的东西。</p><p>这就是为什么尾递归如果在得到编译器的帮助下，是完全可以避免爆栈的原因：每一个函数在调用下一个函数之前，都能做到先把当前自己占用的栈给先释放了，尾递归的调用链上可以做到只有一个函数在使用栈，因此可以无限地调用！</p><p>所谓尾调用，就是一个函数返回另一个函数的返回值：</p><pre><code>function f()…return g()end</code></pre><p>因为调用g()后，f()中不再执行任何代码，所以不需要保留f()的调用桟信息；Lua做了这样的优化，称为”尾调用消除”，g()返回后，控制点直接返回到调用f()的地方。</p><p>这种优化对尾递归非常有益，通常递归意味着调用桟的不断增长，甚至可能造成堆栈溢出；而尾递归提供了优化条件，编译器可以优化掉调用桟</p><img src="/2018/12/11/lua坑点/diguitail.png" title="code test">]]></content>
+      
+      
       <categories>
-        <category>lua</category>
+          
+          <category> lua </category>
+          
       </categories>
-      <tags>
-        <tag>lua</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[lua实现continue]]></title>
-    <url>%2F2018%2F12%2F11%2Flua%E5%AE%9E%E7%8E%B0continue%2F</url>
-    <content type="text"><![CDATA[for i = 1， 10 do repeat if i == 5 then break end until true end for i= 1， 10 do while true do break end end 满足条件时会跳出repeat的内层循环，继续外层循环相当于continue.]]></content>
+      
+      
+        <tags>
+            
+            <tag> lua </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>lua实现continue</title>
+      <link href="/2018/12/11/lua%E5%AE%9E%E7%8E%B0continue/"/>
+      <url>/2018/12/11/lua%E5%AE%9E%E7%8E%B0continue/</url>
+      
+        <content type="html"><![CDATA[<pre><code>for i = 1， 10 do   repeat     if i == 5 then        break     end   until trueendfor i= 1， 10 do   while true do           break   endend</code></pre><p>满足条件时会跳出repeat的内层循环，继续外层循环相当于continue.</p>]]></content>
+      
+      
       <categories>
-        <category>lua</category>
+          
+          <category> lua </category>
+          
       </categories>
-      <tags>
-        <tag>lua</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[lua用法]]></title>
-    <url>%2F2018%2F12%2F11%2Flua%E7%94%A8%E6%B3%95%2F</url>
-    <content type="text"><![CDATA[loadstring load从给定的字符串得到块(函数)。lua5.3使用load()替换loadstring(). 一般如下用法：assert(loadstring(script))()f = loadstring(&quot;a = 1&quot;)语义上相当于：f = loadstring(&quot;function() a = 1 end&quot;)复杂用法如下：下面是动态加载字符串，并执行，结果为一个table local script = &quot;localee={[0]={id=0,lv=5,text=&#39;yy&#39;},[1]={id=1,lv=3,text=&#39;zz&#39;}} return ee&quot; local tb=assert(loadstring(script))() print(tb[0].text) 下面是动态加载字符串，并执行，结果为方法 local addscript=&quot;function dadd(a,b) return a+b end&quot; assert(loadstring(addscript))() print(tostring(dadd(2,3))) local f = load(&quot;a=1+2&quot;) print(type(f)) --function loadfileloadfile 编译Lua外部代码块，但不会运行代码，将会以函数的形式返回编译结果.返回编译结果函数. local f = laodfile(&quot;a.lua&quot;) print(type(f)) --function dofiledofile 直接编译运行Lua外部代码块，并不返回任何结果。编译错误会返回nil. function dofile(filename) local func = assert(loadfile(filename)) func() end loadload (chunk [, chunkname [, mode [, env]]])加载一个代码块。如果 chunk 是一个字符串，代码块指这个字符串。 如果 chunk 是一个函数， load 不断地调用它获取代码块的片断。 每次对 chunk 的调用都必须返回一个字符串紧紧连接在上次调用的返回串之后。 当返回空串、nil、或是不返回值时，都表示代码块结束。 如果结果函数有上值， env 被设为第一个上值。 若不提供此参数，将全局环境替代它。chunkname 在错误消息和调试消息中，用于代码块的名字。字符串 mode 用于控制代码块是文本还是二进制（即预编译代码块）。 它可以是字符串 “b” （只能是二进制代码块）， “t” （只能是文本代码块）， 或 “bt” （可以是二进制也可以是文本）。 默认值为 “bt”。 _ENV引用一个叫 var 的自由名字在句法上都被翻译为 _ENV.var 。 此外，每个被编译的 Lua 代码块都会有一个外部的局部变量叫 _ENV。 这里特别指出，你可以定义一个新变量或指定一个参数叫这个名字。 当编译器在转译自由名字时所用到的 _ENV ， 指的是你的程序在那个点上可见的那个名为 _ENV 的变量被 _ENV 用于值的那张表被称为 环境。 Lua保有一个被称为 全局环境 特别环境。它被保存在 C 注册表的一个特别索引下。在 Lua 中，全局变量 _G 被初始化为这个值。 当 Lua 加载一个代码块，_ENV 这个上值的默认值就是这个全局环境。 因此，在默认情况下，Lua 代码中提及的自由名字都指的全局环境中的相关项 （它们也被称为 全局变量 ）。此外，所有的标准库都被加载入全局环境，一些函数也针对这个环境做操作。 你可以用 load （或 loadfile）加载代码块，并赋予它们不同的环境。 （在 C 里，当你加载一个代码块后，可以通过改变它的第一个上值来改变它的环境。） select如果 index 是个数字， 那么返回参数中第 index 个之后的部分； 负的数字会从后向前索引（-1 指最后一个参数）。 否则，index 必须是字符串 “#”， 此时 select 返回参数的个数。 do function foo(...) for i = 1, select(&#39;#&#39;, ...) do //get the count of the params local arg = select(i, ...);//select the param print(&quot;arg&quot;, arg); end end foo(1, 2, 3, 4); end nextnext (table [, index])允许程序遍历表的所有字段。它的第一个参数是一个表，它的第二个参数是该表的索引。接下来返回表及其关联值的一个索引。 local tee = {1, 3, 4, 6, 8} t = {3,7,10,17, pi=3.14159, banana=&quot;yellow&quot;} for key,value in next,t,nil do print(key,value) end function pairs (t) return next, t, nil end for k, v in pairs(t) do print(k, v) end pcallpcall (f [, arg1, ···]) 传入参数，以 保护模式 调用函数 f 。 这意味着 f 中的任何错误不会抛出； 取而代之的是，pcall 会将错误捕获到，并返回一个状态码。 第一个返回值是状态码（一个布尔量）， 当没有错误时，其为真。 此时，pcall 同样会在状态码后返回所有调用的结果。 在有错误时，pcall 返回 false 加错误消息。 local ret, msg = pcall(function(i) print(i) end, 33) xpcallxpcall (f, msgh [, arg1, ···])这个函数和 pcall 类似。 不过它可以额外设置一个消息处理器 msgh。 local function __TRACKBACK__(errmsg) local track_text = debug.traceback(tostring(errmsg), 6); print(track_text, &quot;LUA ERROR&quot;); return false; end local function trycall(func, ...) local args = { ... }; return xpcall(function() func(unpack(args)) end, __TRACKBACK__); end local function test(aaa) print(&quot;#&quot;..aaa) end trycall(test, nil) 多行文本使用[[ sun feng sunfeng ]] 定义多行文本。]]></content>
+      
+      
+        <tags>
+            
+            <tag> lua </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>lua用法</title>
+      <link href="/2018/12/11/lua%E7%94%A8%E6%B3%95/"/>
+      <url>/2018/12/11/lua%E7%94%A8%E6%B3%95/</url>
+      
+        <content type="html"><![CDATA[<h1 id="loadstring-load"><a href="#loadstring-load" class="headerlink" title="loadstring load"></a>loadstring load</h1><p>从给定的字符串得到块(函数)。lua5.3使用load()替换loadstring(). </p><p>一般如下用法：<br><code>assert(loadstring(script))()</code><br><code>f = loadstring(&quot;a = 1&quot;)</code><br>语义上相当于：<br><code>f = loadstring(&quot;function() a = 1 end&quot;)</code><br>复杂用法如下：<br>下面是动态加载字符串，并执行，结果为一个table       </p><pre><code>local script = &quot;localee={[0]={id=0,lv=5,text=&#39;yy&#39;},[1]={id=1,lv=3,text=&#39;zz&#39;}}  return ee&quot;  local tb=assert(loadstring(script))()  print(tb[0].text)  </code></pre><p>下面是动态加载字符串，并执行，结果为方法</p><pre><code>local addscript=&quot;function dadd(a,b) return a+b  end&quot;  assert(loadstring(addscript))()  print(tostring(dadd(2,3)))  </code></pre><pre><code>local f = load(&quot;a=1+2&quot;)print(type(f))  --function</code></pre><h1 id="loadfile"><a href="#loadfile" class="headerlink" title="loadfile"></a>loadfile</h1><p>loadfile 编译Lua外部代码块，但不会运行代码，将会以函数的形式返回编译结果.返回编译结果函数.</p><pre><code>local f = laodfile(&quot;a.lua&quot;)print(type(f)) --function</code></pre><h1 id="dofile"><a href="#dofile" class="headerlink" title="dofile"></a>dofile</h1><p>dofile 直接编译运行Lua外部代码块，并不返回任何结果。编译错误会返回nil.  </p><pre><code>function dofile(filename)    local func = assert(loadfile(filename))    func()end</code></pre><h1 id="load"><a href="#load" class="headerlink" title="load"></a>load</h1><p><code>load (chunk [, chunkname [, mode [, env]]])</code><br>加载一个代码块。<br>如果 chunk 是一个字符串，代码块指这个字符串。 如果 chunk 是一个函数， load 不断地调用它获取代码块的片断。 每次对 chunk 的调用都必须返回一个字符串紧紧连接在上次调用的返回串之后。 当返回空串、nil、或是不返回值时，都表示代码块结束。</p><p>如果结果函数有上值， env 被设为第一个上值。 若不提供此参数，将全局环境替代它。<br>chunkname 在错误消息和调试消息中，用于代码块的名字。<br>字符串 mode 用于控制代码块是文本还是二进制（即预编译代码块）。 它可以是字符串 “b” （只能是二进制代码块）， “t” （只能是文本代码块）， 或 “bt” （可以是二进制也可以是文本）。 默认值为 “bt”。       </p><h1 id="ENV"><a href="#ENV" class="headerlink" title="_ENV"></a>_ENV</h1><p>引用一个叫 var 的自由名字在句法上都被翻译为 _ENV.var 。 此外，每个被编译的 Lua 代码块都会有一个外部的局部变量叫 _ENV。</p><p> 这里特别指出，你可以定义一个新变量或指定一个参数叫这个名字。    当编译器在转译自由名字时所用到的 _ENV ， 指的是你的程序在那个点上可见的那个名为 _ENV 的变量<br>被 _ENV 用于值的那张表被称为 环境。   </p><p>Lua保有一个被称为 全局环境 特别环境。它被保存在 C 注册表的一个特别索引下。<br>在 Lua 中，全局变量 _G 被初始化为这个值。 </p><p>当 Lua 加载一个代码块，_ENV 这个上值的默认值就是这个全局环境。         因此，在默认情况下，Lua 代码中提及的自由名字都指的全局环境中的相关项        （它们也被称为 全局变量 ）。<br>此外，所有的标准库都被加载入全局环境，一些函数也针对这个环境做操作。 你可以用 load （或 loadfile）加载代码块，并赋予它们不同的环境。 （在 C 里，当你加载一个代码块后，可以通过改变它的第一个上值来改变它的环境。）    </p><h1 id="select"><a href="#select" class="headerlink" title="select"></a>select</h1><p>如果 index 是个数字， 那么返回参数中第 index 个之后的部分； 负的数字会从后向前索引（-1 指最后一个参数）。 否则，index 必须是字符串 “#”， 此时 select 返回参数的个数。 </p><pre><code>do      function foo(...)          for i = 1, select(&#39;#&#39;, ...) do //get the count of the params              local arg = select(i, ...);//select the param              print(&quot;arg&quot;, arg);          end      end      foo(1, 2, 3, 4);  end</code></pre><h1 id="next"><a href="#next" class="headerlink" title="next"></a>next</h1><p><code>next (table [, index])</code><br>允许程序遍历表的所有字段。它的第一个参数是一个表，它的第二个参数是该表的索引。接下来返回表及其关联值的一个索引。</p><pre><code>local tee = {1, 3, 4, 6, 8}t = {3,7,10,17, pi=3.14159, banana=&quot;yellow&quot;}for key,value in next,t,nil do print(key,value)endfunction pairs (t)    return next, t, nilendfor k, v in pairs(t) do    print(k, v)end</code></pre><h1 id="pcall"><a href="#pcall" class="headerlink" title="pcall"></a>pcall</h1><p><code>pcall (f [, arg1, ···])</code></p><p>传入参数，以 保护模式 调用函数 f 。 这意味着 f 中的任何错误不会抛出； 取而代之的是，pcall 会将错误捕获到，并返回一个状态码。 第一个返回值是状态码（一个布尔量）， 当没有错误时，其为真。 此时，pcall 同样会在状态码后返回所有调用的结果。 在有错误时，pcall 返回 false 加错误消息。</p><p><code>local ret, msg = pcall(function(i) print(i) end, 33)</code></p><h1 id="xpcall"><a href="#xpcall" class="headerlink" title="xpcall"></a>xpcall</h1><p><code>xpcall (f, msgh [, arg1, ···])</code><br>这个函数和 pcall 类似。 不过它可以额外设置一个消息处理器 msgh。</p><pre><code>local function __TRACKBACK__(errmsg)    local track_text = debug.traceback(tostring(errmsg), 6);    print(track_text, &quot;LUA ERROR&quot;);    return false;endlocal function trycall(func, ...)    local args = { ... };    return xpcall(function() func(unpack(args)) end, __TRACKBACK__);endlocal function test(aaa)    print(&quot;#&quot;..aaa)endtrycall(test, nil)</code></pre><h1 id="多行文本"><a href="#多行文本" class="headerlink" title="多行文本"></a>多行文本</h1><p>使用[[ sun feng sunfeng ]]  定义多行文本。</p>]]></content>
+      
+      
       <categories>
-        <category>lua</category>
+          
+          <category> lua </category>
+          
       </categories>
-      <tags>
-        <tag>lua</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[lua调用so]]></title>
-    <url>%2F2018%2F12%2F11%2Flua%E8%B0%83%E7%94%A8so%2F</url>
-    <content type="text"><![CDATA[lua5.1动态库c so#include &lt;stdio.h&gt; #include &quot;./src/lua.h&quot; #include &quot;./src/lualib.h&quot; #include &quot;./src/lauxlib.h&quot; static int add(lua_State *L) { int a,b,c; a = lua_tonumber(L,1); b = lua_tonumber(L,2); c = a+b; lua_pushnumber(L,c); printf(&quot;test hello!!!\r\n&quot;); return 1; } static const struct luaL_Reg lib[] = { {&quot;testadd&quot;, add}, {NULL,NULL} }; int luaopen_testlib_core(lua_State *L) // 注意这里的函数写法 { //luaL_register(L,&quot;testlib&quot;,lib); // 1 luaL_openlib(L,&quot;testlib&quot;,lib,0); // 2 return 1; } lua调用脚本require(&quot;testlib.core&quot;) // 注意这里的调用,和上面的函数写法是相关联的 c = testlib.testadd(15,25) print(&quot;The result is &quot;,c); lua5.3c sostatic int lnow(lua_State *L) { uint64_t ti = skynet_now(); lua_pushinteger(L, ti); return 1; } int luaopen_skynet_core(lua_State *L) { luaL_checkversion(L); luaL_Reg l[] = { { &quot;send&quot; , lsend }, { &quot;genid&quot;, lgenid }, { &quot;redirect&quot;, lredirect }, { &quot;command&quot; , lcommand }, { &quot;intcommand&quot;, lintcommand }, { &quot;error&quot;, lerror }, { &quot;tostring&quot;, ltostring }, { &quot;harbor&quot;, lharbor }, { &quot;pack&quot;, luaseri_pack }, { &quot;unpack&quot;, luaseri_unpack }, { &quot;packstring&quot;, lpackstring }, { &quot;trash&quot; , ltrash }, { &quot;callback&quot;, lcallback }, { &quot;now&quot;, lnow }, { NULL, NULL }, }; luaL_newlibtable(L, l); lua_getfield(L, LUA_REGISTRYINDEX, &quot;skynet_context&quot;); struct skynet_context *ctx = lua_touserdata(L,-1); if (ctx == NULL) { return luaL_error(L, &quot;Init skynet context first&quot;); } luaL_setfuncs(L,l,1); return 1; } 编译so直接local c = require &quot;skynet.core&quot;]]></content>
+      
+      
+        <tags>
+            
+            <tag> lua </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>lua调用so</title>
+      <link href="/2018/12/11/lua%E8%B0%83%E7%94%A8so/"/>
+      <url>/2018/12/11/lua%E8%B0%83%E7%94%A8so/</url>
+      
+        <content type="html"><![CDATA[<h1 id="lua5-1动态库"><a href="#lua5-1动态库" class="headerlink" title="lua5.1动态库"></a>lua5.1动态库</h1><h2 id="c-so"><a href="#c-so" class="headerlink" title="c so"></a>c so</h2><pre><code>#include &lt;stdio.h&gt;#include &quot;./src/lua.h&quot;#include &quot;./src/lualib.h&quot;#include &quot;./src/lauxlib.h&quot;static int add(lua_State *L){    int a,b,c;    a = lua_tonumber(L,1);    b = lua_tonumber(L,2);    c = a+b;    lua_pushnumber(L,c);    printf(&quot;test hello!!!\r\n&quot;);    return 1;}static const struct luaL_Reg lib[] ={    {&quot;testadd&quot;, add},    {NULL,NULL}};int luaopen_testlib_core(lua_State *L)  // 注意这里的函数写法{    //luaL_register(L,&quot;testlib&quot;,lib);   // 1    luaL_openlib(L,&quot;testlib&quot;,lib,0);    // 2    return 1;}</code></pre><h2 id="lua调用脚本"><a href="#lua调用脚本" class="headerlink" title="lua调用脚本"></a>lua调用脚本</h2><pre><code>require(&quot;testlib.core&quot;)    // 注意这里的调用,和上面的函数写法是相关联的c = testlib.testadd(15,25)print(&quot;The result is &quot;,c);</code></pre><h1 id="lua5-3"><a href="#lua5-3" class="headerlink" title="lua5.3"></a>lua5.3</h1><h2 id="c-so-1"><a href="#c-so-1" class="headerlink" title="c so"></a>c so</h2><pre><code>static intlnow(lua_State *L) {    uint64_t ti = skynet_now();    lua_pushinteger(L, ti);    return 1;}intluaopen_skynet_core(lua_State *L) {    luaL_checkversion(L);    luaL_Reg l[] = {        { &quot;send&quot; , lsend },        { &quot;genid&quot;, lgenid },        { &quot;redirect&quot;, lredirect },        { &quot;command&quot; , lcommand },        { &quot;intcommand&quot;, lintcommand },        { &quot;error&quot;, lerror },        { &quot;tostring&quot;, ltostring },        { &quot;harbor&quot;, lharbor },        { &quot;pack&quot;, luaseri_pack },        { &quot;unpack&quot;, luaseri_unpack },        { &quot;packstring&quot;, lpackstring },        { &quot;trash&quot; , ltrash },        { &quot;callback&quot;, lcallback },        { &quot;now&quot;, lnow },        { NULL, NULL },    };    luaL_newlibtable(L, l);    lua_getfield(L, LUA_REGISTRYINDEX, &quot;skynet_context&quot;);    struct skynet_context *ctx = lua_touserdata(L,-1);    if (ctx == NULL) {        return luaL_error(L, &quot;Init skynet context first&quot;);    }    luaL_setfuncs(L,l,1);    return 1;}</code></pre><p>编译so直接<br><code>local c = require &quot;skynet.core&quot;</code></p>]]></content>
+      
+      
       <categories>
-        <category>lua</category>
+          
+          <category> lua </category>
+          
       </categories>
-      <tags>
-        <tag>lua</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[lua模块定义]]></title>
-    <url>%2F2018%2F12%2F11%2Flua%E6%A8%A1%E5%9D%97%E5%AE%9A%E4%B9%89%2F</url>
-    <content type="text"><![CDATA[lua5.1中提供的module方法在lua5.3中已经放弃使用，推荐使用的模块儿定义方式如下 require table 方式定义模块 -- square.lua local _M = {} -- 局部的变量 _M._VERSION = &#39;1.0&#39; -- 模块版本 local mt = { __index = _M } function _M.new(self, width, height) return setmetatable({ width=width, height=height }, mt) end function _M.get_square(self) return self.width * self.height end function _M.get_circumference(self) return (self.width + self.height) * 2 end return _M 引用示例代码： local square = require &quot;square&quot; local s1 = square:new(1, 2) print(s1:get_square()) --output: 2 print(s1:get_circumference()) --output: 6 module 方式定义模块`module （“moduleA”) –相当于执行如下代码local name = “moduleA”local M = {}_G[name] = Mpackage.loaded[modname] = Msetfenv(1,M) –设置一个函数的环境当第一个参数为一个数字时，为1代表当前函数 module (…, package.seeall)t = {}function f() –todoend` module会导致当前环境压栈，module之后全局变量都不在可见。]]></content>
+      
+      
+        <tags>
+            
+            <tag> lua </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>lua模块定义</title>
+      <link href="/2018/12/11/lua%E6%A8%A1%E5%9D%97%E5%AE%9A%E4%B9%89/"/>
+      <url>/2018/12/11/lua%E6%A8%A1%E5%9D%97%E5%AE%9A%E4%B9%89/</url>
+      
+        <content type="html"><![CDATA[<p>lua5.1中提供的module方法在lua5.3中已经放弃使用，推荐使用的模块儿定义方式如下</p><ol><li>require table 方式定义模块</li></ol><pre><code>-- square.lualocal _M = {}           -- 局部的变量_M._VERSION = &#39;1.0&#39;     -- 模块版本local mt = { __index = _M }function _M.new(self, width, height)    return setmetatable({ width=width, height=height }, mt)endfunction _M.get_square(self)    return self.width * self.heightendfunction _M.get_circumference(self)    return (self.width + self.height) * 2endreturn _M引用示例代码：local square = require &quot;square&quot; local s1 = square:new(1, 2)print(s1:get_square())          --output: 2print(s1:get_circumference())   --output: 6</code></pre><ol start="2"><li>module 方式定义模块<br><code>`</code><br>module （“moduleA”) </li></ol><p>–相当于执行如下代码<br>local name = “moduleA”<br>local M = {}<br>_G[name] = M<br>package.loaded[modname] = M<br>setfenv(1,M)  –设置一个函数的环境当第一个参数为一个数字时，为1代表当前函数</p><p>module (…, package.seeall)<br>t = {}<br>function f()<br> –todo<br>end<br><code>`</code></p><p>module会导致当前环境压栈，module之后全局变量都不在可见。</p>]]></content>
+      
+      
       <categories>
-        <category>lua</category>
+          
+          <category> lua </category>
+          
       </categories>
-      <tags>
-        <tag>lua</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[lua沙盒]]></title>
-    <url>%2F2018%2F12%2F10%2Flua%E6%B2%99%E7%9B%92%2F</url>
-    <content type="text"><![CDATA[背景知识Lua 给我的感觉是：各种内置函数和标准库的存在感都是比较强的。如果执行这句： for name in pairs(_G) do print(_G) end就会把各种环境中已存在名称的打印出来： 全局变量：比如字符串 _VERSION。内置函数：比如 print、tonumber、dofile 之类。模块名称：比如 string、io、coroutine 之类。这里的全局变量 _G 就是存放环境的表（于是会有 _G 中存在着 _G._G 的递归）。 于是，平时对于全局变量的访问就可以等同于对 _G 表进行索引： value = _G[varname] –&gt; value = varname_G[varname] = value –&gt; varname = value 改变函数的环境函数的上下文环境可以通过 setfenv(f, table) 函数改变，其中 table 是新的环境表，f 表示需要被改变环境的函数。如果 f 是数字，则将其视为堆栈层级（Stack Level），从而指明函数（1 为当前函数，2 为上一级函数）： a = 3 -- 全局变量 a setfenv(1, {}) -- 将当前函数的环境表改为空表 print(a) -- 出错，因为当前环境表中 print 已经不存在了 没错，不仅是 a 不存在，连 print 都一块儿不存在了。如果需要引用以前的 print 则需要在新的环境表中放入线索： a = 3 setfenv(1, { g = _G }) g.print(a) -- 输出 nil g.print(g.a) -- 输出 3 沙盒于是，出于安全或者改变一些内置函数行为的目的，需要在执行 Lua 代码时改变其环境时便可以使用 setfenv 函数。仅将你认为安全的函数或者新的实现加入新环境表中： local env = {} -- 沙盒环境表，按需要添入允许的函数 function run_sandbox(code) local func, message = loadstring(code) if not func then return nil, message end -- 传入代码本身错误 setfenv(func, env) return pcall(func) end Lua 5.2 的 _ENV 变量Lua 5.2 中所有对全局变量 var 的访问都会在语法上翻译为 _ENV.var。而 _ENV 本身被认为是处于当前块外的一个局部变量。（于是只要你自己定义一个名为 _ENV 的变量，就自动成为了其后代码所处的「环境」（enviroment）。另有一个「全局环境」（global enviroment）的概念，指初始的 _G 表。） Lua 的作者之一 Roberto Ierusalimschy 同志在介绍 Lua 5.2 时说： the new scheme, with _ENV, allows the main benefit of setfenv with a little more than syntactic sugar. 就我的理解来说，优点就是原先虚无缥缈只能通过 setfenv、getfenv 访问的所谓「环境」终于实体化为一个始终存在的变量 _ENV 了。 于是以下两个函数内容大致是一样的： -- Lua 5.1 function foobar() setfenv(1, {}) -- code here end -- Lua 5.2 function foobar() local _ENV = {} -- code here end 而更进一步的是，5.2 中对 load 函数作出了修改。（包括但不限于 :)）合并了 loadstring 功能，并可以在参数中指定所使用的环境表： local func, message = load(code, nil, &quot;t&quot;, env) setfenv当我们在全局环境中定义变量时经常会有命名冲突，尤其是在使用一些库的时候，变量声明可能会发生覆盖，这时候就需要一个非全局的环境来解决这问题。setfenv函数可以满足我们的需求。 setfenv(f, table)：设置一个函数的环境 （1）当第一个参数为一个函数时，表示设置该函数的环境 （2）当第一个参数为一个数字时，为1代表当前函数，2代表调用自己的函数，3代表调用自己的函数的函数，以此类推 所谓函数的环境，其实一个环境就是一个表，该函数被限定为只能访问该表中的域，或在函数体内自己定义的变量。下面这个例子，设定当前函数的环境为一个空表，那么在设定执行以后，来自全局的print函数将不可见，所以调用会失败。 – 一个环境就是一个表，该表记录了新环境能够访问的全部域newfenv = {}setfenv(1, newfenv)print(1) – attempt to call global `print’ (a nil value) 我们可以这样继承已有的域： a = 10 newfenv = {_G = _G} setfenv(1, newfenv) _G.print(1) -- 1 _G.print(_G.a) -- 10 _G.print(a) -- nil 注意此处是nil，新环境没有a域，但可以通过_G.a访问_G的a域 可以看到，新环境中可以访问_G，但有一点就是_G中的所有函数必须手动调用，这样其实很不方便。我们可以使用metatable来对上述代码进行改进： -- 任何赋值操作都对新表进行，不用担心误操作修改了全局变量表。另外，你仍然可以通过_G修改全局变量： newfenv = {} setmetatable(newfenv, {__index = _G}) setfenv(1, newfenv) print(1) -- 1 新环境直接继承了全局环境的所有域，好处：可以不需要通过_G来手动调用 这样，当访问到函数中不存在的变量时，会自动在_G中查找。对于当前函数和_G都存在的变量，可以通过是否用_G显示调用来区分，比如如果有两个a，那么_G.a表示继承来的，a就是当前函数环境的。 另外，可以通过getfenv(f)函数查看函数所处的环境，默认会返回全局环境_G。]]></content>
+      
+      
+        <tags>
+            
+            <tag> lua </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>lua沙盒</title>
+      <link href="/2018/12/10/lua%E6%B2%99%E7%9B%92/"/>
+      <url>/2018/12/10/lua%E6%B2%99%E7%9B%92/</url>
+      
+        <content type="html"><![CDATA[<h3 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h3><p>Lua 给我的感觉是：各种内置函数和标准库的存在感都是比较强的。如果执行这句：   </p><p><code>for name in pairs(_G) do print(_G) end</code><br>就会把各种环境中已存在名称的打印出来：    </p><p>全局变量：比如字符串 _VERSION。<br>内置函数：比如 print、tonumber、dofile 之类。<br>模块名称：比如 string、io、coroutine 之类。<br>这里的全局变量 _G 就是存放环境的表（于是会有 _G 中存在着 _G._G 的递归）。   </p><p>于是，平时对于全局变量的访问就可以等同于对 _G 表进行索引：   </p><p>value = _G[varname]  –&gt; value = varname<br>_G[varname] = value  –&gt; varname = value  </p><h3 id="改变函数的环境"><a href="#改变函数的环境" class="headerlink" title="改变函数的环境"></a>改变函数的环境</h3><p>函数的上下文环境可以通过 setfenv(f, table) 函数改变，其中 table 是新的环境表，f 表示需要被改变环境的函数。如果 f 是数字，则将其视为堆栈层级（Stack   Level），从而指明函数（1 为当前函数，2 为上一级函数）：           </p><pre><code>a = 3          -- 全局变量 asetfenv(1, {}) -- 将当前函数的环境表改为空表print(a)       -- 出错，因为当前环境表中 print 已经不存在了没错，不仅是 a 不存在，连 print 都一块儿不存在了。如果需要引用以前的 print 则需要在新的环境表中放入线索：a = 3setfenv(1, { g = _G })g.print(a)             -- 输出 nilg.print(g.a)           -- 输出 3</code></pre><h3 id="沙盒"><a href="#沙盒" class="headerlink" title="沙盒"></a>沙盒</h3><p>于是，出于安全或者改变一些内置函数行为的目的，需要在执行 Lua   代码时改变其环境时便可以使用 setfenv   函数。仅将你认为安全的函数或者新的实现加入新环境表中：  </p><pre><code>local env = {}  -- 沙盒环境表，按需要添入允许的函数  function run_sandbox(code)  local func, message = loadstring(code)  if not func then return nil, message end  -- 传入代码本身错误  setfenv(func, env)  return pcall(func)end</code></pre><p>Lua 5.2 的 _ENV 变量<br>Lua 5.2 中所有对全局变量 var 的访问都会在语法上翻译为 _ENV.var。而 _ENV 本身被认为是处于当前块外的一个局部变量。（于是只要你自己定义一个名为 _ENV 的变量，就自动成为了其后代码所处的「环境」（enviroment）。另有一个「全局环境」（global enviroment）的概念，指初始的 _G 表。）</p><p>Lua 的作者之一 Roberto Ierusalimschy 同志在介绍 Lua 5.2 时说：</p><p>the new scheme, with _ENV, allows the main benefit of setfenv with a little more than syntactic sugar.</p><p>就我的理解来说，优点就是原先虚无缥缈只能通过 setfenv、getfenv 访问的所谓「环境」终于实体化为一个始终存在的变量 _ENV 了。</p><p>于是以下两个函数内容大致是一样的：</p><pre><code>-- Lua 5.1function foobar()  setfenv(1, {})  -- code hereend-- Lua 5.2function foobar()  local _ENV = {}  -- code hereend</code></pre><p>而更进一步的是，5.2 中对 load 函数作出了修改。（包括但不限于 :)）合并了 loadstring 功能，并可以在参数中指定所使用的环境表：</p><p><code>local func, message = load(code, nil, &quot;t&quot;, env)</code></p><h3 id="setfenv"><a href="#setfenv" class="headerlink" title="setfenv"></a>setfenv</h3><p>当我们在全局环境中定义变量时经常会有命名冲突，尤其是在使用一些库的时候，变量声明可能会发生覆盖，这时候就需要一个非全局的环境来解决这问题。setfenv函数可以满足我们的需求。     </p><p>　　setfenv(f, table)：设置一个函数的环境     </p><p>　　（1）当第一个参数为一个函数时，表示设置该函数的环境    </p><p>　　（2）当第一个参数为一个数字时，为1代表当前函数，2代表调用自己的函数，3代表调用自己的函数的函数，以此类推   </p><p>　　所谓函数的环境，其实一个环境就是一个表，该函数被限定为只能访问该表中的域，或在函数体内自己定义的变量。下面这个例子，设定当前函数的环境为一个空表，那么在设定执行以后，来自全局的print函数将不可见，所以调用会失败。   </p><p>– 一个环境就是一个表，该表记录了新环境能够访问的全部域<br>newfenv = {}<br>setfenv(1, newfenv)<br>print(1)        – attempt to call global `print’ (a nil value)<br>　　我们可以这样继承已有的域：  </p><pre><code>a = 10newfenv = {_G = _G}setfenv(1, newfenv)_G.print(1)        -- 1_G.print(_G.a)        -- 10_G.print(a)        -- nil 注意此处是nil，新环境没有a域，但可以通过_G.a访问_G的a域　　可以看到，新环境中可以访问_G，但有一点就是_G中的所有函数必须手动调用，这样其实很不方便。我们可以使用metatable来对上述代码进行改进：-- 任何赋值操作都对新表进行，不用担心误操作修改了全局变量表。另外，你仍然可以通过_G修改全局变量：newfenv = {}setmetatable(newfenv, {__index = _G})setfenv(1, newfenv)print(1)        -- 1 新环境直接继承了全局环境的所有域，好处：可以不需要通过_G来手动调用</code></pre><p>　　这样，当访问到函数中不存在的变量时，会自动在_G中查找。对于当前函数和_G都存在的变量，可以通过是否用_G显示调用来区分，比如如果有两个a，那么_G.a表示继承来的，a就是当前函数环境的。    </p><p>　　另外，可以通过getfenv(f)函数查看函数所处的环境，默认会返回全局环境_G。   </p>]]></content>
+      
+      
       <categories>
-        <category>lua</category>
+          
+          <category> lua </category>
+          
       </categories>
-      <tags>
-        <tag>lua</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[cocos2dx游戏内存优化]]></title>
-    <url>%2F2018%2F12%2F10%2Fcocos2dx%E6%B8%B8%E6%88%8F%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96%2F</url>
-    <content type="text"><![CDATA[纹理消耗了大量内存在大部分情况下，是纹理（textures）消耗了游戏程序大量的内存。因此，纹理是我们首要考虑优化的对象 纹理加载cocos2d里面纹理加载分为两个阶段：从图片文件中创建一个Image对象;以这个创建好的Image对象来创建Texture2D对象.加载纹理的文件io操作和纹理创建都是耗时的，需要避免一帧之内加载大量图片资源.因为不仅会导致卡顿还会导致内存过高.最好的方式是多线程加载即异步加载. 使用JPG图片？cocos2d使用JPG纹理的时候有一个问题,因为JPG纹理在加载的时候，会实时地转化为PNG格式的纹理，而且JPG纹理将消耗三倍于本身内存占用大小的内存。jpg不论在加载速度和内存消耗方面都很差。所以，千万不要大量使用JPG大图. 重视文件图片大小图片文件大小和纹理内存占用是两码事，图片文件大多是压缩过的，它们被使用的话必须先解压缩，然后才能会GPU所处理，变成我们熟知的纹理。一个2048*2048的png图片，采用32位颜色深度编码，那么它在磁盘上占用空间只有2MB。但是，如果变成纹理，它将消耗16MB的内存！ 使用16-bit纹理最快速地减少纹理内存占用的办法就是把它们作为16位颜色深度的纹理来加载。cocos2d默认的纹理像素格式是32位颜色深度。如果把颜色深度减半，那么内存消耗也就可以减少一半。并且这还会带来渲染效率的提升，大约提高10%。 你可以使用Texture2D对象的类方法setDefaultAlphaPixelFormat来更改默认的纹理像素格式，代码如下： [Texture2D setDefaultAlphaPixelFormat:kCCTexture2DPixelFormat_RGB5A1]; 这里有个问题：首先，纹理像素格式的改变会影响后面加载的所有纹理。因此，如果你想后面加载纹理使用不同的像素格式的话，必须再调用此方法，并且重新设置一遍像素格式。 其次，如果你的CCTexture2D设置的像素格式与图片本身的像素格式不匹配的话，就会导致显示严重失真。比如颜色不对，或者透明度不对等等。 有哪些比较有用的纹理像素格式呢?generate 32-bit textures: kCCTexture2DPixelFormat_RGBA8888 (default) generate 16-bit textures: kCCTexture2DPixelFormat_RGBA4444 generate 16-bit textures: kCCTexture2DPixelFormat_RGB5A1 generate 16-bit textures: kCCTexture2DPixelFormat_RGB565 (no alpha) RGBA8888是默认的格式。对于16位的纹理来说，使用RGB565可以获得最佳颜色质量，因为16位全部用来显示颜色：总共有65536总颜色值。但是，这里有个缺点，除非图片是矩形的，并且没有透明像素。所以RBG565格式比较适合背景图片和一些矩形的用户控件。 RGB5A1格式使用一位颜色来表示alpha通道，因此图片可以拥有透明区域。只是，1位似乎有点不够用，它只能表示32768种可用颜色值。而且图片要么只能全部是透明像素，或者全部是不透明的像素。因为一位的alpha通道的缘故，所以没有中间值。但是你可以使用fade in/out动作来改变纹理的opacity属性。 如果你的图片包含有半透明的区域，那么RBGA4444格式很有用。它允许每一个像素值有127个alpha值，因此透明效率与RGBA8888格式的纹理差别不是很大。但是，由于颜色总量减少至4096，所以，RBGA4444是16位图片格式里面颜色质量最差的。 现在，你可以得到16位纹理的不足之处了：它由于颜色总量的减少，有一些图片显示起来可能会失真 使16位纹理看起来更棒幸运的是，我们有TexturePacker.（简称TP） TP有一个特性叫做“抖动”，它可以使得原本由于颜色数量减少而产生的失真问题得到改善。 特别是在拥有Retina显示的像素密度下，你几乎看不出16位与32位的纹理之间的显示差别。当然，前提是你需要采用“抖动”算法。 使用NPOT纹理NOPT是“non power of two”的缩写，译作“不是2的幂”。NPOT stands for “non power of two”.cocos2dx它默认是支持NPOT的。 如果纹理图集（texture atlas）使用NPOT的纹理，它将有一个具大的优势：它允许TP更好地压缩纹理。因此，我们会更少地浪费纹理图集的空白区域。而且，这样的纹理在加载的时候，会少使用1%到49%左右的内存。而且你可以使用TP强制生成NPOT的纹理。(你只需要勾选“allow free size”即可） 默认使用PVR格式的纹理TP让你可以创建PVR格式的纹理。除了PVR纹理支持NPOT外，它们不仅可以不是2的幂，而且还可以不是方形的。 PVR是最灵活的纹理文件格式。除了支持标准的未压缩的RGB图片格式外，不支持有损压缩的pvrtc格式。另外，未压缩的pvr格式的纹理的内存消耗非常地低。不像png图片那样要消耗2倍于本身内存占用大小的内存，pvr格式只需要消耗纹理本身内存大小再加上一点点处理该图片格式的内存大小。 pvr格式的一个缺点就是，你不能在Mac上面打开查看。但是，如果你安装了TP的话，就可以使用TP自带的pvr图片浏览器来浏览pvr格式的图片了. 使用PVR格式的文件几乎没有缺点。此外，它还可以极大地提高加载速度，后面我会解释到。 使用pvr.ccz文件格式在三种可选用的pvr文件格式中，优先选择pvr.ccz格式。它是专门为cocos2d和TP设计的。在TP里面，这是它生成的最小的pvr文件。而且pvr.ccz格式比其它任何文件格式的加载速度都要快。 当在cocos2d里面使用pvr格式的纹理时，只使用pvr.ccz格式，不要使用其它格式！因为它加载速度超快，而且加载的时候使用更少的内存！ 当视觉察觉不出来的时候，可以考虑使用PVRTC压缩PVR纹理支持PVRTC纹理压缩格式。它主要是采用的有损压缩。如果拿PVRTC图片与JPG图片作对比的话，它只有JPG图片中等质量，但是，最大的好处是可以不用在内存里面解压缩纹理。 这里把32位的png图片（左边）与最佳质量的PVRTC4（4位）图片（点击图片查看完整的大小）作对比： 注意，在一些高对比度的地方，明显有一些瑕疵。有颜色梯度的地方看起来还好一点。 PVRTC肯定不是大部分游戏想要采用的纹理格式。但是，它们对于粒子效果来说，非常适用。因为那些小的粒子在不停地移动、旋转、缩放，所以你很难看出一些视觉瑕疵。 PVRTC压缩图片格式TP提供的PVR格式不仅有上面两种，还包括TC2和TC4这两种没有alpha通道的格式。 这里的alpha和16位纹理的alpha是一样的。没有alpha通道意味着图片里面没有透明像素，但是，更多的颜色位会用来表示颜色，那么颜色质量看起来也会更好一些。 有时候，PVRTC图片格式指的是使用4位或者2位颜色值 ，但是，并不完全是那样。PVRTC图片格式可以编码更多的颜色值。 预先加载所有的纹理定要预先加载所有的纹理，你可以在第一个loading场景的时候就全部加载进来。 这样做最大的好处在于，你的游戏体验会表现得非常平滑，而且你不需要再担心资源的加载和卸载问题了。 这样也使得你可以让每一个纹理都使用合适的纹理像素格式，而且可以更方便地找出其它与纹理无关的内存问题。因为如果与纹理有关，那么在第一次加载所有的纹理的时候，这个问题就会暴露出来的。如果所有的纹理都加载完毕，这时候再出现内存问题，那么肯定就与纹理无关了，而是其它的问题了。 按照纹理size从大到小的顺序加载纹理由于加载纹理时额外的内存消耗问题，所以，采用按纹理size从大到小的方式来加载纹理是一个最佳实践。 假设，你有一个占内存16MB的纹理和四个占用内存4MB的纹理。如果你首先加载4MB的纹理，这个程序将会使用16MB的内存，而当它加载第四张纹理的时候，短时间内会飙到20MB。这时，你要加载16MB的那个纹理了，内存会马上飙到48MB（44 + 162），然后再降到32MB（4*4 + 16）。 但是，反过来，你先加载16MB的纹理，然后短时候内飙到32MB。然后又降到16MB。这时候，你再依次加载剩下的4个4MB的，这时，最多会彪到（43 + 42 + 16=36）MB。 在这两种情况下，内存的峰值使用相差12MB，要知道，可能就是这12MB会断送你的游戏进程的小命哦！ 避免在收到内存警告消息的时候清除缓存纹理已经全部在Loading场景里面加载完毕了，这时候，内存警告发生了，然后cocos2d就会把没有使用的纹理从缓存中释放掉。 你刚刚把所有的纹理都加载进来，还没有进入任何一个场景中（此时所有的纹理都被当作“unused”），但是马上被全部从texture cache中移除出去。可是，你又需要在其它场景中使用它们。在loading场景完了之后进入下一个场景的时候很卡的原因了。cocos2dx 在收到内存警告的时候会自动清理缓存. 理解在什么时候、在哪里去清除缓存不要随机清除缓存，也可以心想着释放一些内存而去移除没有使用的纹理。那不是好的代码设计。有时候，它甚至会增加加载次数，并多次引发“间歇内存飙高”。分析你的程序的内存使用，看看内存里面到底有什么，以及什么应该被清除，然后只清除该清除的。 你可以使用dumpCachedTextureInfo方法来观察哪些纹理被缓存了： [[TextureCache] dumpCachedTextureInfo]; cocos2d: &quot;ingamescorefont.png&quot; rc=9 name=ingamescorefont-hd.png id=13 128 x 64 @ 32 bpp =&gt; 32 KB cocos2d: &quot;ui.png&quot; rc=15 name=ui-hd.png id=5 2048 x 2048 @ 16 bpp =&gt; 8192 KB cocos2d: &quot;ui-ingame.png&quot; rc=36 name=ui-ingame-hd.png id=8 1024 x 1024 @ 16 bpp =&gt; 2048 KB cocos2d: &quot;digits.png&quot; rc=13 name=digits-hd.png id=10 512 x 64 @ 16 bpp =&gt; 64 KB cocos2d: &quot;hilfe.png&quot; rc=27 name=hilfe-hd.png id=6 1024 x 2048 @ 32 bpp =&gt; 8192 KB cocos2d: &quot;settings.png&quot; rc=8 name=settings-hd.png id=9 1024 x 1024 @ 16 bpp =&gt; 2048 KB cocos2d: &quot;blitz_kurz.png&quot; rc=1 name=(null) id=12 50 x 50 @ 32 bpp =&gt; 9 KB cocos2d: &quot;gameover.png&quot; rc=8 name=gameover-hd.png id=7 1024 x 2048 @ 32 bpp =&gt; 8192 KB cocos2d: &quot;home.png&quot; rc=32 name=home-hd.png id=4 2048 x 2048 @ 16 bpp =&gt; 8192 KB cocos2d: &quot;particleTexture.png&quot; rc=2 name=(null) id=11 87 x 65 @ 32 bpp =&gt; 22 KB cocos2d: &quot;stern.png&quot; rc=2 name=(null) id=2 87 x 65 @ 32 bpp =&gt; 22 KB cocos2d: &quot;clownmenu.png&quot; rc=60 name=clownmenu-hd.png id=1 1024 x 2048 @ 32 bpp =&gt; 8192 KB cocos2d: CCTextureCache dumpDebugInfo: 13 textures using 60.1 MB （纹理总共占用的内存大小！！！） 上面包含了非常多有用的信息。纹理的大小、颜色深度（bpp）和每一个被缓存的纹理在内存中所占用大小等。这里的“rc”代表纹理的“引用计数”。如果这个引用计数等于1或2的话，那么意味着，这个纹理当前可能不会需要使用了，此时，你可以放心地把它从纹理cache中移除出去。 你只移除你知道在当前场景下不太可能会被使用的纹理（即上面介绍的引用计数为1或2的情况），这是一个明智的做法。另外，只移除那些占用内存大的纹理。如果一个纹理只占几个kb的内存，其它移不移除都没什么太大的影响。 SpriteFrames retain textures上面提到的例子中，纹理的引用计数可能有点让人看不懂。你会发现，纹理集有很高的retain count，即使你知道这些纹理集中的纹理当前并没有被使用。 你可能忽略了一件事：SprteFrame会retain它的纹理。因此，如果你使用了纹理集，你要完全移除它不是那么容易。因为，由这个纹理集产生的sprite frame还是保留在内存中。所以，你必须调用SpriteFrameCache的removeSpriteFramesFromTexture方法，能彻底清除纹理缓存中的纹理集。 [[CCSpriteFrameCache sharedSpriteFrameCache] removeSpriteFramesFromTexture:uncachedTexture]; 你也可以使用 removeSpriteFramesFromFile，并指定一个纹理集的.plist文件来清除缓存起来的精灵帧（spriteframes）. 你可以清除任何缓存（比如animation,sprite frames等），但是请不要轻易清除纹理缓存cocos2d有许多缓存类，比如纹理缓存、精灵帧缓存，动画缓存等。 当然，如果你想从内存中移除一个纹理，你也必须移除与之相关的精灵帧(因为精灵帧会retain纹理）。 例外：检查声音文件的内存使用！声音文件会被缓存起来，然后可以重复播放而不会被中断。由于声音文件一般比较大，特别是，我看到有一些开发者使用没有压缩的声音文件作为游戏的背景音乐，而这些背景音乐文件非常大，它们通常会造成大量的内存消耗。 请使用MP3格式的声音文件。因为使用没有压缩的声音文件既浪费内存又占用程序大小。当你加载完一些游戏音效时，在不需要的时候，记得要卸载掉。 如何避免缓存特定的纹理如果你有一个纹理，你确实不想缓存起来，那怎么办呢？比如，在初始的加载场景中的图片，或者那些用户很少会在意的图片–比如你的非常牛比的致谢场景的图片。 经常容易被误解的一点是，一个纹理显示出来了，那么它就被缓存起来了。如果你从缓存中移除此纹理，那么此时你再移除精灵就会程序崩溃。这个理解不正确。 TextureCache只不过是对纹理再添加了一次retain函数的调用，这样，当没有其它对象（比如sprite）持有纹理的引用的时候，纹理仍然会存在内存之间。基于这一点，我们可以立马从缓存中移除出去，这样，当纹理不存需要的时候，马上就会从内存中释放掉。如下代码所示： bg = [Sprite spriteWithFile:@&quot;introBG.png&quot;]; // don&#39;t cache this texture: [[TextureCache ] removeTextureForKey:@&quot;introBG.png&quot;]; 当TextureCache中移除一个纹理的时候，cocos2d下一次在调用spriteWithFile的时候，还是会再加载该纹理的–不管是否有没有一张名字一样的图片正在被其它精灵所使用。因此，如果你不够细心的话，你有可能最后会在内存中加载两张重复的纹理。 使用一个Loading 场景如果你不能预先加载所有的纹理的话，你可以使用一个loading场景，同时显示一个动画来表明加载的进度。这样可以在进入下一个场景之前，让前面一个场景销毁，同时释放它所占用的内存资源。 实现起来非常简单。这个loading场景调度一个selector，然后每一帧（或者0.1秒也可以）执行一个函数，比如update。除非你前面一个场景有内存泄漏，否则的话，每一次update函数执行的时候，都会把一些引用计数为0的内存资源释放掉。在这个update方法里面，你可以创建新的场景。 这样极大地避免了“间歇性内存飙高”的问题，可以极大地减小内存压力。 在后台加载纹理TextureCache类还支持异步加载资源的功能，利用addImageAsync方法。你可以很方面地给addImageAsync方法添加一个回调方法，这样，当纹理异步加载结束的时候，可以得到通知。 必须等待一个资源加载完毕。否则的话，由于“间歇性内存飙高”，可能会引发下列问题： 1) 程序崩溃2) 纹理被加载两次！因为异步加载并不能保证加载顺序。 减少你的程序的大小把纹理的颜色位深度减少到16位，不仅可以减少内存压力，还可以有效地减少程序的体积。但是，我们还有其它方法可以更进一步地减少程序的大小。 TexturePacker PNG 图片优化如果你有某些原因，让你坚持要使用PNG文件格式而不是我之前极力向你推荐的pvr.ccz文件格式，那么TexturePacker有一个选项，叫做“Png Opt Level”(Png优化级别)，可以帮助我们减少png文件的大小 注意，在xcode里面有一项设置，你可能会把它忽略掉。你需要关闭”Compress PNG files”开关，因为这个选项有可能会使你的png图片膨胀。xcode会在png文件打包进程序的时候运行自带的png优化程序。所以，有可能会使我们先前使用TP优化过的png图片再次膨胀。因此，再次确保这个选项已关闭！ 不过即使你没有禁用此选项，你的程序大小还是会有所减小。因为，你有可能使用一些没有被TP优化过的png图片。 检查你的程序在App Store 里面的大小在Xcode里面，运行Archive build（在菜单中选择Product-&gt;Archive）。当build成功的时候，Xcode的Organizer窗口会打开，然后你会看到一个“Estimate Size”（评估大小）的按钮，可以用来估算你的应用程序大小： 移除未使用的资源文件在开发游戏的过程中，你会经常添加、移除和替换游戏资源。所以，你可能会因为某些原因，忘记移除一些不用的图片资源。所以，你需要额外注意把它们都从项目中移除出去，至少要从程序的target中出去。对于android 的so而言可以做一些选择，针对多种cpu架构可以选择一个. 减少声音文件大小有时候，我们也会忽视这个问题。如果你不考虑声音文件的格式，不管是就内存的使用还是程序的大小而言，都是一种极大的浪费。下面是一些方法可以用来减少声音文件的大小。 立体声道变单声道 – 你的mp3文件可以采用立体声，但是，这样做值得吗？如果你听不出来差别的话，建议还是采用单一声道。这样可以把文件大小和内存使用都减少一半。 MP3 比特率 –在iOS设备上面，任何比特率大于192kbps的声音都是浪费。你可以尽量采用低的比特率来获得最好的音质效果，这是一个折中。一般来说，96到128kbps对于mp3文件来说够用了。 采样率 – 大部分的声音文件使用11，22，44，或者48kHz采样率。采样率越低，声音文件越小。但是，这样声音质量也会越低。44kHz已经达到了CD的音质了，而48kHz会更好（这个差别只有调音师才可以听出来） 在大部分情况下，44kHz或者更高的比特率都有点浪费。所以，可以尝试下减小采样率（在Audacity里面：Tarck-&gt;Resample）。不要只是修改采样率，因为这样会改变声音文件的音高。 Streaming MP3 Filesmp3文件的播放，首先是加载到内存中，然后解码为未压缩的声音buffer，最后再播放。 就我目前所知，CocosDenshion的SimpleAudioEngine的playBackgoundMusic是流式播放mp3文件的。流试处理有两个优点：1.更小的内存足迹。2.解码mp3文件采用ios硬件，而不是cpu。但是，硬件一次只能解码一个文件，如果同时播放多个，那么只有一个采用的是硬件解码，其它的都是软件解码。 减少Tilemap大小许多开发者没有注意到，tilemap大小太大会消耗大量内存。假设你有一个1000*1000的tilemap，这个大概要消耗1M的内存–如果每一个tile消耗一个字节的内存的话。然而，如果每一个tile大概消耗64个字节的话，那么这个tilemap就会消耗60MB内存。我的天啊！ 除了写一个更优的tilemap渲染器以外，我们唯一可以做的就是减少tilemap的大小了，也可以把地图一分为二。]]></content>
+      
+      
+        <tags>
+            
+            <tag> lua </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>cocos2dx游戏内存优化</title>
+      <link href="/2018/12/10/cocos2dx%E6%B8%B8%E6%88%8F%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/"/>
+      <url>/2018/12/10/cocos2dx%E6%B8%B8%E6%88%8F%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/</url>
+      
+        <content type="html"><![CDATA[<h4 id="纹理消耗了大量内存"><a href="#纹理消耗了大量内存" class="headerlink" title="纹理消耗了大量内存"></a>纹理消耗了大量内存</h4><p>在大部分情况下，是纹理（textures）消耗了游戏程序大量的内存。因此，纹理是我们首要考虑优化的对象</p><h4 id="纹理加载"><a href="#纹理加载" class="headerlink" title="纹理加载"></a>纹理加载</h4><p>cocos2d里面纹理加载分为两个阶段：从图片文件中创建一个Image对象;以这个创建好的Image对象来创建Texture2D对象.加载纹理的文件io操作和纹理创建都是耗时的，需要避免一帧之内加载大量图片资源.因为不仅会导致卡顿还会导致内存过高.最好的方式是多线程加载即异步加载.</p><h4 id="使用JPG图片？"><a href="#使用JPG图片？" class="headerlink" title="使用JPG图片？"></a>使用JPG图片？</h4><p>cocos2d使用JPG纹理的时候有一个问题,因为JPG纹理在加载的时候，会实时地转化为PNG格式的纹理，而且JPG纹理将消耗三倍于本身内存占用大小的内存。jpg不论在加载速度和内存消耗方面都很差。所以，千万不要大量使用JPG大图.</p><h4 id="重视文件图片大小"><a href="#重视文件图片大小" class="headerlink" title="重视文件图片大小"></a>重视文件图片大小</h4><p>图片文件大小和纹理内存占用是两码事，图片文件大多是压缩过的，它们被使用的话必须先解压缩，然后才能会GPU所处理，变成我们熟知的纹理。一个2048*2048的png图片，采用32位颜色深度编码，那么它在磁盘上占用空间只有2MB。但是，如果变成纹理，它将消耗16MB的内存！</p><h4 id="使用16-bit纹理"><a href="#使用16-bit纹理" class="headerlink" title="使用16-bit纹理"></a>使用16-bit纹理</h4><p>最快速地减少纹理内存占用的办法就是把它们作为16位颜色深度的纹理来加载。cocos2d默认的纹理像素格式是32位颜色深度。如果把颜色深度减半，那么内存消耗也就可以减少一半。并且这还会带来渲染效率的提升，大约提高10%。</p><p>你可以使用Texture2D对象的类方法<a href="http://www.learn-cocos2d.com/api-ref/latest_2.x/cocos2d-iphone/html/interface_c_c_texture2_d.html#add7db64ac4efbfb1570986c2f0f55ce6" target="_blank" rel="noopener">setDefaultAlphaPixelFormat</a>来更改默认的纹理像素格式，代码如下：</p><pre><code>[Texture2D setDefaultAlphaPixelFormat:kCCTexture2DPixelFormat_RGB5A1];</code></pre><p>这里有个问题：首先，纹理像素格式的改变会影响后面加载的所有纹理。因此，如果你想后面加载纹理使用不同的像素格式的话，必须再调用此方法，并且重新设置一遍像素格式。</p><p>其次，如果你的CCTexture2D设置的像素格式与图片本身的像素格式不匹配的话，就会导致显示严重失真。比如颜色不对，或者透明度不对等等。</p><h4 id="有哪些比较有用的纹理像素格式呢"><a href="#有哪些比较有用的纹理像素格式呢" class="headerlink" title="有哪些比较有用的纹理像素格式呢?"></a>有哪些比较有用的纹理像素格式呢?</h4><pre><code>generate 32-bit textures: kCCTexture2DPixelFormat_RGBA8888 (default)generate 16-bit textures: kCCTexture2DPixelFormat_RGBA4444generate 16-bit textures: kCCTexture2DPixelFormat_RGB5A1generate 16-bit textures: kCCTexture2DPixelFormat_RGB565 (no alpha)</code></pre><p>RGBA8888是默认的格式。对于16位的纹理来说，使用RGB565可以获得最佳颜色质量，因为16位全部用来显示颜色：总共有65536总颜色值。但是，这里有个缺点，除非图片是矩形的，并且没有透明像素。所以RBG565格式比较适合背景图片和一些矩形的用户控件。</p><p>RGB5A1格式使用一位颜色来表示alpha通道，因此图片可以拥有透明区域。只是，1位似乎有点不够用，它只能表示32768种可用颜色值。而且图片要么只能全部是透明像素，或者全部是不透明的像素。因为一位的alpha通道的缘故，所以没有中间值。但是你可以使用fade in/out动作来改变纹理的opacity属性。</p><p>如果你的图片包含有半透明的区域，那么RBGA4444格式很有用。它允许每一个像素值有127个alpha值，因此透明效率与RGBA8888格式的纹理差别不是很大。但是，由于颜色总量减少至4096，所以，RBGA4444是16位图片格式里面颜色质量最差的。</p><p>现在，你可以得到16位纹理的不足之处了：它由于颜色总量的减少，有一些图片显示起来可能会失真 </p><h4 id="使16位纹理看起来更棒"><a href="#使16位纹理看起来更棒" class="headerlink" title="使16位纹理看起来更棒"></a>使16位纹理看起来更棒</h4><p>幸运的是，我们有<a href="http://www.codeandweb.com/texturepacker" target="_blank" rel="noopener">TexturePacker</a>.（简称TP）</p><p>TP有一个特性叫做“抖动”，它可以使得原本由于颜色数量减少而产生的失真问题得到改善。</p><p>特别是在拥有Retina显示的像素密度下，你几乎看不出16位与32位的纹理之间的显示差别。当然，前提是你需要采用“抖动”算法。</p><h4 id="使用NPOT纹理"><a href="#使用NPOT纹理" class="headerlink" title="使用NPOT纹理"></a>使用NPOT纹理</h4><p>NOPT是“non power of two”的缩写，译作“不是2的幂”。NPOT stands for “non power of two”.cocos2dx它默认是支持NPOT的。</p><p>如果纹理图集（texture atlas）使用NPOT的纹理，它将有一个具大的优势：它允许TP更好地压缩纹理。因此，我们会更少地浪费纹理图集的空白区域。而且，这样的纹理在加载的时候，会少使用1%到49%左右的内存。而且你可以使用TP强制生成NPOT的纹理。(你只需要勾选“allow free size”即可）</p><h4 id="默认使用PVR格式的纹理"><a href="#默认使用PVR格式的纹理" class="headerlink" title="默认使用PVR格式的纹理"></a>默认使用PVR格式的纹理</h4><p>TP让你可以创建PVR格式的纹理。除了PVR纹理支持NPOT外，它们不仅可以不是2的幂，而且还可以不是方形的。</p><p>PVR是最灵活的纹理文件格式。除了支持标准的未压缩的RGB图片格式外，不支持有损压缩的pvrtc格式。另外，未压缩的pvr格式的纹理的内存消耗非常地低。不像png图片那样要消耗2倍于本身内存占用大小的内存，pvr格式只需要消耗纹理本身内存大小再加上一点点处理该图片格式的内存大小。</p><p>pvr格式的一个缺点就是，你不能在Mac上面打开查看。但是，如果你安装了TP的话，就可以使用TP自带的pvr图片浏览器来浏览pvr格式的图片了.</p><p>使用PVR格式的文件几乎没有缺点。此外，它还可以极大地提高加载速度，后面我会解释到。</p><h4 id="使用pvr-ccz文件格式"><a href="#使用pvr-ccz文件格式" class="headerlink" title="使用pvr.ccz文件格式"></a>使用pvr.ccz文件格式</h4><p>在三种可选用的pvr文件格式中，优先选择pvr.ccz格式。它是专门为cocos2d和TP设计的。在TP里面，这是它生成的最小的pvr文件。而且pvr.ccz格式比其它任何文件格式的加载速度<a href="http://www.learn-cocos2d.com/2011/11/depth-ios-cocos2d-performance-analysis-test-project/#image-formats" target="_blank" rel="noopener">都要快</a>。</p><p>当在cocos2d里面使用pvr格式的纹理时，只使用pvr.ccz格式，不要使用其它格式！因为它加载速度超快，而且加载的时候使用更少的内存！</p><h4 id="当视觉察觉不出来的时候，可以考虑使用PVRTC压缩"><a href="#当视觉察觉不出来的时候，可以考虑使用PVRTC压缩" class="headerlink" title="当视觉察觉不出来的时候，可以考虑使用PVRTC压缩"></a>当视觉察觉不出来的时候，可以考虑使用PVRTC压缩</h4><p>PVR纹理支持PVRTC纹理压缩格式。它主要是采用的<a href="http://en.wikipedia.org/wiki/Lossy_compression" target="_blank" rel="noopener">有损压缩</a>。如果拿PVRTC图片与JPG图片作对比的话，它只有JPG图片中等质量，但是，最大的好处是可以不用在内存里面解压缩纹理。</p><p>这里把32位的png图片（左边）与最佳质量的PVRTC4（4位）图片（点击图片查看完整的大小）作对比：</p><p>注意，在一些高对比度的地方，明显有一些瑕疵。有颜色梯度的地方看起来还好一点。</p><p>PVRTC肯定不是大部分游戏想要采用的纹理格式。但是，它们对于粒子效果来说，非常适用。因为那些小的粒子在不停地移动、旋转、缩放，所以你很难看出一些视觉瑕疵。</p><h4 id="PVRTC压缩图片格式"><a href="#PVRTC压缩图片格式" class="headerlink" title="PVRTC压缩图片格式"></a>PVRTC压缩图片格式</h4><p>TP提供的PVR格式不仅有上面两种，还包括TC2和TC4这两种没有alpha通道的格式。</p><p>这里的alpha和16位纹理的alpha是一样的。没有alpha通道意味着图片里面没有透明像素，但是，更多的颜色位会用来表示颜色，那么颜色质量看起来也会更好一些。</p><p>有时候，PVRTC图片格式指的是使用4位或者2位颜色值 ，但是，并不完全是那样。PVRTC图片格式可以编码更多的颜色值。</p><h4 id="预先加载所有的纹理"><a href="#预先加载所有的纹理" class="headerlink" title="预先加载所有的纹理"></a>预先加载所有的纹理</h4><p>定要预先加载所有的纹理，你可以在第一个loading场景的时候就全部加载进来。</p><p>这样做最大的好处在于，你的游戏体验会表现得非常平滑，而且你不需要再担心资源的加载和卸载问题了。</p><p>这样也使得你可以让每一个纹理都使用合适的纹理像素格式，而且可以更方便地找出其它与纹理无关的内存问题。因为如果与纹理有关，那么在第一次加载所有的纹理的时候，这个问题就会暴露出来的。如果所有的纹理都加载完毕，这时候再出现内存问题，那么肯定就与纹理无关了，而是其它的问题了。</p><h4 id="按照纹理size从大到小的顺序加载纹理"><a href="#按照纹理size从大到小的顺序加载纹理" class="headerlink" title="按照纹理size从大到小的顺序加载纹理"></a>按照纹理size从大到小的顺序加载纹理</h4><p>由于加载纹理时额外的内存消耗问题，所以，采用按纹理size从大到小的方式来加载纹理是一个最佳实践。</p><p>假设，你有一个占内存16MB的纹理和四个占用内存4MB的纹理。如果你首先加载4MB的纹理，这个程序将会使用16MB的内存，而当它加载第四张纹理的时候，短时间内会飙到20MB。这时，你要加载16MB的那个纹理了，内存会马上飙到48MB（4<em>4 + 16</em>2），然后再降到32MB（4*4 + 16）。</p><p>但是，反过来，你先加载16MB的纹理，然后短时候内飙到32MB。然后又降到16MB。这时候，你再依次加载剩下的4个4MB的，这时，最多会彪到（4<em>3 + 4</em>2 + 16=36）MB。</p><p>在这两种情况下，内存的峰值使用相差12MB，要知道，可能就是这12MB会断送你的游戏进程的小命哦！</p><h4 id="避免在收到内存警告消息的时候清除缓存"><a href="#避免在收到内存警告消息的时候清除缓存" class="headerlink" title="避免在收到内存警告消息的时候清除缓存"></a>避免在收到内存警告消息的时候清除缓存</h4><p>纹理已经全部在Loading场景里面加载完毕了，这时候，内存警告发生了，然后cocos2d就会把没有使用的纹理从缓存中释放掉。</p><p>你刚刚把所有的纹理都加载进来，还没有进入任何一个场景中（此时所有的纹理都被当作“unused”），但是马上被全部从texture cache中移除出去。可是，你又需要在其它场景中使用它们。在loading场景完了之后进入下一个场景的时候很卡的原因了。cocos2dx 在收到内存警告的时候会自动清理缓存.</p><h4 id="理解在什么时候、在哪里去清除缓存"><a href="#理解在什么时候、在哪里去清除缓存" class="headerlink" title="理解在什么时候、在哪里去清除缓存"></a>理解在什么时候、在哪里去清除缓存</h4><p>不要随机清除缓存，也可以心想着释放一些内存而去移除没有使用的纹理。那不是好的代码设计。有时候，它甚至会增加加载次数，并多次引发“间歇内存飙高”。分析你的程序的内存使用，看看内存里面到底有什么，以及什么应该被清除，然后只清除该清除的。</p><p>你可以使用<a href="http://www.learn-cocos2d.com/api-ref/latest_2.x/cocos2d-iphone/html/interface_c_c_texture_cache.html#ae2b40ef270a73cdfe2398578240b553f" target="_blank" rel="noopener">dumpCachedTextureInfo</a>方法来观察哪些纹理被缓存了：</p><pre><code>[[TextureCache] dumpCachedTextureInfo];</code></pre><pre><code>cocos2d: &quot;ingamescorefont.png&quot; rc=9 name=ingamescorefont-hd.png id=13 128 x 64 @ 32 bpp =&gt; 32 KBcocos2d: &quot;ui.png&quot; rc=15 name=ui-hd.png id=5 2048 x 2048 @ 16 bpp =&gt; 8192 KBcocos2d: &quot;ui-ingame.png&quot; rc=36 name=ui-ingame-hd.png id=8 1024 x 1024 @ 16 bpp =&gt; 2048 KBcocos2d: &quot;digits.png&quot; rc=13 name=digits-hd.png id=10 512 x 64 @ 16 bpp =&gt; 64 KBcocos2d: &quot;hilfe.png&quot; rc=27 name=hilfe-hd.png id=6 1024 x 2048 @ 32 bpp =&gt; 8192 KBcocos2d: &quot;settings.png&quot; rc=8 name=settings-hd.png id=9 1024 x 1024 @ 16 bpp =&gt; 2048 KBcocos2d: &quot;blitz_kurz.png&quot; rc=1 name=(null) id=12 50 x 50 @ 32 bpp =&gt; 9 KBcocos2d: &quot;gameover.png&quot; rc=8 name=gameover-hd.png id=7 1024 x 2048 @ 32 bpp =&gt; 8192 KBcocos2d: &quot;home.png&quot; rc=32 name=home-hd.png id=4 2048 x 2048 @ 16 bpp =&gt; 8192 KBcocos2d: &quot;particleTexture.png&quot; rc=2 name=(null) id=11 87 x 65 @ 32 bpp =&gt; 22 KBcocos2d: &quot;stern.png&quot; rc=2 name=(null) id=2 87 x 65 @ 32 bpp =&gt; 22 KBcocos2d: &quot;clownmenu.png&quot; rc=60 name=clownmenu-hd.png id=1 1024 x 2048 @ 32 bpp =&gt; 8192 KBcocos2d: CCTextureCache dumpDebugInfo: 13 textures using 60.1 MB （纹理总共占用的内存大小！！！）</code></pre><p> 上面包含了非常多有用的信息。纹理的大小、颜色深度（bpp）和每一个被缓存的纹理在内存中所占用大小等。这里的“rc”代表纹理的“引用计数”。如果这个引用计数等于1或2的话，那么意味着，这个纹理当前可能不会需要使用了，此时，你可以放心地把它从纹理cache中移除出去。</p><p>你只移除你知道在当前场景下不太可能会被使用的纹理（即上面介绍的引用计数为1或2的情况），这是一个明智的做法。另外，只移除那些占用内存大的纹理。如果一个纹理只占几个kb的内存，其它移不移除都没什么太大的影响。</p><h4 id="SpriteFrames-retain-textures"><a href="#SpriteFrames-retain-textures" class="headerlink" title="SpriteFrames retain textures"></a>SpriteFrames retain textures</h4><p>上面提到的例子中，纹理的引用计数可能有点让人看不懂。你会发现，纹理集有很高的retain count，即使你知道这些纹理集中的纹理当前并没有被使用。</p><p>你可能忽略了一件事：SprteFrame会retain它的纹理。因此，如果你使用了纹理集，你要完全移除它不是那么容易。因为，由这个纹理集产生的sprite frame还是保留在内存中。所以，你必须调用SpriteFrameCache的<a href="http://www.learn-cocos2d.com/api-ref/latest_2.x/cocos2d-iphone/html/interface_c_c_sprite_frame_cache.html#ad2bb95d9e83bbf732c9eba2514bc24cd" target="_blank" rel="noopener">removeSpriteFramesFromTexture</a>方法，能彻底清除纹理缓存中的纹理集。</p><pre><code>[[CCSpriteFrameCache sharedSpriteFrameCache] removeSpriteFramesFromTexture:uncachedTexture];</code></pre><p> 你也可以使用 <a href="http://www.learn-cocos2d.com/api-ref/latest_2.x/cocos2d-iphone/html/interface_c_c_sprite_frame_cache.html#aa3a61d8b6e9936f9e5a3bf8f4d264e10" target="_blank" rel="noopener">removeSpriteFramesFromFile</a>，并指定一个纹理集的.plist文件来清除缓存起来的精灵帧（spriteframes）. </p><h4 id="你可以清除任何缓存（比如animation-sprite-frames等），但是请不要轻易清除纹理缓存"><a href="#你可以清除任何缓存（比如animation-sprite-frames等），但是请不要轻易清除纹理缓存" class="headerlink" title="你可以清除任何缓存（比如animation,sprite frames等），但是请不要轻易清除纹理缓存"></a>你可以清除任何缓存（比如animation,sprite frames等），但是请不要轻易清除纹理缓存</h4><p>cocos2d有许多缓存类，比如纹理缓存、精灵帧缓存，动画缓存等。</p><p>当然，如果你想从内存中移除一个纹理，你也必须移除与之相关的精灵帧(因为精灵帧会retain纹理）。</p><h4 id="例外：检查声音文件的内存使用！"><a href="#例外：检查声音文件的内存使用！" class="headerlink" title="例外：检查声音文件的内存使用！"></a>例外：检查声音文件的内存使用！</h4><p>声音文件会被缓存起来，然后可以重复播放而不会被中断。由于声音文件一般比较大，特别是，我看到有一些开发者使用没有压缩的声音文件作为游戏的背景音乐，而这些背景音乐文件非常大，它们通常会造成大量的内存消耗。</p><p>请使用MP3格式的声音文件。因为使用没有压缩的声音文件既浪费内存又占用程序大小。当你加载完一些游戏音效时，在不需要的时候，记得要卸载掉。</p><h4 id="如何避免缓存特定的纹理"><a href="#如何避免缓存特定的纹理" class="headerlink" title="如何避免缓存特定的纹理"></a>如何避免缓存特定的纹理</h4><p>如果你有一个纹理，你确实不想缓存起来，那怎么办呢？比如，在初始的加载场景中的图片，或者那些用户很少会在意的图片–比如你的非常牛比的致谢场景的图片。</p><p>经常容易被误解的一点是，一个纹理显示出来了，那么它就被缓存起来了。如果你从缓存中移除此纹理，那么此时你再移除精灵就会程序崩溃。这个理解不正确。</p><p>TextureCache只不过是对纹理再添加了一次retain函数的调用，这样，当没有其它对象（比如sprite）持有纹理的引用的时候，纹理仍然会存在内存之间。基于这一点，我们可以立马从缓存中移除出去，这样，当纹理不存需要的时候，马上就会从内存中释放掉。如下代码所示：</p><pre><code>        bg = [Sprite spriteWithFile:@&quot;introBG.png&quot;];        // don&#39;t cache this texture:        [[TextureCache ] removeTextureForKey:@&quot;introBG.png&quot;];</code></pre><p> 当TextureCache中移除一个纹理的时候，cocos2d下一次在调用spriteWithFile的时候，还是会再加载该纹理的–不管是否有没有一张名字一样的图片正在被其它精灵所使用。因此，如果你不够细心的话，你有可能最后会在内存中加载两张重复的纹理。</p><h4 id="使用一个Loading-场景"><a href="#使用一个Loading-场景" class="headerlink" title="使用一个Loading 场景"></a>使用一个Loading 场景</h4><p>如果你不能预先加载所有的纹理的话，你可以使用一个loading场景，同时显示一个动画来表明加载的进度。这样可以在进入下一个场景之前，让前面一个场景销毁，同时释放它所占用的内存资源。</p><p> 实现起来非常简单。这个loading场景调度一个selector，然后每一帧（或者0.1秒也可以）执行一个函数，比如update。除非你前面一个场景有内存泄漏，否则的话，每一次update函数执行的时候，都会把一些引用计数为0的内存资源释放掉。在这个update方法里面，你可以创建新的场景。</p><p>这样极大地避免了“间歇性内存飙高”的问题，可以极大地减小内存压力。</p><h4 id="在后台加载纹理"><a href="#在后台加载纹理" class="headerlink" title="在后台加载纹理"></a>在后台加载纹理</h4><p>TextureCache类还支持异步加载资源的功能，利用<a href="http://www.learn-cocos2d.com/api-ref/latest_2.x/cocos2d-iphone/html/interface_c_c_texture_cache.html#a19844e2980e63b366605eaa97239ba59" target="_blank" rel="noopener">addImageAsync</a>方法。你可以很方面地给addImageAsync方法添加一个回调方法，这样，当纹理异步加载结束的时候，可以得到通知。</p><p>必须等待一个资源加载完毕。否则的话，由于“间歇性内存飙高”，可能会引发下列问题：</p><p>1) 程序崩溃<br>2) 纹理被加载两次！因为异步加载并不能保证加载顺序。</p><h4 id="减少你的程序的大小"><a href="#减少你的程序的大小" class="headerlink" title="减少你的程序的大小"></a>减少你的程序的大小</h4><p>把纹理的颜色位深度减少到16位，不仅可以减少内存压力，还可以有效地减少程序的体积。但是，我们还有其它方法可以更进一步地减少程序的大小。</p><h4 id="TexturePacker-PNG-图片优化"><a href="#TexturePacker-PNG-图片优化" class="headerlink" title="TexturePacker PNG 图片优化"></a>TexturePacker PNG 图片优化</h4><p>如果你有某些原因，让你坚持要使用PNG文件格式而不是我之前极力向你推荐的pvr.ccz文件格式，那么TexturePacker有一个选项，叫做“Png Opt Level”(Png优化级别)，可以帮助我们减少png文件的大小</p><p>注意，在xcode里面有一项设置，你可能会把它忽略掉。你需要关闭”Compress PNG files”开关，因为这个选项有可能会使你的png图片膨胀。xcode会在png文件打包进程序的时候运行自带的png优化程序。所以，有可能会使我们先前使用TP优化过的png图片再次膨胀。因此，再次确保这个选项已关闭！</p><p>不过即使你没有禁用此选项，你的程序大小还是会有所减小。因为，你有可能使用一些没有被TP优化过的png图片。</p><h4 id="检查你的程序在App-Store-里面的大小"><a href="#检查你的程序在App-Store-里面的大小" class="headerlink" title="检查你的程序在App Store 里面的大小"></a>检查你的程序在App Store 里面的大小</h4><p>在Xcode里面，运行Archive build（在菜单中选择Product-&gt;Archive）。当build成功的时候，Xcode的Organizer窗口会打开，然后你会看到一个“Estimate Size”（评估大小）的按钮，可以用来估算你的应用程序大小：</p><h4 id="移除未使用的资源文件"><a href="#移除未使用的资源文件" class="headerlink" title="移除未使用的资源文件"></a>移除未使用的资源文件</h4><p>在开发游戏的过程中，你会经常添加、移除和替换游戏资源。所以，你可能会因为某些原因，忘记移除一些不用的图片资源。所以，你需要额外注意把它们都从项目中移除出去，至少要从程序的target中出去。对于android 的so而言可以做一些选择，针对多种cpu架构可以选择一个.</p><h4 id="减少声音文件大小"><a href="#减少声音文件大小" class="headerlink" title="减少声音文件大小"></a>减少声音文件大小</h4><p>有时候，我们也会忽视这个问题。如果你不考虑声音文件的格式，不管是就内存的使用还是程序的大小而言，都是一种极大的浪费。下面是一些方法可以用来减少声音文件的大小。</p><p><strong>立体声道变单声道</strong> – 你的mp3文件可以采用立体声，但是，这样做值得吗？如果你听不出来差别的话，建议还是采用单一声道。这样可以把文件大小和内存使用都减少一半。</p><p><strong>MP3 比特率</strong> –在iOS设备上面，任何比特率大于192kbps的声音都是浪费。你可以尽量采用低的比特率来获得最好的音质效果，这是一个折中。一般来说，96到128kbps对于mp3文件来说够用了。</p><p><strong>采样率</strong> – 大部分的声音文件使用11，22，44，或者48kHz采样率。采样率越低，声音文件越小。但是，这样声音质量也会越低。44kHz已经达到了CD的音质了，而48kHz会更好（这个差别只有调音师才可以听出来）</p><p>在大部分情况下，44kHz或者更高的比特率都有点浪费。所以，可以尝试下减小采样率（在Audacity里面：Tarck-&gt;Resample）。不要只是修改采样率，因为这样会改变声音文件的音高。</p><h4 id="Streaming-MP3-Files"><a href="#Streaming-MP3-Files" class="headerlink" title="Streaming MP3 Files"></a>Streaming MP3 Files</h4><p>mp3文件的播放，首先是加载到内存中，然后解码为未压缩的声音buffer，最后再播放。</p><p>就我目前所知，CocosDenshion的SimpleAudioEngine的playBackgoundMusic是流式播放mp3文件的。流试处理有两个优点：1.更小的内存足迹。2.解码mp3文件采用ios硬件，而不是cpu。但是，硬件一次只能解码一个文件，如果同时播放多个，那么只有一个采用的是硬件解码，其它的都是软件解码。</p><h4 id="减少Tilemap大小"><a href="#减少Tilemap大小" class="headerlink" title="减少Tilemap大小"></a>减少Tilemap大小</h4><p>许多开发者没有注意到，tilemap大小太大会消耗大量内存。假设你有一个1000*1000的tilemap，这个大概要消耗1M的内存–如果每一个tile消耗一个字节的内存的话。然而，如果每一个tile大概消耗64个字节的话，那么这个tilemap就会消耗60MB内存。我的天啊！</p><p>除了写一个更优的tilemap渲染器以外，我们唯一可以做的就是减少tilemap的大小了，也可以把地图一分为二。</p>]]></content>
+      
+      
       <categories>
-        <category>cocos2dx</category>
+          
+          <category> cocos2dx </category>
+          
       </categories>
-      <tags>
-        <tag>cocos2dx</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[lua表访问跟踪]]></title>
-    <url>%2F2018%2F12%2F05%2Flua%E8%A1%A8%E8%AE%BF%E9%97%AE%E8%B7%9F%E8%B8%AA%2F</url>
-    <content type="text"><![CDATA[当访问一个 table 或者更新 table 中的某个元素时，lua 首先会在 table 查找是否存在该元素，如果没有，就会查找 table 是否存在 index(访问) 或者 newindex(更新) 原方法。以访问为例，首先在 table 中查找某个字段，如果不存在，解释器会去查找 index 这个原方法，如果仍然没有，返回 nil。所以说，index 和 __newindex 是在 table 中没有所需访问的 index 时才发挥作用的。 根据上面这种思路，如果我们想跟踪一个 table 的操作行为，那么需要一个空表，每次对这个空表操作的时候，就会使用 index 或者 newindex 这些元方法，在元方法中对原始 table 进行访问和操作，并打印跟踪信息。而之前创建的那个空表，就是代理。 --------------------------------------------- print &quot;跟踪单个表&quot; local _t = {} local mt = { __newindex = function(t, name, value) print(&quot;__newindex&quot;, name, value) --rawset(_t, name, value) --原始访问 不访问原表 _t[name] = value end, __index = function(t, name) print(&quot;__index&quot;, name, value) --return rawget(_t, name) --原始访问 不访问原表 return _t[name] end } --a.__index = a local a = {} setmetatable(a, mt) a.x = 1 print(a.x) --------------------------------------------- print &quot;跟踪多个表&quot; local index = {} -- 创建私有索引，即原表在代理表中特殊字段 local mt = { __index = function (t, k) print(&quot;__index &quot; .. tostring(k)) return t[index][k] end, __newindex = function (t, k, v) print(&quot;__newindex &quot; .. tostring(k) .. &quot; to &quot; .. tostring(v)) t[index][k] = v end } function track (t) local proxy = {} proxy[index] = t setmetatable(proxy, mt) return proxy end local ori_table = {} --在其他地方创建的原表，对他进行跟踪 local _o = track(ori_table) _o[2] = &quot;lua&quot; print(_o[2])]]></content>
+      
+      
+        <tags>
+            
+            <tag> cocos2dx </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>lua表访问跟踪</title>
+      <link href="/2018/12/05/lua%E8%A1%A8%E8%AE%BF%E9%97%AE%E8%B7%9F%E8%B8%AA/"/>
+      <url>/2018/12/05/lua%E8%A1%A8%E8%AE%BF%E9%97%AE%E8%B7%9F%E8%B8%AA/</url>
+      
+        <content type="html"><![CDATA[<p>当访问一个 table 或者更新 table 中的某个元素时，lua 首先会在 table 查找是否存在该元素，如果没有，就会查找 table 是否存在 <strong>index(访问) 或者 </strong>newindex(更新) 原方法。以访问为例，首先在 table 中查找某个字段，如果不存在，解释器会去查找 <strong>index 这个原方法，如果仍然没有，返回 nil。所以说，</strong>index 和 __newindex 是在 table 中没有所需访问的 index 时才发挥作用的。    </p><p>根据上面这种思路，如果我们想跟踪一个 table 的操作行为，那么<strong>需要一个空表</strong>，每次对这个空表操作的时候，就会使用 <strong>index 或者 </strong>newindex 这些元方法，在元方法中对原始 table 进行访问和操作，并打印跟踪信息。而之前创建的那个空表，就是代理。</p><pre><code>---------------------------------------------print &quot;跟踪单个表&quot;local _t = {}local mt = {    __newindex = function(t, name, value)        print(&quot;__newindex&quot;, name, value)        --rawset(_t, name, value) --原始访问 不访问原表        _t[name] = value    end,    __index = function(t, name)        print(&quot;__index&quot;, name, value)        --return rawget(_t, name) --原始访问 不访问原表        return _t[name]    end}--a.__index = alocal a = {}   setmetatable(a, mt)a.x = 1print(a.x)---------------------------------------------print &quot;跟踪多个表&quot;local index = {}    --  创建私有索引，即原表在代理表中特殊字段local mt = {    __index = function (t, k)        print(&quot;__index &quot; .. tostring(k))        return t[index][k]    end,    __newindex = function (t, k, v)        print(&quot;__newindex &quot; .. tostring(k) .. &quot; to &quot; .. tostring(v))        t[index][k] = v    end}function track (t)    local proxy = {}    proxy[index] = t    setmetatable(proxy, mt)    return proxyendlocal ori_table = {} --在其他地方创建的原表，对他进行跟踪local _o = track(ori_table)_o[2] = &quot;lua&quot;print(_o[2])</code></pre>]]></content>
+      
+      
       <categories>
-        <category>lua</category>
+          
+          <category> lua </category>
+          
       </categories>
-      <tags>
-        <tag>lua</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[git重点用法]]></title>
-    <url>%2F2018%2F12%2F05%2Fgit%E9%87%8D%E7%82%B9%E7%94%A8%E6%B3%95%2F</url>
-    <content type="text"><![CDATA[流程 Workspace：工作区Index / Stage：暂存区Repository：仓库区（或本地仓库）Remote：远程仓库 基本操作 放入暂存区git add .git add file 提交到仓库git commit -m &#39;log&#39; 撤销工作区修改git checkout -- filegit checkout . 暂存区回退到工作区git reset HEAD file Reset回退commit回滚commit,工作区暂存区也改变git reset --hard commitid只回滚commit,工作区暂存区代码没有改变git reset --soft commitid回滚commit,暂存区改变,工作区不变git reset -mixed commitid 等同 git reset commitid revert回退commit git revert commit 但是会生成一次新的提交，需要填写提交注释，以前的历史记录都在. 而reset是指将HEAD指针指到指定提交,历史记录中不会出现放弃的提交记录. commit id查看git loggit reflog git pushgit push &lt;远程主机名&gt; &lt;本地分支名&gt;:&lt;远程分支名&gt;推送本地master分支到远程origin主机的master分支，后者不存在就创建git push origin master 省略了远程分支名 git pullgit pull &lt;远程主机名&gt; &lt;远程分支名&gt;:&lt;本地分支名&gt;远程主机origin的master分支拉取过来，与本地的brantest分支合并:git pull origin master:brantest将远程origin主机的master分支拉取过来和本地的当前分支进行合并git pull origin master 远程操作 本地代码回滚到commitidgit reset --hard commitid 远程代码回回滚方法1：回滚后强制推送本地到远程git reset --hard commitidgit push origin branch -f方法2：且分支在分支上reset然后删除远程分支，使用本地分支重新远程分支git checkout the_branch git branch bk git pull git reset --hard th_commit_id git push origin :the_branch 删除远程then_branch git push origin the_branch 特殊操作 删除某次提交 git rebase -i commitid^ 在命令编辑里边把某次提交之前的内容改为drop.退出交互模式,就会删除相应commit.之后强制推送就ok. 修改某次提交 git rebase -i commitid^ 在编辑框中把需要修改的某次提交所在commit之前的pick改为edit然后保存退出.之后做出修改,完成之后执行如下命令： git add . git commit --amend git rebase --continue 子仓库主要用于工程中以来的第三方库，第三方库是独立的git仓库可以自行管理. 添加submodule git submodule add 仓库地址 localpath 会在.gitmodules和.git/config中添加submodule路径和对应的仓库库地址 clone父仓库之后更新子仓库 git submodule init git submodule update submodule修改后再localpath中 add commit push 删除submodule 删除.gitmodules和.git.config中的submodule信息;git rm –cached localpath. 合并代码 git merge $ git merge issueFix 如果没有冲突的话，merge完成。有冲突的话，git会提示那个文件中有冲突，比如有如下冲突： &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD:test.c printf (“test1″); ======= printf (“test2″); >&gt;&gt;&gt;&gt;&gt;&gt; issueFix:test.c 可以看到 ======= 隔开的上半部分，是 HEAD（即 master 分支，在运行 merge 命令时检出的分支）中的内容，下半部分是在 issueFix 分支中的内容。解决冲突的办法无非是二者选其一或者由你亲自整合到一起。比如你可以通过把这段内容替换为下面这样来解决： printf (“test2″); 这个解决方案各采纳了两个分支中的一部分内容，而且删除了 &lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，和&gt;&gt;&gt;&gt;&gt;&gt;&gt; 这些行。在解决了所有文件里的所有冲突后，运行 git add 将把它们标记为已解决（resolved）。 分支操作 创建分支 git branch bname 切换分支 git checkout bname 创建并切分支 git checkout -b bname git checkout -b 本地分支名x origin/远程分支名x git checkout -b dev origin/dev 远程分支dev切分支到本地dev分支 查看分支 git branch -av]]></content>
+      
+      
+        <tags>
+            
+            <tag> lua </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>git重点用法</title>
+      <link href="/2018/12/05/git%E9%87%8D%E7%82%B9%E7%94%A8%E6%B3%95/"/>
+      <url>/2018/12/05/git%E9%87%8D%E7%82%B9%E7%94%A8%E6%B3%95/</url>
+      
+        <content type="html"><![CDATA[<h4 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h4><img src="/2018/12/05/git重点用法/gitflow.png" title="git flow"><p>Workspace：工作区<br>Index / Stage：暂存区<br>Repository：仓库区（或本地仓库）<br>Remote：远程仓库</p><h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><ul><li><p>放入暂存区<br><code>git add .</code><br><code>git add file</code></p></li><li><p>提交到仓库<br><code>git commit -m &#39;log&#39;</code></p></li><li><p>撤销工作区修改<br><code>git checkout -- file</code><br><code>git checkout .</code></p></li><li><p>暂存区回退到工作区<br><code>git reset HEAD file</code></p></li><li><p>Reset回退commit<br>回滚commit,工作区暂存区也改变<br><code>git reset --hard  commitid</code><br>只回滚commit,工作区暂存区代码没有改变<br><code>git reset --soft commitid</code><br>回滚commit,暂存区改变,工作区不变<br><code>git reset -mixed commitid</code> 等同 <code>git reset commitid</code></p></li><li><p>revert回退commit</p><p><code>git revert commit</code></p><p>但是会生成一次新的提交，需要填写提交注释，以前的历史记录都在.</p><p>而reset是指将HEAD指针指到指定提交,历史记录中不会出现放弃的提交记录.</p></li><li><p>commit id查看<br><code>git log</code><br><code>git reflog</code></p></li><li><p>git push<br><code>git push &lt;远程主机名&gt; &lt;本地分支名&gt;:&lt;远程分支名&gt;</code><br>推送本地master分支到远程origin主机的master分支，后者不存在就创建<br><code>git push origin master</code> 省略了远程分支名</p></li><li><p>git pull<br><code>git pull &lt;远程主机名&gt; &lt;远程分支名&gt;:&lt;本地分支名&gt;</code><br>远程主机origin的master分支拉取过来，与本地的brantest分支合并:<br><code>git pull origin master:brantest</code><br>将远程origin主机的master分支拉取过来和本地的当前分支进行合并<br><code>git pull origin master</code></p><h4 id="远程操作"><a href="#远程操作" class="headerlink" title="远程操作"></a>远程操作</h4></li><li>本地代码回滚到commitid<br><code>git reset --hard commitid</code></li><li>远程代码回回滚<br>方法1：<br>回滚后强制推送本地到远程<br><code>git reset --hard commitid</code><br><code>git push origin branch -f</code><br>方法2：<br>且分支在分支上reset然后删除远程分支，使用本地分支重新远程分支<pre><code>git checkout the_branchgit branch bkgit pullgit reset --hard th_commit_idgit push origin :the_branch 删除远程then_branchgit push origin the_branch</code></pre></li></ul><h4 id="特殊操作"><a href="#特殊操作" class="headerlink" title="特殊操作"></a>特殊操作</h4><ul><li><p>删除某次提交</p><p><code>git rebase -i commitid^</code></p><p>在命令编辑里边把某次提交之前的内容改为drop.退出交互模式,就会删除相应commit.之后强制推送就ok.</p></li><li><p>修改某次提交</p><p><code>git rebase -i commitid^</code></p><p>在编辑框中把需要修改的某次提交所在commit之前的pick改为edit然后保存退出.之后做出修改,完成之后执行如下命令：</p><pre><code>git add .git commit --amendgit rebase --continue</code></pre></li></ul><h4 id="子仓库"><a href="#子仓库" class="headerlink" title="子仓库"></a>子仓库</h4><p>主要用于工程中以来的第三方库，第三方库是独立的git仓库可以自行管理.</p><ul><li><p>添加submodule</p><p><code>git submodule add 仓库地址 localpath</code></p><p>会在.gitmodules和.git/config中添加submodule路径和对应的仓库库地址</p></li><li><p>clone父仓库之后更新子仓库</p><pre><code>git submodule initgit submodule update</code></pre></li><li><p>submodule修改后再localpath中 add commit push</p></li><li><p>删除submodule</p><p>删除.gitmodules和.git.config中的submodule信息;git rm –cached localpath.  </p><h4 id="合并代码"><a href="#合并代码" class="headerlink" title="合并代码"></a>合并代码</h4></li><li><p>git merge</p><p>$ git merge issueFix</p><p>如果没有冲突的话，merge完成。有冲突的话，git会提示那个文件中有冲突，比如有如下冲突：</p><p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD:test.c</p><p>printf (“test1″);</p><p>=======</p><p>printf (“test2″);</p><p>>&gt;&gt;&gt;&gt;&gt;&gt; issueFix:test.c</p><p>可以看到 ======= 隔开的上半部分，是 HEAD（即 master 分支，在运行 merge 命令时检出的分支）中的内容，下半部分是在 issueFix 分支中的内容。解决冲突的办法无非是二者选其一或者由你亲自整合到一起。比如你可以通过把这段内容替换为下面这样来解决：</p><p>printf (“test2″);</p><p>这个解决方案各采纳了两个分支中的一部分内容，而且删除了 &lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，和&gt;&gt;&gt;&gt;&gt;&gt;&gt; 这些行。在解决了所有文件里的所有冲突后，运行 git add 将把它们标记为已解决（resolved）。</p></li></ul><h4 id="分支操作"><a href="#分支操作" class="headerlink" title="分支操作"></a>分支操作</h4><ul><li><p>创建分支</p><p><code>git branch bname</code></p></li><li><p>切换分支</p><p>git checkout bname</p></li><li><p>创建并切分支</p><p>git checkout -b bname</p></li><li><p>git checkout -b 本地分支名x origin/远程分支名x</p><p><code>git checkout -b dev origin/dev</code></p><p>远程分支dev切分支到本地dev分支</p></li><li><p>查看分支</p><p>git branch -av</p></li></ul>]]></content>
+      
+      
       <categories>
-        <category>git</category>
+          
+          <category> git </category>
+          
       </categories>
-      <tags>
-        <tag>git</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[cocos2dx性能优化]]></title>
-    <url>%2F2018%2F12%2F03%2Fcocos2dx%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%2F</url>
-    <content type="text"><![CDATA[游戏性能应该在设计编码时就需要认真对待,在按照常规处理之后需要使用工具查找游戏性能瓶颈，之后针对处理. 主要的性能问题所在基本是GPU,CPU.经常涉及到游戏逻辑优化,优化效果的指标：帧率、内存、drawcall. 查找 GPU 性能瓶颈的工具 使用 Xcode OpenGL ES Profiler。 文档链接地址 如果你想 profiling 特定 GPU 的移动设备的图形性能，我们可以使用这些 GPU 制造商提供的工具： 对于 ARM Mali GPU，可以使用 mali graphics debugger: http://malideveloper.arm.com/resources/tools/mali-graphics-debugger/ 对于 Imagination PowerVR GPU，可以使用 PVRTune: https://community.imgtec.com/developers/powervr/tools/pvrtune/ 对于 Qualcomm Adreno GPU，可以使用 adreno GPU profiler: https://developer.qualcomm.com/software/adreno-gpu-profiler 使用工具查看图形渲染管线哪个阶段遇到瓶颈了，是顶点处理阶段，还是像素着色阶段。 查找 CPU 性能瓶颈的工具 Mac 平台可以使用 Xcode 的 Time Profiler 工具： https://developer.apple.com/library/ios/documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/MeasuringCPUUse.html Windows 平台可以使用 Visual Studio 的 CPU profiler： https://blogs.msdn.microsoft.com/visualstudioalm/2015/10/29/profile-your-cpu-in-the-debugger-in-visual-studio-2015/ Cocos Creator 的用户，可以使用 Chrome 自带的 timeline 工具和 CPU profile 工具。 熟悉你的移动设备和你使用的游戏引擎熟悉你的移动设备使用的 GPU 和 CPU 的型号， Android 手机可以安装一个应用“GPU-Z”可以非常方便地查看到这些信息，而到目前为止iOS 设备统一使用的都是 PowerVR 的 GPU。如果你在测试游戏的过程中，发现其它手机都没有问题，但是某些具有同种类型的GPU 的设备性能表现都不佳，此时你可能需要留意一下针对特定 GPU 的优化技巧了. 同样的，了解你所使用的游戏引擎的局限也是非常重要的。你需要清楚地知道你所使用的游戏引擎是如何组织图形渲染命令的，这些命令又是如何处理 Batch Draw 的。以及，我们需要如何组织我们的纹理和游戏节点对象，这样才能最大限度地利用引擎提供的自动批处理功能。 如果你知道这些内容，那么你就可以避免一些常见的性能瓶颈。 常见的优化技巧 对于资源在能满足效果的前提下需要使用省资源和计算的方式实现 例如像素格式为RGBA4444可以达到效果就不要使用RGBA8888;不带通道的图片使用jpg而非png;使用压缩纹理和多级纹理;声音可以采纳较低采样率和单通道;使用九宫图等 关于CPU瓶颈一般跟Draw call 数量和你的游戏循环的复杂度相关 降低你的游戏的 Draw call 数量，最大限度地利用批次渲染来减少 Draw call 数量。 Cocos2d-x 3.x 包含了自动批处理功能，但是它需要你合图，并且生成的图形渲染命令必须相邻，且有相同的 material id。 对于游戏中出现的大量对象,可以使用对象缓存池来避免对象生成的消耗的时间 对于外部资源例如纹理声音文字等,尽量采用预加载避免游戏循环中出现大量IO操作 对于复杂UI的实现如listview等,里面重复的item可以使用clone的方法 避免在游戏循环做复杂运算,对于系统更新可以分系统选择不同的更新频率,特别是AI有些事不用每帧更新。 GPU 瓶颈通常局限于Overdraw和 Bandwidth Overdraw 这个问题会导致你的 GPU 很容易碰到带宽的瓶颈,从而降低你的图形性能.所谓 Overdraw，指的是在图形渲染管线中,很多像素的着色对于最终显示在屏幕上的颜色没有帮助,这些多余的计算和处理是浪费的，最重要的就是浪费带宽，因为它们需要从主存中采样纹理坐标。 Cocos2d-x 引擎总是按照从后往前的顺序去提交图形渲染命令的，因为在 2D 里面，大量的图片都是带有透明像素的，为了保证 blending 的正确性，就必须保持这种顺序的渲染命令提交。即使按照这种顺序去提交渲染命令，PowerVR 的 HSR 也可以在片断着色之前剔除掉不需要计算的像素。这也是为什么同样的 Cocos2d-x 游戏在很垃圾的 iPod 上面性能也不错，但是在某些 Android 旗舰机上面性能却表现得一团糟的原因。 注意: 通过使用工具， 预先将 2D 图片三角化，可以提高 Fillrate。具体做法可以参考 TexturePacker 作者写的文章： https://www.codeandweb.com/texturepacker/tutorials/cocos2d-x-performance-optimization cocos2dx优化方案 尽可能地使用批次渲染（Batch Draw） 控制Draw 数量尽量少 减少 32 位未压缩纹理的使用，尽量使用 16 位且压缩过的纹理格式。 尽可能地使用支持硬件解码的压缩纹理：比如 iOS 平台使用 PVRTC 纹理， 在安卓平台上面使用 ETC格式的纹理。 请使用对象缓存池和预加载技术来避免临时创建耗时导致卡顿。 使用 armeabi-v7a 架构来编译 Android 的 SO，因为在此架构下面 Cocos2d-x 会启用 neon 指令集，矩阵运算的效率会大大提高。 避免在 pixel shader 里面做非常复杂的计算 避免在 pixel shader 里面使用 discard 和 alpha test，因为这样会破坏 GPU 自身的 depth testing 优化，比如 PowerVR 的 HSR。]]></content>
+      
+      
+        <tags>
+            
+            <tag> git </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>cocos2dx性能优化</title>
+      <link href="/2018/12/03/cocos2dx%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
+      <url>/2018/12/03/cocos2dx%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/</url>
+      
+        <content type="html"><![CDATA[<p>游戏性能应该在设计编码时就需要认真对待,在按照常规处理之后需要使用工具查找游戏性能瓶颈，之后针对处理.</p><p>主要的性能问题所在基本是GPU,CPU.经常涉及到游戏逻辑优化,优化效果的指标：帧率、内存、drawcall.</p><h4 id="查找-GPU-性能瓶颈的工具"><a href="#查找-GPU-性能瓶颈的工具" class="headerlink" title="查找 GPU 性能瓶颈的工具"></a>查找 GPU 性能瓶颈的工具</h4><ol><li><p>使用 Xcode OpenGL ES Profiler。</p><p><a href="https://github.com/rstrahl/rudistrahl.me/blob/master/entries/Debugging-OpenGL-ES-With-Xcode-Profile-Tools.md" target="_blank" rel="noopener">文档链接地址</a></p><p>如果你想 profiling 特定 GPU 的移动设备的图形性能，我们可以使用这些 GPU 制造商提供的工具：</p></li><li><p>对于 ARM Mali GPU，可以使用 mali graphics debugger: </p><p><a href="http://malideveloper.arm.com/resources/tools/mali-graphics-debugger/" target="_blank" rel="noopener">http://malideveloper.arm.com/resources/tools/mali-graphics-debugger/</a></p></li><li><p>对于 Imagination PowerVR GPU，可以使用 PVRTune: </p><p><a href="https://community.imgtec.com/developers/powervr/tools/pvrtune/" target="_blank" rel="noopener">https://community.imgtec.com/developers/powervr/tools/pvrtune/</a></p></li><li><p>对于 Qualcomm Adreno GPU，可以使用 adreno GPU profiler: </p><p><a href="https://developer.qualcomm.com/software/adreno-gpu-profiler" target="_blank" rel="noopener">https://developer.qualcomm.com/software/adreno-gpu-profiler</a></p></li></ol><p>使用工具查看图形渲染管线哪个阶段遇到瓶颈了，是顶点处理阶段，还是像素着色阶段。</p><h4 id="查找-CPU-性能瓶颈的工具"><a href="#查找-CPU-性能瓶颈的工具" class="headerlink" title="查找 CPU 性能瓶颈的工具"></a>查找 CPU 性能瓶颈的工具</h4><ol><li><p>Mac 平台可以使用 Xcode 的 Time Profiler 工具：</p><p><a href="https://developer.apple.com/library/ios/documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/MeasuringCPUUse.html" target="_blank" rel="noopener">https://developer.apple.com/library/ios/documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/MeasuringCPUUse.html</a></p></li><li><p>Windows 平台可以使用 Visual Studio 的 CPU profiler：</p><p><a href="https://blogs.msdn.microsoft.com/visualstudioalm/2015/10/29/profile-your-cpu-in-the-debugger-in-visual-studio-2015/" target="_blank" rel="noopener">https://blogs.msdn.microsoft.com/visualstudioalm/2015/10/29/profile-your-cpu-in-the-debugger-in-visual-studio-2015/</a></p></li><li><p>Cocos Creator 的用户，可以使用 Chrome 自带的 timeline 工具和 CPU profile 工具。</p></li></ol><h4 id="熟悉你的移动设备和你使用的游戏引擎"><a href="#熟悉你的移动设备和你使用的游戏引擎" class="headerlink" title="熟悉你的移动设备和你使用的游戏引擎"></a>熟悉你的移动设备和你使用的游戏引擎</h4><p>熟悉你的移动设备使用的 GPU 和 CPU 的型号， Android 手机可以安装一个应用“GPU-Z”可以非常方便地查看到这些信息，而到目前为止iOS 设备统一使用的都是 PowerVR 的 GPU。如果你在测试游戏的过程中，发现其它手机都没有问题，但是某些具有同种类型的GPU 的设备性能表现都不佳，此时你可能需要留意一下针对特定 GPU 的优化技巧了.</p><p>同样的，了解你所使用的游戏引擎的局限也是非常重要的。你需要清楚地知道你所使用的游戏引擎是如何组织图形渲染命令的，这些命令又是如何处理 Batch Draw 的。以及，我们需要如何组织我们的纹理和游戏节点对象，这样才能最大限度地利用引擎提供的自动批处理功能。</p><p>如果你知道这些内容，那么你就可以避免一些常见的性能瓶颈。</p><h4 id="常见的优化技巧"><a href="#常见的优化技巧" class="headerlink" title="常见的优化技巧"></a>常见的优化技巧</h4><ol><li><p>对于资源在能满足效果的前提下需要使用省资源和计算的方式实现</p><p>例如像素格式为RGBA4444可以达到效果就不要使用RGBA8888;不带通道的图片使用jpg而非png;使用压缩纹理和多级纹理;声音可以采纳较低采样率和单通道;使用九宫图等</p></li><li><p>关于CPU瓶颈一般跟Draw call 数量和你的游戏循环的复杂度相关</p></li></ol><ul><li>降低你的游戏的 Draw call 数量，最大限度地利用批次渲染来减少 Draw call 数量。 Cocos2d-x 3.x 包含了自动批处理功能，但是它需要你合图，并且生成的图形渲染命令必须相邻，且有相同的 material id。</li><li>对于游戏中出现的大量对象,可以使用对象缓存池来避免对象生成的消耗的时间</li><li>对于外部资源例如纹理声音文字等,尽量采用预加载避免游戏循环中出现大量IO操作</li><li>对于复杂UI的实现如listview等,里面重复的item可以使用clone的方法</li><li>避免在游戏循环做复杂运算,对于系统更新可以分系统选择不同的更新频率,特别是AI有些事不用每帧更新。</li></ul><ol start="3"><li><p>GPU 瓶颈通常局限于Overdraw和 Bandwidth</p><p>Overdraw 这个问题会导致你的 GPU 很容易碰到带宽的瓶颈,从而降低你的图形性能.所谓 Overdraw，指的是在图形渲染管线中,很多像素的着色对于最终显示在屏幕上的颜色没有帮助,这些多余的计算和处理是浪费的，最重要的就是浪费带宽，因为它们需要从主存中采样纹理坐标。 Cocos2d-x 引擎总是按照从后往前的顺序去提交图形渲染命令的，因为在 2D 里面，大量的图片都是带有透明像素的，为了保证 blending 的正确性，就必须保持这种顺序的渲染命令提交。即使按照这种顺序去提交渲染命令，PowerVR 的 HSR 也可以在片断着色之前剔除掉不需要计算的像素。这也是为什么同样的 Cocos2d-x 游戏在很垃圾的 iPod 上面性能也不错，但是在某些 Android 旗舰机上面性能却表现得一团糟的原因。</p><p>注意: 通过使用工具， 预先将 2D 图片三角化，可以提高 Fillrate。具体做法可以参考 TexturePacker 作者写的文章： <a href="https://www.codeandweb.com/texturepacker/tutorials/cocos2d-x-performance-optimization" target="_blank" rel="noopener">https://www.codeandweb.com/texturepacker/tutorials/cocos2d-x-performance-optimization</a></p></li></ol><h4 id="cocos2dx优化方案"><a href="#cocos2dx优化方案" class="headerlink" title="cocos2dx优化方案"></a>cocos2dx优化方案</h4><ol><li>尽可能地使用批次渲染（Batch Draw）</li><li>控制Draw 数量尽量少</li><li>减少 32 位未压缩纹理的使用，尽量使用 16 位且压缩过的纹理格式。</li><li>尽可能地使用支持硬件解码的压缩纹理：比如 iOS 平台使用 PVRTC 纹理， 在安卓平台上面使用 ETC格式的纹理。</li><li>请使用对象缓存池和预加载技术来避免临时创建耗时导致卡顿。</li><li>使用 armeabi-v7a 架构来编译 Android 的 SO，因为在此架构下面 Cocos2d-x 会启用 neon 指令集，矩阵运算的效率会大大提高。</li><li>避免在 pixel shader 里面做非常复杂的计算</li><li>避免在 pixel shader 里面使用 discard 和 alpha test，因为这样会破坏 GPU 自身的 depth testing 优化，比如 PowerVR 的 HSR。</li></ol>]]></content>
+      
+      
       <categories>
-        <category>cocos2dx</category>
+          
+          <category> cocos2dx </category>
+          
       </categories>
-      <tags>
-        <tag>cocos2dx</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[golang服务器开发]]></title>
-    <url>%2F2018%2F11%2F30%2Fgolang%2F</url>
-    <content type="text"><![CDATA[golang开发笔记涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软件的解读. leaf goworld 等教程. 同时会有一些游戏demo展示. 跳转链接： golang深度解析 leaf解析 goworld解析 https://gameloses.github.io/golang/]]></content>
+      
+      
+        <tags>
+            
+            <tag> cocos2dx </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>golang服务器开发</title>
+      <link href="/2018/11/30/golang/"/>
+      <url>/2018/11/30/golang/</url>
+      
+        <content type="html"><![CDATA[<h4 id="golang开发笔记"><a href="#golang开发笔记" class="headerlink" title="golang开发笔记"></a>golang开发笔记</h4><p>涉及内容包括web服务器、游戏服务器的开始使用,包括一些开元的golang软件的解读.</p><p>leaf goworld 等教程. 同时会有一些游戏demo展示.</p><blockquote><p>跳转链接：</p></blockquote><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">golang深度解析</a></p><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">leaf解析</a></p><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">goworld解析</a></p><p><a href="https://gameloses.github.io/golang/" target="_blank" rel="noopener">https://gameloses.github.io/golang/</a></p>]]></content>
+      
+      
       <categories>
-        <category>golang</category>
+          
+          <category> golang </category>
+          
       </categories>
-      <tags>
-        <tag>golang</tag>
-        <tag>go</tag>
-        <tag>游戏服务器</tag>
-        <tag>leaf</tag>
-        <tag>goworld</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[gitbook使用]]></title>
-    <url>%2F2018%2F11%2F28%2Fgitbook%2F</url>
-    <content type="text"><![CDATA[Gitbook的搭建 gitbook是一个npm工具使用的是git和markdown技术支持构建多种格式的ebook. 安装npm install gitbook-cli gitbook -V 初始化创建一个空目录,生成README.md SUMMARY.md两个文件,使用如下命令 gitbook init README.md —— 书籍的介绍写在这个文件里 SUMMARY.md —— 书籍的目录结构在这里配置 编辑电子书目录编辑 * [第一章](section1/README.md) * [第一节](section1/example1.md) * [第二节](section1/example2.md) * [第二章](section2/README.md) * [第一节](section2/example1.md) 目录支持三级，目录中可以带链接.名录名+链接的方式.链接即相对md文件名字. 本地预览gitbook serve 发布电子书gitbook build 在本地目录生成_book静态网页电子书 生成电子书安装插件calibre. https://calibre-ebook.com/download 添加环境变量： cd ~ vim .bash_profile PATH = /Applications/calibre.app/Contents/MacOS:${PATH}&quot; source .bash_profile 生成电子书命令如下： gitbook pdf gitbook mobi 部署到github利用gh-pages将gitbook生成的静态网页发布到github pages上. 安装gh-pages npm install g gh-pages 在github上创建仓库例如cocos2dx 将书籍源码push到仓库的master分支 将_book发布到github仓库的gh-pages分支 gitbook build gh-pages -d _book]]></content>
+      
+      
+        <tags>
+            
+            <tag> golang </tag>
+            
+            <tag> go </tag>
+            
+            <tag> 游戏服务器 </tag>
+            
+            <tag> leaf </tag>
+            
+            <tag> goworld </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>gitbook使用</title>
+      <link href="/2018/11/28/gitbook/"/>
+      <url>/2018/11/28/gitbook/</url>
+      
+        <content type="html"><![CDATA[<p>Gitbook的搭建</p><p>gitbook是一个npm工具使用的是git和markdown技术支持构建多种格式的ebook.</p><h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><pre><code>npm install gitbook-cligitbook -V</code></pre><h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>创建一个空目录,生成README.md SUMMARY.md两个文件,使用如下命令</p><p><code>gitbook init</code></p><ul><li>README.md —— 书籍的介绍写在这个文件里</li><li>SUMMARY.md —— 书籍的目录结构在这里配置</li></ul><h4 id="编辑电子书"><a href="#编辑电子书" class="headerlink" title="编辑电子书"></a>编辑电子书</h4><p>目录编辑</p><pre><code>* [第一章](section1/README.md)    * [第一节](section1/example1.md)    * [第二节](section1/example2.md)* [第二章](section2/README.md)    * [第一节](section2/example1.md)</code></pre><p>目录支持三级，目录中可以带链接.名录名+链接的方式.链接即相对md文件名字.</p><h4 id="本地预览"><a href="#本地预览" class="headerlink" title="本地预览"></a>本地预览</h4><p><code>gitbook serve</code></p><h4 id="发布电子书"><a href="#发布电子书" class="headerlink" title="发布电子书"></a>发布电子书</h4><p><code>gitbook build</code></p><p>在本地目录生成_book静态网页电子书</p><h4 id="生成电子书"><a href="#生成电子书" class="headerlink" title="生成电子书"></a>生成电子书</h4><p>安装插件calibre. <a href="https://link.jianshu.com/?t=https://calibre-ebook.com/download" target="_blank" rel="noopener">https://calibre-ebook.com/download</a></p><p>添加环境变量：</p><pre><code>cd ~vim .bash_profilePATH = /Applications/calibre.app/Contents/MacOS:${PATH}&quot;source .bash_profile</code></pre><p>生成电子书命令如下：</p><pre><code>gitbook pdfgitbook mobi</code></pre><h4 id="部署到github"><a href="#部署到github" class="headerlink" title="部署到github"></a>部署到github</h4><p>利用gh-pages将gitbook生成的静态网页发布到github pages上.</p><ol><li><p>安装gh-pages <code>npm install g gh-pages</code> </p></li><li><p>在github上创建仓库例如cocos2dx</p></li><li><p>将书籍源码push到仓库的master分支</p></li><li><p>将_book发布到github仓库的gh-pages分支</p><pre><code>gitbook buildgh-pages -d _book</code></pre></li></ol>]]></content>
+      
+      
       <categories>
-        <category>web</category>
+          
+          <category> web </category>
+          
       </categories>
-      <tags>
-        <tag>Gitbook</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[github上搭建hexo博客]]></title>
-    <url>%2F2018%2F11%2F23%2Fhexo%E6%90%AD%E5%BB%BAgithubblog%2F</url>
-    <content type="text"><![CDATA[打算在github上搭建起hexo博客和gitbook,主要记录一些技术积累.涉及游戏开前后端区块链等.解读一些开源的库.像skynet,pomelo,kbengine,coco2dx,cocos creator,ETH,goworld等.本文记录一下搭建hexo的过程纯属经验之谈. 基本流程 安装前提 node.js mac下注意npm对user/local的权限问题 git 保证使用ssh和github进行认证测试通过：ssh -T git@github.com. 创建github仓库 例如github用户名为gameloses则仓库名为:gameloses.github.io 安装hexonpm install -g hexo-cli hexo init blog cd blog npm install 基本配置在 _config.yml 中修改大部份的配置 配置部署参数 deploy: type: git repository: git@github.com:gameloses/gameloses.github.io.git branch: master 安装部署插件 cd blog npm install hexo-deployer-git --save 安装首页文章显示插件 npm install --save hexo-auto-excerpt 设置显示字数： auto_excerpt: enable: true length: 300 手动添加文章描述 npm install --save hexo-front-matter-excerpt 在文章标题描述中添加：excerpt: xxxxxxxx 或者文章中添加 ““ 文章资源文件夹 post_asset_folder: true {% asset_img example.jpg This is an example image %} 发布上传博客hexo d -g 常见的其他命令 hexo s == hexo server //启动本地服务 hexo g == hexo generate //生成 hexo d == hexo deploy //发布 hexo n == hexo new //新建 书写文章hexo new post &quot;文章名字&quot;使用模板生成文章 title: cocos2dx引擎架构概述 comments: true date: 2018-11-23 20:51:11 tags: categories: 分类标签为了使分类标签生效需要生成两个page文件 hexo new page categories hexo new page tags 主题配置一个模仿github样式的主题 git clone git@github.com:sabrinaluo/hexo-theme-replica.git themes/replica Set theme: replica in _config.yml (the one in your root folder) 安装插件安装rssnpm install hero-generator-feed配置如下： plugin: - hexo-generator-feed feed: type: atom path: atom.xml limit: 20 rss: /atom.xml 绑定域名添加WWW和@主机记录，记录类型为CNAME. 在source目录下创建CNAME文件，文件内容为域名例如：chuangyutime.com QA mac下node安装好之后使用npm安装全局包会出现usr/local目录权限读写问题？sudo chown -R $USER /usr/local修改权限之后使用ls -l /usr/local 查看权限 分类标签404？需要创建两个page categories、tags vscode 编写markdown回退文本之后以后存在特殊的bs字符问题？显示隐藏字符 &quot;editor.renderControlCharacters&quot;: true安装插件：Remove backspace control character开启设置：&quot;editor.formatOnType&quot;: true 在被设定的情况下，进行变换时;输入时启动]]></content>
+      
+      
+        <tags>
+            
+            <tag> Gitbook </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>github上搭建hexo博客</title>
+      <link href="/2018/11/23/hexo%E6%90%AD%E5%BB%BAgithubblog/"/>
+      <url>/2018/11/23/hexo%E6%90%AD%E5%BB%BAgithubblog/</url>
+      
+        <content type="html"><![CDATA[<p>打算在github上搭建起hexo博客和gitbook,主要记录一些技术积累.涉及游戏开前后端区块链等.解读一些开源的库.像skynet,pomelo,kbengine,coco2dx,cocos creator,ETH,goworld等.本文记录一下搭建hexo的过程纯属经验之谈.</p><h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4><img src="/2018/11/23/hexo搭建githubblog/hexo_github.png" title="基本流程"><h4 id="安装前提"><a href="#安装前提" class="headerlink" title="安装前提"></a>安装前提</h4><ul><li><p>node.js</p><blockquote><p>mac下注意npm对user/local的权限问题</p></blockquote></li><li><p>git  </p><blockquote><p>保证使用ssh和github进行认证测试通过：ssh -T <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>.</p></blockquote></li><li><p>创建github仓库</p><blockquote><p>例如github用户名为gameloses则仓库名为:gameloses.github.io</p></blockquote></li></ul><h4 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h4><pre><code>npm install -g hexo-clihexo init blogcd blognpm install</code></pre><h4 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h4><p>在 _config.yml 中修改大部份的配置  </p><ul><li><p>配置部署参数</p><pre><code>deploy:  type: git  repository: git@github.com:gameloses/gameloses.github.io.git  branch: master</code></pre></li><li><p>安装部署插件      </p><pre><code>cd blognpm install hexo-deployer-git --save</code></pre></li><li><p>安装首页文章显示插件</p><p><code>npm install --save hexo-auto-excerpt</code></p><p>设置显示字数：</p><p>auto_excerpt:</p><p>  enable: true</p><p>  length: 300</p></li><li><p>手动添加文章描述</p><p><code>npm install --save hexo-front-matter-excerpt</code></p><p>在文章标题描述中添加：excerpt: xxxxxxxx 或者文章中添加 “<a id="more"></a>“</p></li><li><p>文章资源文件夹</p><pre><code>post_asset_folder: true{% asset_img example.jpg This is an example image %}</code></pre></li><li><p>发布上传博客<br><code>hexo d -g</code></p></li><li><p>常见的其他命令</p><pre><code>hexo s == hexo server   //启动本地服务hexo g == hexo generate //生成hexo d == hexo deploy   //发布hexo n == hexo new      //新建</code></pre></li></ul><h4 id="书写文章"><a href="#书写文章" class="headerlink" title="书写文章"></a>书写文章</h4><p><code>hexo new post &quot;文章名字&quot;</code><br>使用模板生成文章</p><pre><code>title: cocos2dx引擎架构概述comments: truedate: 2018-11-23 20:51:11tags:categories:</code></pre><h4 id="分类标签"><a href="#分类标签" class="headerlink" title="分类标签"></a>分类标签</h4><p>为了使分类标签生效需要生成两个page文件</p><pre><code>hexo new page categorieshexo new page tags</code></pre><h4 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h4><p>一个模仿github样式的主题</p><pre><code>git clone git@github.com:sabrinaluo/hexo-theme-replica.git themes/replica</code></pre><p>Set theme: replica in _config.yml (the one in your root folder)     </p><h4 id="安装插件"><a href="#安装插件" class="headerlink" title="安装插件"></a>安装插件</h4><p>安装rss<br><code>npm install hero-generator-feed</code><br>配置如下：</p><pre><code>plugin:- hexo-generator-feedfeed:type: atompath: atom.xmllimit: 20rss: /atom.xml</code></pre><h4 id="绑定域名"><a href="#绑定域名" class="headerlink" title="绑定域名"></a>绑定域名</h4><p>添加WWW和@主机记录，记录类型为CNAME.</p><p> 在source目录下创建CNAME文件，文件内容为域名例如：chuangyutime.com</p><h4 id="QA"><a href="#QA" class="headerlink" title="QA"></a>QA</h4><ol><li>mac下node安装好之后使用npm安装全局包会出现usr/local目录权限读写问题？<br><code>sudo chown -R $USER /usr/local</code><br>修改权限之后使用ls -l /usr/local 查看权限</li><li>分类标签404？<br>需要创建两个page categories、tags</li><li>vscode 编写markdown回退文本之后以后存在特殊的bs字符问题？<br>显示隐藏字符 <code>&quot;editor.renderControlCharacters&quot;: true</code><br>安装插件：<code>Remove backspace control character</code><br>开启设置：<code>&quot;editor.formatOnType&quot;: true 在被设定的情况下，进行变换时;输入时启动</code></li></ol>]]></content>
+      
+      
       <categories>
-        <category>web</category>
+          
+          <category> web </category>
+          
       </categories>
-      <tags>
-        <tag>hexo</tag>
-      </tags>
-  </entry>
+      
+      
+        <tags>
+            
+            <tag> hexo </tag>
+            
+        </tags>
+      
+    </entry>
+    
+  
+  
 </search>
