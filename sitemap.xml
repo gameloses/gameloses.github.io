@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://bytemode.github.io/2018/12/13/lua-pcall%E7%9A%84%E5%AE%9E%E7%8E%B0/</loc>
+    
+    <lastmod>2018-12-13T05:30:12.410Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/13/lua%E8%A1%A8%E7%9A%84%E5%88%9B%E5%BB%BA%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96/</loc>
+    
+    <lastmod>2018-12-13T05:21:36.681Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://bytemode.github.io/2018/12/12/lua%E7%89%88%E6%9C%AC%E5%8F%98%E5%8C%96/</loc>
     
     <lastmod>2018-12-12T14:47:58.254Z</lastmod>

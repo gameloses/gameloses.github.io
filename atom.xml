@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://bytemode.github.io/"/>
-  <updated>2018-12-12T13:46:33.620Z</updated>
+  <updated>2018-12-13T05:30:12.410Z</updated>
   <id>https://bytemode.github.io/</id>
   
   <author>
@@ -15,6 +15,58 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>lua-pcall的实现</title>
+    <link href="https://bytemode.github.io/2018/12/13/lua-pcall%E7%9A%84%E5%AE%9E%E7%8E%B0/"/>
+    <id>https://bytemode.github.io/2018/12/13/lua-pcall的实现/</id>
+    <published>2018-12-13T05:24:24.000Z</published>
+    <updated>2018-12-13T05:30:12.410Z</updated>
+    
+    <content type="html"><![CDATA[<p>Lua支持两种形式的函数调用，一种对调用过程的堆栈进行保护，即使中间过程出错，也不至于让进程退出，也就是pcall，一般在使用C调用Lua写的脚本函数时，都采用pcall方式。</p><p>对比起一般的函数调用方式，pcall多做了这些事情：</p><p>对函数调用前的Lua堆栈进行保护在调用完毕之后恢复，支持传入出错时的函数在调用出错时调用。</p><p>来依次看这个过程。</p><ol><li>首先看入口函数lua_pcall：</li></ol><pre><code>LUA_API int lua_pcall (lua_State *L, int nargs, int nresults, int errfunc) {  struct CallS c;  int status;  ptrdiff_t func;  lua_lock(L);  api_checknelems(L, nargs+1);  checkresults(L, nargs, nresults);  if (errfunc == 0)    func = 0;  else {    StkId o = index2adr(L, errfunc);    api_checkvalidindex(L, o);    func = savestack(L, o);  }  c.func = L-&gt;top - (nargs+1);  /* function to be called */  c.nresults = nresults;  status = luaD_pcall(L, f_call, &amp;c, savestack(L, c.func), func);  adjustresults(L, nresults);  lua_unlock(L);  return status;}</code></pre><p>lua_pcall函数与lua_call相比，多了第四个参数，该函数用于传入错误处理函数在Lua栈中的地址。所以第一步将根据传入的参数得到它的值在函数栈中的地址。然后根据这些参数调用函数luaD_pcall函数。</p><ol start="2"><li>luaD_pcall的实现</li></ol><pre><code>int luaD_pcall (lua_State *L, Pfunc func, void *u,                ptrdiff_t old_top, ptrdiff_t ef) {  int status;  unsigned short oldnCcalls = L-&gt;nCcalls;  ptrdiff_t old_ci = saveci(L, L-&gt;ci);  lu_byte old_allowhooks = L-&gt;allowhook;  ptrdiff_t old_errfunc = L-&gt;errfunc;  L-&gt;errfunc = ef;  status = luaD_rawrunprotected(L, func, u);  if (status != 0) {  /* an error occurred? */    StkId oldtop = restorestack(L, old_top);    luaF_close(L, oldtop);  /* close eventual pending closures */    luaD_seterrorobj(L, status, oldtop);    L-&gt;nCcalls = oldnCcalls;    L-&gt;ci = restoreci(L, old_ci);    L-&gt;base = L-&gt;ci-&gt;base;    L-&gt;savedpc = L-&gt;ci-&gt;savedpc;    L-&gt;allowhook = old_allowhooks;    restore_stack_limit(L);  }  L-&gt;errfunc = old_errfunc;  return status;}</code></pre><p>这个函数首先将一些需要保存以便以后进行错误恢复的值保存，然后调用函数luaD_rawrunprotected。</p><ol start="3"><li>在luaD_rawrunprotected中，</li></ol><pre><code>int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {  struct lua_longjmp lj;  lj.status = 0;  lj.previous = L-&gt;errorJmp;  /* chain new error handler */  L-&gt;errorJmp = &amp;lj;  LUAI_TRY(L, &amp;lj,    (*f)(L, ud);  );  L-&gt;errorJmp = lj.previous;  /* restore old error handler */  return lj.status;}</code></pre><p>可以看到的是，在Lua中，涉及到这些错误恢复的数据，实际上形成一个链条关系，这个函数首先将之前的错误链保存起来。而LUAI_TRY这个宏，会根据不同的编译器进行实现，比如C++中使用的try…catch，C中使用longjmp等。</p><ol start="4"><li>再来看看真正出错的时候是如何处理的。</li></ol><pre><code>void luaG_errormsg (lua_State *L) {  if (L-&gt;errfunc != 0) {  /* is there an error handling function? */    StkId errfunc = restorestack(L, L-&gt;errfunc);    if (!ttisfunction(errfunc)) luaD_throw(L, LUA_ERRERR);    setobjs2s(L, L-&gt;top, L-&gt;top - 1);  /* move argument */    setobjs2s(L, L-&gt;top - 1, errfunc);  /* push function */    incr_top(L);    luaD_call(L, L-&gt;top - 2, 1);  /* call it */  }  luaD_throw(L, LUA_ERRRUN);}</code></pre><p><strong>首先如果之前保存的errfunc不为空，则首先从Lua栈中得到该函数，如果判断这个地址存放的不是一个函数则直接抛出错误。否则将错误参数压入栈中调用该错误处理函数。最后调用LuaD_throw函数，这个函数与前面的LUAI_TRY宏是对应的。这样就可以回到原来保存的错误恢复地点，恢复调用前的Lua栈，继续执行下去，而不是导致宿主进程退出。</strong></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;Lua支持两种形式的函数调用，一种对调用过程的堆栈进行保护，即使中间过程出错，也不至于让进程退出，也就是pcall，一般在使用C调用Lua写的脚本函数时，都采用pcall方式。&lt;/p&gt;
+&lt;p&gt;对比起一般的函数调用方式，pcall多做了这些事情：&lt;/p&gt;
+&lt;p&gt;对函数调用前的
+      
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>lua表的创建和初始化</title>
+    <link href="https://bytemode.github.io/2018/12/13/lua%E8%A1%A8%E7%9A%84%E5%88%9B%E5%BB%BA%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96/"/>
+    <id>https://bytemode.github.io/2018/12/13/lua表的创建和初始化/</id>
+    <published>2018-12-13T05:11:44.000Z</published>
+    <updated>2018-12-13T05:21:36.681Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="表的基本实现"><a href="#表的基本实现" class="headerlink" title="表的基本实现"></a>表的基本实现</h4><p>在Lua中，表是唯一的数据结构，可以使用它，模拟hash表，数组，链表，树等一切常用的数据结构。Lua表分为数组部分和hash部分。比如：</p><pre><code>local t = {1,2,3,4,5}</code></pre><p>以上分配一个Lua数组，依次为1到5.</p><p>而如果要初始化hash部分，则需要指定key，有两种方式：</p><pre><code>local t = {a=&quot;test&quot;}local t = {[&quot;a&quot;]=&quot;test&quot;}</code></pre><p>以上都指定了key为”a”的元素对应的值是”test”（注意一些上面两种情况key分别可以加引号和不加引号的）。</p><h5 id="现在可以来看Lua表创建相关的操作。涉及到这部分的，是两个OPCODE："><a href="#现在可以来看Lua表创建相关的操作。涉及到这部分的，是两个OPCODE：" class="headerlink" title="现在可以来看Lua表创建相关的操作。涉及到这部分的，是两个OPCODE："></a>现在可以来看Lua表创建相关的操作。涉及到这部分的，是两个OPCODE：</h5><ol><li><p>NEWTABLE指令。</p><p>指令域A指定的是所要创建的表在Lua栈中的地址，而B,C则分别指定的是创建表时数组和hash部分的初始大小。</p></li><li><p>SETLIST指令。</p><p>需要特别说明的是，这个指令仅能用于初始化Lua表的数组部分时使用，hash部分没有作用。指令域A同样指定的是所要初始化的表在Lua栈中的地址，B指定的是初始化时数组的数量，而C指定的是BLOCK的数量。这里需要做一个说明。在Lua中有一个特殊的常量，叫FPF（fields per flush），可以简单的理解为，每次调用SETLIST指令时，写入数组的数量最多可以有多少，Lua中这个常量定义为50.于是，假如这里要初始化一个有60个元素的数组，那么将会拆分成两个SETLIST指令，第一个SETLIST指令，B为50，C为1，而第二个SETLIST指令，B为10而C为0.</p></li></ol><h5 id="实际上，SETLIST指令还是有点复杂的。需要再继续了解一下几个知识点。"><a href="#实际上，SETLIST指令还是有点复杂的。需要再继续了解一下几个知识点。" class="headerlink" title="实际上，SETLIST指令还是有点复杂的。需要再继续了解一下几个知识点。"></a>实际上，SETLIST指令还是有点复杂的。需要再继续了解一下几个知识点。</h5><ol><li>lopcodes.h中对这个指令的注释为：</li></ol><pre><code>OP_SETLIST,/*   A B C   R(A)[(C-1)*FPF+i] := R(A+i), 1 &lt;= i &lt;= B        */</code></pre><p>需要注意的是，A在这里既指定了表的栈位置，还有另一层含义从”=”右边可知，A在栈中紧跟着的数据是需要初始化给A数组的数据，所以A在这个指令中负担了两个数据的指示。换言之，当在A位置创建了这个Lua表之后，紧跟着这个Lua表的数据（数量由B指定）则是准备初始化给Lua表的数据。</p><ol><li>Lua还要处理某些情况下，数组元素可变的情况，比如:</li></ol><pre><code>local t = {func()}</code></pre><p>可以看到，此时数组元素的数量是不确定的，依赖于函数的返回值，而当解析到这个点时，也并不知道func的具体情况。Lua在这里的处理是将B置为0，表示从A+1位置开始直到这个函数栈的栈顶位置之间的元素全部用来初始化这个Lua表的数组部分。</p><ol start="2"><li>C也有可能为0，但是这种情况很少有，仅当初始化数组的数量非常大的时候出现，这里就不做分析了（因为要模拟这种情况有些蛋疼）。</li></ol><h4 id="Lua源码中相关的实现。"><a href="#Lua源码中相关的实现。" class="headerlink" title="Lua源码中相关的实现。"></a>Lua源码中相关的实现。</h4><p>分析Lua表创建部分的入口函数是lparser.c中的constructor函数。<br>首先，函数调用pc = luaK_codeABC(fs, OP_NEWTABLE, 0, 0, 0);生成一个NEWTABLE指令，注意在这里，B/C部分都是0，从前面的分析知道，这两部分分别指定的是Lua表的数组和hash部分的初始尺寸，因为在这里这两部分的大小并不知道，所以先填0，而保存在pc中是要保存这个生成的NEWTABLE指令，后面需要对B/C部分进行改写，填充数组和hash部分的尺寸。</p><p>紧跟着，在解析Lua表初始化的整个流程中，使用了结构体ConsControl：</p><pre><code>struct ConsControl {  expdesc v;  /* last list item read */  expdesc *t;  /* table descriptor */  int nh;  /* total number of `record&#39; elements */  int na;  /* total number of array elements */  int tostore;  /* number of array elements pending to be stored */};</code></pre><p>每一项的含义分别是，v表示的是上一个解析到表元素，它可能是一个key-value形式的赋值（此时是初始化一个hash元素），也有可能是单独的元素（此时是初始化一个数组元素）；t是一个指针，存放的是待初始化的Lua表；nh和na分别表示表的hash和数组部分尺寸，解析过程中将用这两个变量记录以便在最后重新填充前面的NEWTABLE的B/C部分；tostore则是存放的当前已经有多少数组元素待存放到Lua表中，当这个值达到FPF时，根据上面的分析则生成一个SETLIST指令，然后重新值0进入下一个元素的处理。</p><pre><code>   checknext(ls, &#39;{&#39;);   do {      lua_assert(cc.v.k == VVOID || cc.tostore &gt; 0);      if (ls-&gt;t.token == &#39;}&#39;) break;      closelistfield(fs, &amp;cc);      switch(ls-&gt;t.token) {        case TK_NAME: {  /* may be listfields or recfields */          luaX_lookahead(ls);         if (ls-&gt;lookahead.token != &#39;=&#39;)  /* expression? */           listfield(ls, &amp;cc);         else           recfield(ls, &amp;cc);         break;       }       case &#39;[&#39;: {  /* constructor_item -&gt; recfield */         recfield(ls, &amp;cc);         break;       }       default: {  /* constructor_part -&gt; listfield */         listfield(ls, &amp;cc);         break;       }     }   } while (testnext(ls, &#39;,&#39;) || testnext(ls, &#39;;&#39;));   check_match(ls, &#39;}&#39;, &#39;{&#39;, line);   lastlistfield(fs, &amp;cc);   SETARG_B(fs-&gt;f-&gt;code[pc], luaO_int2fb(cc.na)); /* set initial array size */   SETARG_C(fs-&gt;f-&gt;code[pc], luaO_int2fb(cc.nh));  /* set initial table size */</code></pre><p>这个分析过程的主体部分，是一个循环，循环的终止条件是遇到了”}”符号，则该数组的初始化部分完成。<br>每次循环做以下的事情：</p><ol><li><p>调用closelistfield函数。</p><p>它是对数组元素做处理。首先将上一个分析到的数组元素，写入到当前的Lua栈中，这一点可以结合前面分析SETLIST指令来看。同时，如果当前的tostore数量达到FPF时，则生成SETLIST指令，这一点前面也做了分析。</p></li><li><p>然后就是两种情况的处理：</p><p>hash和数组部分，可以参看最开始Lua表初始化的语法就能知道什么语法是用于初始化hash部分，什么语法是初始化数组部分的了。分别调用的是recfield和listfield函数。</p></li></ol><p>listfield函数相对简单，需要判断当前表的数组元素是不是超过了限制，同时增加na和tostore计数。</p><p>recfield稍微复杂一点，还涉及到另一个指令SETTABLE，暂时跳过下一节再解释，现在知道它肯定会增加na计数就可以了。</p><ol start="3"><li>最后，由于初始化Lua表时，不同的元素之间是以”,”或者”;”做分割的，所以在遇到”}”退出循环之后，还有最后一个元素没有处理，于是还要调用lastlistfield函数进行处理。</li></ol><p>lastlistfield函数要处理的情况，就是前面分析过的，初始化过程中是不是遇到了函数返回值的情况，如果有则生成的SETLIST指令的域B要为0.</p><ol start="4"><li>最后就是根据分析过程中得到的na，nh数量重新填充NEWTABLE指令的B/C域了。</li></ol>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;表的基本实现&quot;&gt;&lt;a href=&quot;#表的基本实现&quot; class=&quot;headerlink&quot; title=&quot;表的基本实现&quot;&gt;&lt;/a&gt;表的基本实现&lt;/h4&gt;&lt;p&gt;在Lua中，表是唯一的数据结构，可以使用它，模拟hash表，数组，链表，树等一切常用的数据结构。Lua表分为
+      
+    
+    </summary>
+    
+      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
+    
+    
+      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
+    
+  </entry>
   
   <entry>
     <title>lua require机制</title>
@@ -451,50 +503,6 @@ local _M = {}
     
     
       <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua表访问跟踪</title>
-    <link href="https://bytemode.github.io/2018/12/05/lua%E8%A1%A8%E8%AE%BF%E9%97%AE%E8%B7%9F%E8%B8%AA/"/>
-    <id>https://bytemode.github.io/2018/12/05/lua表访问跟踪/</id>
-    <published>2018-12-05T12:21:39.000Z</published>
-    <updated>2018-12-05T12:25:15.853Z</updated>
-    
-    <content type="html"><![CDATA[<p>当访问一个 table 或者更新 table 中的某个元素时，lua 首先会在 table 查找是否存在该元素，如果没有，就会查找 table 是否存在 <strong>index(访问) 或者 </strong>newindex(更新) 原方法。以访问为例，首先在 table 中查找某个字段，如果不存在，解释器会去查找 <strong>index 这个原方法，如果仍然没有，返回 nil。所以说，</strong>index 和 __newindex 是在 table 中没有所需访问的 index 时才发挥作用的。    </p><p>根据上面这种思路，如果我们想跟踪一个 table 的操作行为，那么<strong>需要一个空表</strong>，每次对这个空表操作的时候，就会使用 <strong>index 或者 </strong>newindex 这些元方法，在元方法中对原始 table 进行访问和操作，并打印跟踪信息。而之前创建的那个空表，就是代理。</p><pre><code>---------------------------------------------print &quot;跟踪单个表&quot;local _t = {}local mt = {    __newindex = function(t, name, value)        print(&quot;__newindex&quot;, name, value)        --rawset(_t, name, value) --原始访问 不访问原表        _t[name] = value    end,    __index = function(t, name)        print(&quot;__index&quot;, name, value)        --return rawget(_t, name) --原始访问 不访问原表        return _t[name]    end}--a.__index = alocal a = {}   setmetatable(a, mt)a.x = 1print(a.x)---------------------------------------------print &quot;跟踪多个表&quot;local index = {}    --  创建私有索引，即原表在代理表中特殊字段local mt = {    __index = function (t, k)        print(&quot;__index &quot; .. tostring(k))        return t[index][k]    end,    __newindex = function (t, k, v)        print(&quot;__newindex &quot; .. tostring(k) .. &quot; to &quot; .. tostring(v))        t[index][k] = v    end}function track (t)    local proxy = {}    proxy[index] = t    setmetatable(proxy, mt)    return proxyendlocal ori_table = {} --在其他地方创建的原表，对他进行跟踪local _o = track(ori_table)_o[2] = &quot;lua&quot;print(_o[2])</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      lua表问跟踪器,使用一个代理器通过——index和newindex特性记录表的访问.跟踪lua表的赋值和取值table.key table.key = value会被跟踪.
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>git重点用法</title>
-    <link href="https://bytemode.github.io/2018/12/05/git%E9%87%8D%E7%82%B9%E7%94%A8%E6%B3%95/"/>
-    <id>https://bytemode.github.io/2018/12/05/git重点用法/</id>
-    <published>2018-12-05T05:46:52.000Z</published>
-    <updated>2018-12-05T12:12:59.103Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h4><img src="/2018/12/05/git重点用法/gitflow.png" title="git flow"><p>Workspace：工作区<br>Index / Stage：暂存区<br>Repository：仓库区（或本地仓库）<br>Remote：远程仓库</p><h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><ul><li><p>放入暂存区<br><code>git add .</code><br><code>git add file</code></p></li><li><p>提交到仓库<br><code>git commit -m &#39;log&#39;</code></p></li><li><p>撤销工作区修改<br><code>git checkout -- file</code><br><code>git checkout .</code></p></li><li><p>暂存区回退到工作区<br><code>git reset HEAD file</code></p></li><li><p>Reset回退commit<br>回滚commit,工作区暂存区也改变<br><code>git reset --hard  commitid</code><br>只回滚commit,工作区暂存区代码没有改变<br><code>git reset --soft commitid</code><br>回滚commit,暂存区改变,工作区不变<br><code>git reset -mixed commitid</code> 等同 <code>git reset commitid</code></p></li><li><p>revert回退commit</p><p><code>git revert commit</code></p><p>但是会生成一次新的提交，需要填写提交注释，以前的历史记录都在.</p><p>而reset是指将HEAD指针指到指定提交,历史记录中不会出现放弃的提交记录.</p></li><li><p>commit id查看<br><code>git log</code><br><code>git reflog</code></p></li><li><p>git push<br><code>git push &lt;远程主机名&gt; &lt;本地分支名&gt;:&lt;远程分支名&gt;</code><br>推送本地master分支到远程origin主机的master分支，后者不存在就创建<br><code>git push origin master</code> 省略了远程分支名</p></li><li><p>git pull<br><code>git pull &lt;远程主机名&gt; &lt;远程分支名&gt;:&lt;本地分支名&gt;</code><br>远程主机origin的master分支拉取过来，与本地的brantest分支合并:<br><code>git pull origin master:brantest</code><br>将远程origin主机的master分支拉取过来和本地的当前分支进行合并<br><code>git pull origin master</code></p><h4 id="远程操作"><a href="#远程操作" class="headerlink" title="远程操作"></a>远程操作</h4></li><li>本地代码回滚到commitid<br><code>git reset --hard commitid</code></li><li>远程代码回回滚<br>方法1：<br>回滚后强制推送本地到远程<br><code>git reset --hard commitid</code><br><code>git push origin branch -f</code><br>方法2：<br>且分支在分支上reset然后删除远程分支，使用本地分支重新远程分支<pre><code>git checkout the_branchgit branch bkgit pullgit reset --hard th_commit_idgit push origin :the_branch 删除远程then_branchgit push origin the_branch</code></pre></li></ul><h4 id="特殊操作"><a href="#特殊操作" class="headerlink" title="特殊操作"></a>特殊操作</h4><ul><li><p>删除某次提交</p><p><code>git rebase -i commitid^</code></p><p>在命令编辑里边把某次提交之前的内容改为drop.退出交互模式,就会删除相应commit.之后强制推送就ok.</p></li><li><p>修改某次提交</p><p><code>git rebase -i commitid^</code></p><p>在编辑框中把需要修改的某次提交所在commit之前的pick改为edit然后保存退出.之后做出修改,完成之后执行如下命令：</p><pre><code>git add .git commit --amendgit rebase --continue</code></pre></li></ul><h4 id="子仓库"><a href="#子仓库" class="headerlink" title="子仓库"></a>子仓库</h4><p>主要用于工程中以来的第三方库，第三方库是独立的git仓库可以自行管理.</p><ul><li><p>添加submodule</p><p><code>git submodule add 仓库地址 localpath</code></p><p>会在.gitmodules和.git/config中添加submodule路径和对应的仓库库地址</p></li><li><p>clone父仓库之后更新子仓库</p><pre><code>git submodule initgit submodule update</code></pre></li><li><p>submodule修改后再localpath中 add commit push</p></li><li><p>删除submodule</p><p>删除.gitmodules和.git.config中的submodule信息;git rm –cached localpath.  </p><h4 id="合并代码"><a href="#合并代码" class="headerlink" title="合并代码"></a>合并代码</h4></li><li><p>git merge</p><p>$ git merge issueFix</p><p>如果没有冲突的话，merge完成。有冲突的话，git会提示那个文件中有冲突，比如有如下冲突：</p><p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD:test.c</p><p>printf (“test1″);</p><p>=======</p><p>printf (“test2″);</p><p>>&gt;&gt;&gt;&gt;&gt;&gt; issueFix:test.c</p><p>可以看到 ======= 隔开的上半部分，是 HEAD（即 master 分支，在运行 merge 命令时检出的分支）中的内容，下半部分是在 issueFix 分支中的内容。解决冲突的办法无非是二者选其一或者由你亲自整合到一起。比如你可以通过把这段内容替换为下面这样来解决：</p><p>printf (“test2″);</p><p>这个解决方案各采纳了两个分支中的一部分内容，而且删除了 &lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，和&gt;&gt;&gt;&gt;&gt;&gt;&gt; 这些行。在解决了所有文件里的所有冲突后，运行 git add 将把它们标记为已解决（resolved）。</p></li></ul><h4 id="分支操作"><a href="#分支操作" class="headerlink" title="分支操作"></a>分支操作</h4><ul><li><p>创建分支</p><p><code>git branch bname</code></p></li><li><p>切换分支</p><p>git checkout bname</p></li><li><p>创建并切分支</p><p>git checkout -b bname</p></li><li><p>git checkout -b 本地分支名x origin/远程分支名x</p><p><code>git checkout -b dev origin/dev</code></p><p>远程分支dev切分支到本地dev分支</p></li><li><p>查看分支</p><p>git branch -av</p></li></ul>]]></content>
-    
-    <summary type="html">
-    
-      涉及git工作流程,实用方法.分支合并回滚子模块等.注重实践中常用的方法流程,同时对原理稍作注解.git的实践说明书.
-    
-    </summary>
-    
-      <category term="git" scheme="https://bytemode.github.io/categories/git/"/>
-    
-    
-      <category term="git" scheme="https://bytemode.github.io/tags/git/"/>
     
   </entry>
   
