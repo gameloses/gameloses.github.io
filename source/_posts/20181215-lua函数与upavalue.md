@@ -6,7 +6,6 @@ tags:
 - lua
 categories:
 - lua
-excerpt:
 ---
 
 Lua中的所谓upvalue是一类比较特殊的值，可以理解为在某函数内引用外部的数据。
