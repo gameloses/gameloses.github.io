@@ -2,6 +2,111 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://bytemode.github.io/2018/12/27/cocos2dx%E6%89%B9%E5%A4%84%E7%90%86%E6%B8%B2%E6%9F%93/</loc>
+    
+    <lastmod>2018-12-27T10:00:34.643Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/27/opengl%E7%BA%B9%E7%90%86/</loc>
+    
+    <lastmod>2018-12-27T09:59:58.566Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/27/opengl%E5%9F%BA%E7%A1%80/</loc>
+    
+    <lastmod>2018-12-27T08:38:33.225Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/17/cocos2dx%E6%B8%B2%E6%9F%93%E6%9E%B6%E6%9E%84/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.826Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E9%97%AD%E5%8C%85/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.826Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/17/tolua%E5%8E%9F%E7%90%86/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.826Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A6%82%E8%BF%B0/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.825Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E8%A1%A8%E7%B1%BB%E5%9E%8B/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.825Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E6%A8%A1%E5%9D%97%E6%B3%A8%E5%86%8C/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.825Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E6%A0%88/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.824Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E5%8D%8F%E7%A8%8B/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.824Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E5%87%BD%E6%95%B0%E5%AE%9A%E4%B9%89/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.823Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/15/LUA%E7%9A%84%E9%80%9A%E7%94%A8%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.823Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E5%87%BD%E6%95%B0%E4%B8%8Eupavalue/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.823Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/14/lua%E5%AD%97%E7%AC%A6%E4%B8%B2/</loc>
+    
+    <lastmod>2018-12-27T08:12:07.822Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://bytemode.github.io/2018/12/13/lua-pcall%E7%9A%84%E5%AE%9E%E7%8E%B0/</loc>
     
     <lastmod>2018-12-13T05:30:12.410Z</lastmod>
@@ -33,13 +138,6 @@
     <loc>https://bytemode.github.io/2018/12/12/lua%20require%E6%9C%BA%E5%88%B6/</loc>
     
     <lastmod>2018-12-12T13:46:33.620Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://bytemode.github.io/2018/12/12/lua%E5%85%83%E6%96%B9%E6%B3%95/</loc>
-    
-    <lastmod>2018-12-12T13:42:22.793Z</lastmod>
     
   </url>
   
