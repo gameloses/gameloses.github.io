@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="stay hungry stay foolish">
+<meta name="description" content="openglopengl是一个由Khronos组织制定并维护的规范(Specification) 。是一系列的图形软件编程接口，和gdi类似。opengl有很多封装的库最有名的GLFW库。接下来很多东西以GLFW 为例子来说明一些api的使用问题，但这并不影响opengl本身的逻辑表述。 状态机OpenGL自身是一个巨大的状态机(State Machine)：一系列的变量描述OpenGL此刻应当如">
 <meta name="keywords" content="opengl">
 <meta property="og:type" content="article">
 <meta property="og:title" content="opengl基础">
 <meta property="og:url" content="https://bytemode.github.io/2018/12/27/opengl基础/index.html">
 <meta property="og:site_name" content="小工知识库">
-<meta property="og:description" content="stay hungry stay foolish">
+<meta property="og:description" content="openglopengl是一个由Khronos组织制定并维护的规范(Specification) 。是一系列的图形软件编程接口，和gdi类似。opengl有很多封装的库最有名的GLFW库。接下来很多东西以GLFW 为例子来说明一些api的使用问题，但这并不影响opengl本身的逻辑表述。 状态机OpenGL自身是一个巨大的状态机(State Machine)：一系列的变量描述OpenGL此刻应当如">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-12-27T08:38:33.225Z">
+<meta property="og:updated_time" content="2018-12-29T13:53:10.763Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="opengl基础">
-<meta name="twitter:description" content="stay hungry stay foolish">
+<meta name="twitter:description" content="openglopengl是一个由Khronos组织制定并维护的规范(Specification) 。是一系列的图形软件编程接口，和gdi类似。opengl有很多封装的库最有名的GLFW库。接下来很多东西以GLFW 为例子来说明一些api的使用问题，但这并不影响opengl本身的逻辑表述。 状态机OpenGL自身是一个巨大的状态机(State Machine)：一系列的变量描述OpenGL此刻应当如">
 
 
 
@@ -416,7 +416,156 @@
       
 
       
-        
+        <h4 id="opengl"><a href="#opengl" class="headerlink" title="opengl"></a>opengl</h4><p>opengl是一个由<a href="http://www.khronos.org/" target="_blank" rel="noopener">Khronos组织</a>制定并维护的规范(Specification) 。是一系列的图形软件编程接口，和gdi类似。opengl有很多封装的库最有名的GLFW库。接下来很多东西以GLFW 为例子来说明一些api的使用问题，但这并不影响opengl本身的逻辑表述。</p>
+<h5 id="状态机"><a href="#状态机" class="headerlink" title="状态机"></a>状态机</h5><p>OpenGL自身是一个巨大的状态机(State Machine)：一系列的变量描述OpenGL此刻应当如何运行。OpenGL的状态通常被称为OpenGL上下文(Context)。我们通常使用如下途径去更改OpenGL状态：设置选项，操作缓冲。最后，我们使用当前OpenGL上下文来渲染。</p>
+<p>假设当我们想告诉OpenGL去画线段而不是三角形的时候，我们通过改变一些上下文变量来改变OpenGL状态，从而告诉OpenGL如何去绘图。一旦我们改变了OpenGL的状态为绘制线段，下一个绘制命令就会画出线段而不是三角形。</p>
+<p>当使用OpenGL的时候，我们会遇到一些状态设置函数(State-changing Function)，这类函数将会改变上下文。以及状态使用函数(State-using Function)，这类函数会根据当前OpenGL的状态执行一些操作。只要你记住OpenGL本质上是个大状态机，就能更容易理解它的大部分特性。</p>
+<h5 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h5><p>在OpenGL中一个对象是指一些选项的集合，它代表OpenGL状态的一个子集 。</p>
+<p>当我们使用一个对象时，通常看起来像如下一样：</p>
+<pre><code>// OpenGL的状态
+struct OpenGL_Context {
+    ...
+    object* object_Window_Target;
+    ...     
+};
+// 创建对象
+unsigned int objectId = 0;
+glGenObject(1, &amp;objectId);
+// 绑定对象至上下文
+glBindObject(GL_WINDOW_TARGET, objectId);
+// 设置当前绑定到 GL_WINDOW_TARGET 的对象的一些选项
+glSetObjectOption(GL_WINDOW_TARGET, GL_OPTION_WINDOW_WIDTH, 800);
+glSetObjectOption(GL_WINDOW_TARGET, GL_OPTION_WINDOW_HEIGHT, 600);
+// 将上下文对象设回默认
+glBindObject(GL_WINDOW_TARGET, 0);
+</code></pre><p>这一段代码展现了使用OpenGL时常见的工作流。我们首先创建一个对象，然后用一个id保存它的引用（实际数据被储存在后台）。然后我们将对象绑定至上下文的目标位置（例子中窗口对象目标的位置被定义成GL_WINDOW_TARGET）。接下来我们设置窗口的选项。最后我们将目标位置的对象id设回0，解绑这个对象。设置的选项将被保存在objectId所引用的对象中，一旦我们重新绑定这个对象到GL_WINDOW_TARGET位置，这些选项就会重新生效。</p>
+<h4 id="程序结构"><a href="#程序结构" class="headerlink" title="程序结构"></a>程序结构</h4><p>我们要开始一个图形渲染程序，首要是要选择gl库，因为要使用api.然后创建窗口、设置视口、设置窗口大小调整后的回调在回调中要处理视口、接着是渲染循环、还要处理处输入等。</p>
+<h5 id="实例化配置glfw"><a href="#实例化配置glfw" class="headerlink" title="实例化配置glfw"></a>实例化配置glfw</h5><pre><code>int main()
+{
+    glfwInit();  //初始化glfw
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //配置glfw
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+    return 0;
+}
+</code></pre><p>首先，我们在main函数中调用glfwInit函数来初始化GLFW，然后我们可以使用glfwWindowHint函数来配置GLFW。glfwWindowHint函数的第一个参数代表选项的名称，我们可以从很多以GLFW_开头的枚举值中选择；第二个参数接受一个整形，用来设置这个选项的值</p>
+<h5 id="创建窗口"><a href="#创建窗口" class="headerlink" title="创建窗口"></a>创建窗口</h5><p>接下来我们创建一个窗口对象，这个窗口对象存放了所有和窗口相关的数据，而且会被GLFW的其他函数频繁地用到。</p>
+<pre><code>GLFWwindow* window = glfwCreateWindow(800, 600, &quot;LearnOpenGL&quot;, NULL, NULL);
+if (window == NULL)
+{
+    glfwTerminate();
+    return -1;
+}
+glfwMakeContextCurrent(window);
+</code></pre><p>glfwCreateWindow函数需要窗口的宽和高作为它的前两个参数。第三个参数表示这个窗口的名称（标题），。这个函数将会返回一个GLFWwindow对象，创建完窗口我们就可以通知GLFW将我们窗口的上下文设置为当前线程的主上下文了。</p>
+<h5 id="视口"><a href="#视口" class="headerlink" title="视口"></a>视口</h5><p>必须告诉OpenGL渲染窗口的尺寸大小，即视口(Viewport)，这样OpenGL才只能知道怎样根据窗口大小显示数据和坐标。我们可以通过调用glViewport函数来设置窗口的<strong>维度</strong>(Dimension)：</p>
+<pre><code>glViewport(0, 0, 800, 600);
+</code></pre><p>glViewport函数前两个参数控制窗口左下角的位置。第三个和第四个参数控制渲染窗口的宽度和高度（像素）。</p>
+<p>OpenGL幕后使用glViewport中定义的位置和宽高进行2D坐标的转换，将OpenGL中的位置坐标转换为你的屏幕坐标，处理过的OpenGL坐标范围只为-1到1。 </p>
+<p>当窗口大小发生变换的时候需要设置视口的大小：</p>
+<pre><code>glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height){
+    glViewport(0, 0, width, height);
+});
+</code></pre><h5 id="处理输入"><a href="#处理输入" class="headerlink" title="处理输入"></a>处理输入</h5><p>我们同样也希望能够在GLFW中实现一些输入控制，这可以通过使用GLFW的几个输入函数来完成。我们将会使用GLFW的glfwGetKey函数，它需要一个窗口以及一个按键作为输入。这个函数将会返回这个按键是否正在被按下。我们将创建一个processInput函数来让所有的输入代码保持整洁。</p>
+<pre><code>void processInput(GLFWwindow *window)
+{
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+}
+</code></pre><h5 id="渲染循环"><a href="#渲染循环" class="headerlink" title="渲染循环"></a>渲染循环</h5><p>需要在程序中添加一个while循环，我们可以把它称之为渲染循环(Render Loop)，它能在我们让GLFW退出前一直保持运行。下面几行的代码就实现了一个简单的渲染循环：</p>
+<pre><code>// 渲染循环
+while(!glfwWindowShouldClose(window))
+{
+    // 输入
+    processInput(window);
+
+    // 渲染指令
+    ...
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // 检查并调用事件，交换缓冲
+    glfwPollEvents();
+    glfwSwapBuffers(window);
+}
+glfwTerminate();
+</code></pre><ul>
+<li>glfwWindowShouldClose函数在我们每次循环的开始前检查一次GLFW是否被要求退出，如果是的话该函数返回<code>true</code>然后渲染循环便结束了，之后为我们就可以关闭应用程序了。</li>
+<li>glfwPollEvents函数检查有没有触发什么事件（比如键盘输入、鼠标移动等）、更新窗口状态，并调用对应的回调函数（可以通过回调方法手动设置）。</li>
+<li>glfwSwapBuffers函数会交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色值的大缓冲），它在这一迭代中被用来绘制，并且将会作为输出显示在屏幕上。</li>
+<li>glClear函数来清空屏幕的颜色缓冲，它接受一个缓冲位(Buffer Bit)来指定要清空的缓冲，可能的缓冲位有GL_COLOR_BUFFER_BIT，GL_DEPTH_BUFFER_BIT和GL_STENCIL_BUFFER_BIT。 </li>
+<li>调用了glClearColor来设置清空屏幕所用的颜色 </li>
+<li>glClearColor函数是一个<strong>状态设置</strong>函数，而glClear函数则是一个<strong>状态使用</strong>的函数，它使用了当前的状态来获取应该清除为的颜色。 </li>
+<li>glfwTerminate(); 释放所有申请的资源</li>
+</ul>
+<h5 id="双缓冲-Double-Buffer"><a href="#双缓冲-Double-Buffer" class="headerlink" title="双缓冲(Double Buffer)"></a>双缓冲(Double Buffer)</h5><p>应用程序使用单缓冲绘图时可能会存在图像闪烁的问题。 这是因为生成的图像不是一下子被绘制出来的，而是按照从左到右，由上而下逐像素地绘制而成的。最终图像不是在瞬间显示给用户，而是通过一步一步生成的，这会导致渲染的结果很不真实。为了规避这些问题，我们应用双缓冲渲染窗口应用程序。<strong>前</strong>缓冲保存着最终输出的图像，它会在屏幕上显示；而所有的的渲染指令都会在<strong>后</strong>缓冲上绘制。当所有的渲染指令执行完毕后，我们<strong>交换</strong>(Swap)前缓冲和后缓冲，这样图像就立即呈显出来，之前提到的不真实感就消除了。</p>
+<h4 id="最终的程序结构"><a href="#最终的程序结构" class="headerlink" title="最终的程序结构"></a>最终的程序结构</h4><pre><code>#include &lt;glad/glad.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+
+#include &lt;iostream&gt;
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow *window);
+
+// settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+int main()
+{
+    //glfw初始化和设置
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    //创建窗口配置窗口
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, &quot;LearnOpenGL&quot;, NULL, NULL);
+    if (window == NULL)
+    {
+        glfwTerminate();
+        return -1;
+    }
+    //设置问当前窗口上下文
+    glfwMakeContextCurrent(window);
+    //设置窗口大小改变的回调 处理视口变化
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    // render loop
+    while (!glfwWindowShouldClose(window))
+    {
+        // input
+        processInput(window);
+
+        // render
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // -------------------------------------------------------------------------------
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // glfw: terminate, clearing all previously allocated GLFW resources.
+    glfwTerminate();
+    return 0;
+}
+
+void processInput(GLFWwindow *window)
+{
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+</code></pre>
       
     </div>
     
@@ -475,8 +624,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/12/17/cocos2dx渲染架构/" rel="next" title="cocos2dx渲染架构">
-                <i class="fa fa-chevron-left"></i> cocos2dx渲染架构
+              <a href="/2018/12/18/cocos2dx是如何绘制图片的/" rel="next" title="cocos2dx是如何绘制图片的">
+                <i class="fa fa-chevron-left"></i> cocos2dx是如何绘制图片的
               </a>
             
           </div>
@@ -542,8 +691,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -560,7 +718,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">40</span>
+                  <span class="site-state-item-count">42</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -620,6 +778,12 @@
                         <i class="fa fa-fw fa-csdn"></i>csdn</a>
                   </span>
                 
+                  <span class="links-of-author-item">
+                    <a href="https://www.cnblogs.com/bytemode" target="_blank" title="cnblogs">
+                      
+                        <i class="fa fa-fw fa-cnblogs"></i>cnblogs</a>
+                  </span>
+                
             </div>
           
 
@@ -634,6 +798,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#opengl"><span class="nav-number">1.</span> <span class="nav-text">opengl</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#状态机"><span class="nav-number">1.1.</span> <span class="nav-text">状态机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#对象"><span class="nav-number">1.2.</span> <span class="nav-text">对象</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#程序结构"><span class="nav-number">2.</span> <span class="nav-text">程序结构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#实例化配置glfw"><span class="nav-number">2.1.</span> <span class="nav-text">实例化配置glfw</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#创建窗口"><span class="nav-number">2.2.</span> <span class="nav-text">创建窗口</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#视口"><span class="nav-number">2.3.</span> <span class="nav-text">视口</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#处理输入"><span class="nav-number">2.4.</span> <span class="nav-text">处理输入</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#渲染循环"><span class="nav-number">2.5.</span> <span class="nav-text">渲染循环</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#双缓冲-Double-Buffer"><span class="nav-number">2.6.</span> <span class="nav-text">双缓冲(Double Buffer)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#最终的程序结构"><span class="nav-number">3.</span> <span class="nav-text">最终的程序结构</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
