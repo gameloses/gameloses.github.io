@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="lua,">
+  <meta name="keywords" content="c++,">
 
 
 
@@ -81,18 +81,21 @@
 
 
 
-<meta name="description" content="TValue这个结构体是Lua的通用结构体,,Lua中的所有的数据都可以使用这个结构体来表示.这个结构体定义,总体来说分为两个部分:tt存放的数据类型,而value域存放的是各种数据.而在其中,又划分为两个部分,可gc的数据类型使用union放在一起,剩下的就是不可gc的数据类型了:void*,lua_Number,int. gc联合体部分就是GCobject">
-<meta name="keywords" content="lua">
+<meta name="description" content="关于对象加上封装后的布局成本c语言中如下声明一个结构体 typedef struct point3d{ float x; float y; float z;}Point3d; struct point3d 转化为class Point3d之后 class Point3d {     public:       Point3d(float x = 0.0f, float y = 0.0f; floa">
+<meta name="keywords" content="c++">
 <meta property="og:type" content="article">
-<meta property="og:title" content="lua通用数据类型">
-<meta property="og:url" content="https://bytemode.github.io/2018/12/15/LUA的通用数据类型/index.html">
+<meta property="og:title" content="c++对象模型">
+<meta property="og:url" content="https://bytemode.github.io/2018/12/31/c-对象模型/index.html">
 <meta property="og:site_name" content="小工知识库">
-<meta property="og:description" content="TValue这个结构体是Lua的通用结构体,,Lua中的所有的数据都可以使用这个结构体来表示.这个结构体定义,总体来说分为两个部分:tt存放的数据类型,而value域存放的是各种数据.而在其中,又划分为两个部分,可gc的数据类型使用union放在一起,剩下的就是不可gc的数据类型了:void*,lua_Number,int. gc联合体部分就是GCobject">
+<meta property="og:description" content="关于对象加上封装后的布局成本c语言中如下声明一个结构体 typedef struct point3d{ float x; float y; float z;}Point3d; struct point3d 转化为class Point3d之后 class Point3d {     public:       Point3d(float x = 0.0f, float y = 0.0f; floa">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-12-27T08:12:07.823Z">
+<meta property="og:image" content="https://bytemode.github.io/2018/12/31/c-对象模型/objmode.png">
+<meta property="og:image" content="https://bytemode.github.io/2018/12/31/c-对象模型/vitrual_call.png">
+<meta property="og:updated_time" content="2019-01-01T13:46:41.980Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="lua通用数据类型">
-<meta name="twitter:description" content="TValue这个结构体是Lua的通用结构体,,Lua中的所有的数据都可以使用这个结构体来表示.这个结构体定义,总体来说分为两个部分:tt存放的数据类型,而value域存放的是各种数据.而在其中,又划分为两个部分,可gc的数据类型使用union放在一起,剩下的就是不可gc的数据类型了:void*,lua_Number,int. gc联合体部分就是GCobject">
+<meta name="twitter:title" content="c++对象模型">
+<meta name="twitter:description" content="关于对象加上封装后的布局成本c语言中如下声明一个结构体 typedef struct point3d{ float x; float y; float z;}Point3d; struct point3d 转化为class Point3d之后 class Point3d {     public:       Point3d(float x = 0.0f, float y = 0.0f; floa">
+<meta name="twitter:image" content="https://bytemode.github.io/2018/12/31/c-对象模型/objmode.png">
 
 
 
@@ -122,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="https://bytemode.github.io/2018/12/15/LUA的通用数据类型/">
+  <link rel="canonical" href="https://bytemode.github.io/2018/12/31/c-对象模型/">
 
 
 
 
 
-  <title>lua通用数据类型 | 小工知识库</title>
+  <title>c++对象模型 | 小工知识库</title>
   
 
 
@@ -317,7 +320,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/15/LUA的通用数据类型/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/31/c-对象模型/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -334,7 +337,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">lua通用数据类型</h1>
+          <h1 class="post-title" itemprop="name headline">c++对象模型</h1>
         
 
         <div class="post-meta">
@@ -346,8 +349,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-15T14:57:00+08:00">
-                2018-12-15
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-31T16:47:44+08:00">
+                2018-12-31
               </time>
             
 
@@ -369,8 +372,8 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/c/" itemprop="url" rel="index">
+                    <span itemprop="name">c++</span>
                   </a>
                 </span>
 
@@ -387,8 +390,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/15/LUA的通用数据类型/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/15/LUA的通用数据类型/" itemprop="commentCount"></span>
+                <a href="/2018/12/31/c-对象模型/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/31/c-对象模型/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -416,67 +419,82 @@
       
 
       
-        <h4 id="TValue结构"><a href="#TValue结构" class="headerlink" title="TValue结构"></a>TValue结构</h4><p>TValue这个结构体是Lua的通用结构体,,Lua中的所有的数据都可以使用这个结构体来表示.很容易想到,在面向对象中,这个结构体是一个基类,派生出来的都是其他的子类.</p>
-<p>TValue结构体内部有几个宏, 展开之后就是这样的:</p>
-<pre><code>typedef struct lua_TValue {
-    union {
-      union GCObject {
-        struct GCheader {
-          GCObject *next; lu_byte tt; lu_byte marked;
-        } gch;
+        <h4 id="关于对象"><a href="#关于对象" class="headerlink" title="关于对象"></a>关于对象</h4><h5 id="加上封装后的布局成本"><a href="#加上封装后的布局成本" class="headerlink" title="加上封装后的布局成本"></a>加上封装后的布局成本</h5><p>c语言中如下声明一个结构体</p>
+<pre><code>typedef struct point3d{ float x; float y; float z;}Point3d;
+</code></pre><p>struct point3d 转化为class Point3d之后</p>
+<pre><code>class Point3d
+{
+    public:
+      Point3d(float x = 0.0f, float y = 0.0f; float z = 0.0f)
+        :_x(x),_y(y),_z(z){}
+    private:
+      float _x,_y,_y;
+}
+</code></pre><p>封装带来的布局成本增加了多少？实际是没有增加布局成本的。3个数据成员直接在class object内，member function在classs声明却不出现在class object中，所谓布局的成本主要由virtual引起的。</p>
+<p>virtual function 机制用以支持运行时绑定（运行时多态）</p>
+<p>virtual base class 机制支持多次出现在集成体系中的base class有一个单一的被共享的实例。</p>
+<h5 id="基本c-对象模型"><a href="#基本c-对象模型" class="headerlink" title="基本c++对象模型"></a>基本c++对象模型</h5><p>nostatic data members 被配置在class object之内，static data member存放在class object之外.</p>
+<p>static 和nostatic function memners放在class object之外</p>
+<p>virtual function的处理步骤：</p>
+<ol>
+<li>每个class产生出一堆指向virtual functions的指针，放在表格中，这个表格称为虚表virtual table</li>
+<li>每个class object 安插一个虚表指针vptr指向虚表（virtual table）.</li>
+<li>vptr的设定和重置都由每个class的构造函数、拷贝赋值运算符、析构函数自动完成，每个class所关联的type_info object (用以支持runtime type identification, RTTI)也经由virtual table被指出，通常放在virtual table的第一个slot.</li>
+</ol>
+<p>声明一个class Point然后查看其对象模型</p>
+<pre><code>class Point
+{
+    public:
+      Point(float x);
+      virtual ~Point();
+      float x() const;
+      static int PointCount();
+    protected:
+      virtual ostream&amp; print(ostream&amp; os) const;
+      float _x;
+      static int _point_count;
+}
+</code></pre><img src="/2018/12/31/c-对象模型/objmode.png" title="Point的对象模型">
+<h5 id="加上继承"><a href="#加上继承" class="headerlink" title="加上继承"></a>加上继承</h5><p>c++支持单一继承和多重继承.base class subobject的data members直接被放置在derived class object,也就是说子类对象中包含基类子对象.基类成员的改变都会导致继承类重新编译.对于虚基类则是扩展子类自己的vittual table维护virtual base class的位置。</p>
+<pre><code>class istream : virtual public ios{...};
+class ostream : virtual public ios{...};
+class iostream : public istream, public ostream{...};
+</code></pre><p>在虚拟继承的情况下base class 不管在继承链中被派生多少次，永远只有一个实例存在即一个subobject.iostream之中只有virtual ios base class的一个实例.</p>
+<h5 id="NRV优化"><a href="#NRV优化" class="headerlink" title="NRV优化"></a>NRV优化</h5><p>函数返回基本是数据类型或者指针类型是通过eax寄存器进行传递的，返回对象对象则会进行命名返回值优化.以外部引用传参的形式去掉函数内部的局部对象构造。</p>
+<pre><code>X foo(){
+    X xx
+    X* px = new X();
+    xx.foo(); //func是一个虚函数
+    px-&gt;foo()
+    delete px;
+    rerurn xx
+}
+</code></pre><p>如上函数有可能内部转化为如下代码：</p>
+<pre><code>void foo(X &amp;result){
+    _result.X::X();
 
-        union TString ts;
-        union Udata u;
-        union Closure cl;
-        struct Table h;
-        struct Proto p;
-        struct UpVal uv;
-        struct lua_State th;  /* thread */
-      } gc;
+    px = _new(sizeof(X));
+    if(px != 0){ px-&gt;X::X(); }
 
-      void *p;
-      lua_Number n;
-      int b;
-    } value;
-    int tt;
-} TValue;
-</code></pre><p>这个结构体定义,总体来说分为两个部分:tt存放的数据类型,而value域存放的是各种数据.而在其中,又划分为两个部分,可gc的数据类型使用union放在一起,剩下的就是不可gc的数据类型了:void*,lua_Number,int.</p>
-<h4 id="gc-union"><a href="#gc-union" class="headerlink" title="gc union"></a>gc union</h4><p>gc union的定义,可以看到各种可gc的类型(Tstring,Udata..etc)和一个GCHeader放在 一起,也就是说,当这部分还是数据的时候,数据部分启用,否则就是gc部分了.这里的GCHeader包括了三个部分:next指针将可gc的数据串联成链表,tt表示数据类型,marked存放的gc处理时的颜色值.<br>这是另一种方式的使用C语言实现的面向对象,对外部而言,TValue结构体可以看作是”基类”,真正进行处理时,再根据数据类型决定到底使用value union中的哪个数据部分.可以看到lua源代码中定义了很多宏就是这样操作Tvalue数据指针的,比如:</p>
-<pre><code>#define hvalue(o)    check_exp(ttistable(o), &amp;(o)-&gt;value.gc-&gt;h)
-</code></pre><p>这个宏定义了如何从TValue指针得到Table结构体:首先判断数据类型是Table,然后将value的gc union中Table *h取出.</p>
-<p>反之,要从一个具体的类型转换再赋值为相应的TValue,Lua源代码中也提供了相应的宏.因为TValue结构体的中的value域是一个union,所以其实随便强制转换为其中的哪一种类型都可以,不过看上去最舒服的写法还是直接转换为公共类型GCObject了,比如:</p>
-<pre><code>#define setsvalue(L,obj,x) \
-  { TValue *i_o=(obj); \
-    i_o-&gt;value.gc=cast(GCObject *, (x)); i_o-&gt;tt=LUA_TSTRING; \
-checkliveness(G(L),i_o); }
-</code></pre><h4 id="GCObject"><a href="#GCObject" class="headerlink" title="GCObject"></a>GCObject</h4><pre><code>union GCObject {
-  GCheader gch;
-  union TString ts;
-  union Udata u;
-  union Closure cl;
-  struct Table h;
-  struct Proto p;
-  struct UpVal uv;
-  struct lua_State th;  /* thread */
-};
-</code></pre><p>其中的GCheader展开是这样的:</p>
-<pre><code>typedef struct GCheader {
-  CommonHeader;
-} GCheader;
-</code></pre><p>而随便抽在GCObject结构体中的数据类型结构体定义,都发现也包含了一个CommonHeader结构体,比如:</p>
-<pre><code>typedef struct Table {
-  CommonHeader;
-  lu_byte flags;
-  lu_byte lsizenode;  /* log2 of size of `node&#39; array */
-  struct Table *metatable;
-  TValue *array;  /* array part */
-  Node *node;
-  Node *lastfree;  /* any free position is before this position */
-  GCObject *gclist;
-  int sizearray;  /* size of `array&#39; array */
-} Table;
-</code></pre><p>换言之,在GCObject中,无论是哪个数据结构体,都自己有一份CommonHeader.仔细观察,其实GCObject这个union的内存分布,最开始部分无论如何都是留给CommonHeader的.这样做,就保证了一个存放在TValue结构体中的数据,既可以使用CommonHeader关于GC的部分,也可以使用到自己本身的数据部分了.</p>
+    func(&amp;_result);//这里涉及到成员函数的语义
 
+    (*px-&gt;vtbl[2])(px) //使用virtual机制扩展px-&gt;func()
+
+    if(px != 0) {
+        (*px-&gt;[1])(px); //扩展delete px
+        _delete(p)
+    }
+    return;   
+}
+</code></pre><img src="/2018/12/31/c-对象模型/vitrual_call.png" title="NRV优化和虚函数调用">
+<h5 id="指针类型"><a href="#指针类型" class="headerlink" title="指针类型"></a>指针类型</h5><ul>
+<li>指针类型会指导编译器如何解释某个特定地址中内容及其大小</li>
+<li>void*的指针只能够持有一个地址，而不能够通过他操作他所指向的object</li>
+<li>cast是一种编译指令它不改变一个指针的内容，只影响被指出的大小和其内容的解释方式</li>
+<li>c++通过引用或者指针的方式支持多态，是因为他们不会引发任何与类型有关的内存委托，</li>
+<li>当一个基类对象直接被初始化为一个子类对象是，子类对象会被切割以放入base type的内存中</li>
+</ul>
+<h4 id="构造函数语义学"><a href="#构造函数语义学" class="headerlink" title="构造函数语义学"></a>构造函数语义学</h4>
       
     </div>
     
@@ -522,7 +540,7 @@ checkliveness(G(L),i_o); }
       
         <div class="post-tags">
           
-            <a href="/tags/lua/" rel="tag"># lua</a>
+            <a href="/tags/c/" rel="tag"># c++</a>
           
         </div>
       
@@ -535,8 +553,8 @@ checkliveness(G(L),i_o); }
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/12/15/lua栈/" rel="next" title="lua栈">
-                <i class="fa fa-chevron-left"></i> lua栈
+              <a href="/2018/12/28/opengl绘制三角形/" rel="next" title="opengl绘制三角形">
+                <i class="fa fa-chevron-left"></i> opengl绘制三角形
               </a>
             
           </div>
@@ -544,10 +562,6 @@ checkliveness(G(L),i_o); }
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/12/15/lua表类型/" rel="prev" title="lua表类型">
-                lua表类型 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -719,7 +733,7 @@ checkliveness(G(L),i_o); }
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#TValue结构"><span class="nav-number">1.</span> <span class="nav-text">TValue结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gc-union"><span class="nav-number">2.</span> <span class="nav-text">gc union</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GCObject"><span class="nav-number">3.</span> <span class="nav-text">GCObject</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#关于对象"><span class="nav-number">1.</span> <span class="nav-text">关于对象</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#加上封装后的布局成本"><span class="nav-number">1.1.</span> <span class="nav-text">加上封装后的布局成本</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#基本c-对象模型"><span class="nav-number">1.2.</span> <span class="nav-text">基本c++对象模型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#加上继承"><span class="nav-number">1.3.</span> <span class="nav-text">加上继承</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NRV优化"><span class="nav-number">1.4.</span> <span class="nav-text">NRV优化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#指针类型"><span class="nav-number">1.5.</span> <span class="nav-text">指针类型</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#构造函数语义学"><span class="nav-number">2.</span> <span class="nav-text">构造函数语义学</span></a></li></ol></div>
             
 
           </div>

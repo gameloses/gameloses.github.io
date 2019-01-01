@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://bytemode.github.io/"/>
-  <updated>2018-12-31T07:50:12.394Z</updated>
+  <updated>2019-01-01T13:46:41.980Z</updated>
   <id>https://bytemode.github.io/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>c++对象模型</title>
+    <link href="https://bytemode.github.io/2018/12/31/c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B/"/>
+    <id>https://bytemode.github.io/2018/12/31/c-对象模型/</id>
+    <published>2018-12-31T08:47:44.000Z</published>
+    <updated>2019-01-01T13:46:41.980Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="关于对象"><a href="#关于对象" class="headerlink" title="关于对象"></a>关于对象</h4><h5 id="加上封装后的布局成本"><a href="#加上封装后的布局成本" class="headerlink" title="加上封装后的布局成本"></a>加上封装后的布局成本</h5><p>c语言中如下声明一个结构体</p><pre><code>typedef struct point3d{ float x; float y; float z;}Point3d;</code></pre><p>struct point3d 转化为class Point3d之后</p><pre><code>class Point3d{    public:      Point3d(float x = 0.0f, float y = 0.0f; float z = 0.0f)        :_x(x),_y(y),_z(z){}    private:      float _x,_y,_y;}</code></pre><p>封装带来的布局成本增加了多少？实际是没有增加布局成本的。3个数据成员直接在class object内，member function在classs声明却不出现在class object中，所谓布局的成本主要由virtual引起的。</p><p>virtual function 机制用以支持运行时绑定（运行时多态）</p><p>virtual base class 机制支持多次出现在集成体系中的base class有一个单一的被共享的实例。</p><h5 id="基本c-对象模型"><a href="#基本c-对象模型" class="headerlink" title="基本c++对象模型"></a>基本c++对象模型</h5><p>nostatic data members 被配置在class object之内，static data member存放在class object之外.</p><p>static 和nostatic function memners放在class object之外</p><p>virtual function的处理步骤：</p><ol><li>每个class产生出一堆指向virtual functions的指针，放在表格中，这个表格称为虚表virtual table</li><li>每个class object 安插一个虚表指针vptr指向虚表（virtual table）.</li><li>vptr的设定和重置都由每个class的构造函数、拷贝赋值运算符、析构函数自动完成，每个class所关联的type_info object (用以支持runtime type identification, RTTI)也经由virtual table被指出，通常放在virtual table的第一个slot.</li></ol><p>声明一个class Point然后查看其对象模型</p><pre><code>class Point{    public:      Point(float x);      virtual ~Point();      float x() const;      static int PointCount();    protected:      virtual ostream&amp; print(ostream&amp; os) const;      float _x;      static int _point_count;}</code></pre><img src="/2018/12/31/c-对象模型/objmode.png" title="Point的对象模型"><h5 id="加上继承"><a href="#加上继承" class="headerlink" title="加上继承"></a>加上继承</h5><p>c++支持单一继承和多重继承.base class subobject的data members直接被放置在derived class object,也就是说子类对象中包含基类子对象.基类成员的改变都会导致继承类重新编译.对于虚基类则是扩展子类自己的vittual table维护virtual base class的位置。</p><pre><code>class istream : virtual public ios{...};class ostream : virtual public ios{...};class iostream : public istream, public ostream{...};</code></pre><p>在虚拟继承的情况下base class 不管在继承链中被派生多少次，永远只有一个实例存在即一个subobject.iostream之中只有virtual ios base class的一个实例.</p><h5 id="NRV优化"><a href="#NRV优化" class="headerlink" title="NRV优化"></a>NRV优化</h5><p>函数返回基本是数据类型或者指针类型是通过eax寄存器进行传递的，返回对象对象则会进行命名返回值优化.以外部引用传参的形式去掉函数内部的局部对象构造。</p><pre><code>X foo(){    X xx    X* px = new X();    xx.foo(); //func是一个虚函数    px-&gt;foo()    delete px;    rerurn xx}</code></pre><p>如上函数有可能内部转化为如下代码：</p><pre><code>void foo(X &amp;result){    _result.X::X();    px = _new(sizeof(X));    if(px != 0){ px-&gt;X::X(); }    func(&amp;_result);//这里涉及到成员函数的语义    (*px-&gt;vtbl[2])(px) //使用virtual机制扩展px-&gt;func()    if(px != 0) {        (*px-&gt;[1])(px); //扩展delete px        _delete(p)    }    return;   }</code></pre><img src="/2018/12/31/c-对象模型/vitrual_call.png" title="NRV优化和虚函数调用"><h5 id="指针类型"><a href="#指针类型" class="headerlink" title="指针类型"></a>指针类型</h5><ul><li>指针类型会指导编译器如何解释某个特定地址中内容及其大小</li><li>void*的指针只能够持有一个地址，而不能够通过他操作他所指向的object</li><li>cast是一种编译指令它不改变一个指针的内容，只影响被指出的大小和其内容的解释方式</li><li>c++通过引用或者指针的方式支持多态，是因为他们不会引发任何与类型有关的内存委托，</li><li>当一个基类对象直接被初始化为一个子类对象是，子类对象会被切割以放入base type的内存中</li></ul><h4 id="构造函数语义学"><a href="#构造函数语义学" class="headerlink" title="构造函数语义学"></a>构造函数语义学</h4>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;关于对象&quot;&gt;&lt;a href=&quot;#关于对象&quot; class=&quot;headerlink&quot; title=&quot;关于对象&quot;&gt;&lt;/a&gt;关于对象&lt;/h4&gt;&lt;h5 id=&quot;加上封装后的布局成本&quot;&gt;&lt;a href=&quot;#加上封装后的布局成本&quot; class=&quot;headerlink&quot; titl
+      
+    
+    </summary>
+    
+      <category term="c++" scheme="https://bytemode.github.io/categories/c/"/>
+    
+    
+      <category term="c++" scheme="https://bytemode.github.io/tags/c/"/>
+    
+  </entry>
   
   <entry>
     <title>opengl绘制三角形</title>
@@ -476,33 +501,6 @@
       
       
         &lt;h4 id=&quot;表的基本实现&quot;&gt;&lt;a href=&quot;#表的基本实现&quot; class=&quot;headerlink&quot; title=&quot;表的基本实现&quot;&gt;&lt;/a&gt;表的基本实现&lt;/h4&gt;&lt;p&gt;在Lua中，表是唯一的数据结构，可以使用它，模拟hash表，数组，链表，树等一切常用的数据结构。Lua表分为
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua require机制</title>
-    <link href="https://bytemode.github.io/2018/12/12/lua%20require%E6%9C%BA%E5%88%B6/"/>
-    <id>https://bytemode.github.io/2018/12/12/lua require机制/</id>
-    <published>2018-12-12T13:45:37.000Z</published>
-    <updated>2018-12-12T13:46:33.620Z</updated>
-    
-    <content type="html"><![CDATA[<p>require(modname)</p><p>加载给定的模块.函数首先检查表package.loaded来判定modname是否已经存在.</p><p>如果存在,则require返回package.loaded[modname]所存储的值否则它尝试为模块找到一个加载器(loader).</p><p>要找到一个加载器,require首先查询package.preloaded[modname].如果它有值,该值(应该是一个函数)就是加载器.</p><p>如果没值require使用package.path中存储的路径查找一个Lua的加载器.如果该查找也失败,它使用package.cpath中</p><p>存储的路径查找一个C语言加载器(C loader).如果还是失败,它尝试使用all-in-one加载器(如下)</p><p>当加载一个C库的时候,require首先使用动态链接工具将应用程序与库连接起来.之后它尝试找到一个该库中的C函数,该函数要被当做加载器使用.这个C函数的名称是字符串”luaopen_”连接着复制的模块名(模块名称中的每个点号”.”都被替换为一个下划线).此外,如果模块名称含有连字符”-“,则第一个连字符的前缀(包括连字符)都被移除.比如,如果模块名称是a.v1-b.c,则函数名称将是luaopen_b_c.</p><p>如果require即没有为模块找到一个Lua库也没有为模块找到一个C库,他将调用all-in-one加载器.该加载器为给定模块的根名称查找C路径找到对应库(原文:this loader searches the C path for a library for the root name of the given module).例如,当require a.b.c时,它将为a查找一个库.如果找到,它查询该库内部为子模块找到一个开放函数(open function);在我们这个例子中将会是luaopen_a_b_c.使用这个便利机制(facility),一个包可以将几个子模块打包进单个的库中,同时每个子模块保存着它本来的开放函数.</p><p>一旦找到一个加载器,require使用单个的参数modname调用加载器.如果加载器返回任何值,require将其赋值给package.loaded[modname].</p><p>如果加载器没有返回值且没有给package.loaded[modname]赋与任何值,则require为该条目赋值为true.</p><p>无论如何,require返回package.loaded[modname]的最终值.</p><p>如果加载或者运行模块有任何错误,或者他不能为模块找到一个加载器,则require发出一个错误信号.</p><p>require函数的实现原理如下:</p><ol><li>–require 函数的实现  </li><li>function require(name)  </li><li>​    if not package.loaded[name] then    –是否在package.loaded中存在name</li><li>​        local loader = findloader(name) –不存在则查找加载器 </li><li>​        if loader == nil then  </li><li>​            error(“unable to load module” .. name)  </li><li>​        end  </li><li>​        package.loaded[name] = true     –加载器不存在 设置true</li><li>​        local res = loader(name)        –加载</li><li>​        if res ~= nil then  </li><li>​            package.loaded[name] = res  –加载返回的值给你 package.loaded</li><li>​        end  </li><li>​    end  </li><li>​    return package.loaded[name]         –返回 package.loaded[name]</li><li>end  </li></ol><p>package.cpath</p><p>由require使用查找C加载器的路径</p><p>Lua初始化C路径package.cpath的方法与初始化Lua路径package.path的相同,使用LUA_CPATH中的环境变量(另外一个默认的路径在luaconf.h中定义)</p><p>package.loaded</p><p>一个用于控制哪些模块已经加载的表,该表由require使用.当require一个模块名为modname的模块且package.loaded[modname]不为false时,require仅返回package.loaded[modname]存储的值.</p><p>package.loadlib(libname,funcname)</p><p>使用C库libname动态链接到宿主程序.在这个库中,寻找函数funcname并将该函数作为一个C函数返回.(所以,funcname必须遵守协议(参见lua_CFunction)).</p><p>这是一个底层函数.它完全绕过了package和module系统.与require不同,它不执行任何路径查找且不自动添加扩展名.libname必须是C库中完整的文件名,如果必要的话还要包含路径和扩展名.funcname必须是原封不动的C库中导出的名字(这可能取决于使用的C编译器和链接器).</p><p>这个函数不被ANSI C支持.就其本身而言,它只在一些平台上才能使用(Windows,Linux,Mac OS X,Solaris,BSD,加上其他支持dlfcn标准的Unix系统)</p><p>package.path</p><p>require用于查找Lua加载器的路径</p><p>在启动时,Lua使用环境变量LUA_PATH或者如果环境变量未定义就使用luaconf.h中定义的默认值来初始化该值.环境变量中的任何”::”都被替换为默认路径.</p><p>路径是一系列由分号隔开的模板(templates).对于每个模板,require将每个模板中的问号替换为filename,filename是modname中每个点都被替换成”目录分隔符”(比如Unix中的”/“)(这句感觉翻译不准确,原文:For each template,require will change each interrogation mark in the template by filename,which is modname with each dot replaced by a “directory separator”(such as “/“ in Unix));之后他将加载产生的文件名.因此,举个例子,如果Lua路径是”./?.lua;./?.lc;/usr/local/?/init.lua”,为模块foo查找一个Lua加载器将会尝试以如下顺序加载文件./foo.lua,./foo.lc和/usr/local/foo/init.lua</p><p>package.preload</p><p>为特定模块存储加载器的一个表(参见require)</p><p>package.seeall(module)</p><p>为module设置一个元表,module的__index只想全局环境(global environment),以便该module继承全局环境中的值.作为函数module中的一个选项来使用.</p><p>在Programming Lua中是这么讲的:</p><p>默认情况下,module不提供外部访问.必须在调用它之前,为需要访问的外部函数或模块声明适当的局部变量.也可以通过继承来实现外部访问,只需在调用module时附加一个选项package.seeall.这个选项等价于如下代码:</p><ol><li>setmetatable(M,{__index = _G})  </li></ol><p>因而只需这么做:</p><ol><li>module(…,package.seeall)  </li></ol><p>module(name,[,…])</p><p>创建一个模块.如果在package.loaded[name]中有表,该表便是创建的模块.否则,如果有一个全局表t其名称与给定名称相同,则该全局表便是创建的模块.否则创建一个新的表t</p><p>lua中import和require的区别</p><p>载入一个模块</p><p>import() 与 require() 功能相同，但具有一定程度的自动化特性。</p><p>假设有如下的目录结构：</p><p>app/</p><p>app/classes/</p><p>app/classes/MyClass.luaapp/classes/MyClassBase.luaapp/classes/data/Data1.luaapp/classes/data/Data2.lua</p><p>MyClass 中需要载入 MyClassBase 和 MyClassData。如果用 require()，MyClass 内的代码如下：</p><p>local MyClassBase = require(“app.classes.MyClassBase”)</p><p>local MyClass = class(“MyClass”, MyClassBase)</p><p>local Data1 = require(“app.classes.data.Data1”)</p><p>local Data2 = require(“app.classes.data.Data2”)</p><p>假如将 MyClass 及其相关文件换一个目录存放，那么就必须修改 MyClass 中的 require() 命令，否则将找不到模块文件。</p><p>而使用 import()，只需要如下写：</p><p>local MyClassBase = import(“.MyClassBase”)</p><p>local MyClass = class(“MyClass”, MyClassBase)</p><p>local Data1 = import(“.data.Data1”)</p><p>local Data2 = import(“.data.Data2”)</p><p>当在模块名前面有一个”.” 时，import() 会从当前模块所在目录中查找其他模块。因此 MyClass 及其相关文件不管存放到什么目录里，都不再需要修改 MyClass 中的 import() 命令。这在开发一些重复使用的功能组件时，会非常方便。</p><p>可以在模块名前添加多个”.” ，这样 import() 会从更上层的目录开始查找模块。</p><p>不过 import() 只有在模块级别调用（也就是没有将 import() 写在任何函数中）时，才能够自动得到当前模块名。如果需要在函数中调用 import()，那么就需要指定当前模块名：</p><p># MyClass.lua</p><p># 这里的 … 是隐藏参数，包含了当前模块的名字，所以最好将这行代码写在模块的第一行</p><p>local CURRENT_MODULE_NAME = …</p><p>local function testLoad() local MyClassBase = import(“.MyClassBase”, CURRENT_MODULE_NAME)</p><p># 更多代码</p><p>end</p><p>Parameters</p><p>string moduleName 要载入的模块的名字</p><p>[string currentModuleName]</p><p>当前模块名</p><p>Returns</p><p>module</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;require(modname)&lt;/p&gt;
-&lt;p&gt;加载给定的模块.函数首先检查表package.loaded来判定modname是否已经存在.&lt;/p&gt;
-&lt;p&gt;如果存在,则require返回package.loaded[modname]所存储的值否则它尝试为模块找到一个加载器(
       
     
     </summary>
