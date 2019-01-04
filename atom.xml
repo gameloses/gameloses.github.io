@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://bytemode.github.io/"/>
-  <updated>2019-01-04T08:22:14.599Z</updated>
+  <updated>2019-01-04T09:59:58.636Z</updated>
   <id>https://bytemode.github.io/</id>
   
   <author>
@@ -15,6 +15,106 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>opengl帧缓冲</title>
+    <link href="https://bytemode.github.io/2019/01/04/opengl%E5%B8%A7%E7%BC%93%E5%86%B2/"/>
+    <id>https://bytemode.github.io/2019/01/04/opengl帧缓冲/</id>
+    <published>2019-01-04T09:45:27.000Z</published>
+    <updated>2019-01-04T09:59:58.636Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="缓冲区"><a href="#缓冲区" class="headerlink" title="缓冲区"></a>缓冲区</h4><p>用于写入颜色值的颜色缓冲、用于写入深度信息的深度缓冲和允许我们根据一些条件丢弃特定片段的模板缓冲。这些缓冲结合起来叫做帧缓冲(Framebuffer)，它被储存在内存中。OpenGL允许我们定义我们自己的帧缓冲，也就是说我们能够定义我们自己的颜色缓冲，甚至是深度缓冲和模板缓冲。</p><p>我们目前所做的所有操作都是在默认帧缓冲的渲染缓冲上进行的。默认的帧缓冲是在你创建窗口的时候生成和配置的（GLFW帮我们做了这些）。有了我们自己的帧缓冲，我们就能够有更多方式来渲染了。</p><h4 id="创建缓冲区"><a href="#创建缓冲区" class="headerlink" title="创建缓冲区"></a>创建缓冲区</h4><p>和OpenGL中的其它对象一样，我们会使用一个叫做glGenFramebuffers的函数来创建一个帧缓冲对象(Framebuffer Object, FBO)：</p><pre><code>unsigned int fbo;glGenFramebuffers(1, &amp;fbo);</code></pre><p>这种创建和使用对象的方式我们已经见过很多次了，所以它的使用函数也和其它的对象类似。首先我们创建一个帧缓冲对象，将它绑定为激活的(Active)帧缓冲，做一些操作，之后解绑帧缓冲。我们使用glBindFramebuffer来绑定帧缓冲。</p><pre><code>glBindFramebuffer(GL_FRAMEBUFFER, fbo);</code></pre><p>在绑定到GL_FRAMEBUFFER目标之后，所有的读取和写入帧缓冲的操作将会影响当前绑定的帧缓冲。</p><p>一个完整的帧缓冲需要满足以下的条件：</p><ul><li>附加至少一个缓冲（颜色、深度或模板缓冲）。</li><li>至少有一个颜色附件(Attachment)。</li><li>所有的附件都必须是完整的（保留了内存）。</li><li>每个缓冲都应该有相同的样本数。</li></ul><p>从上面的条件中可以知道，我们需要为帧缓冲创建一些附件，并将附件附加到帧缓冲上。在完成所有的条件之后，我们可以以GL_FRAMEBUFFER为参数调用glCheckFramebufferStatus，检查帧缓冲是否完整。它将会检测当前绑定的帧缓冲，并返回规范中这些值的其中之一。如果它返回的是GL_FRAMEBUFFER_COMPLETE，帧缓冲就是完整的了。</p><p>之后所有的渲染操作将会渲染到当前绑定帧缓冲的附件中。由于我们的帧缓冲不是默认帧缓冲，渲染指令将不会对窗口的视觉输出有任何影响。出于这个原因，渲染到一个不同的帧缓冲被叫做离屏渲染(Off-screen Rendering)。要保证所有的渲染操作在主窗口中有视觉效果，我们需要再次激活默认帧缓冲，将它绑定到0。</p><p><code>glBindFramebuffer(GL_FRAMEBUFFER, 0);</code></p><p>在完成所有的帧缓冲操作之后，不要忘记删除这个帧缓冲对象：</p><p><code>glDeleteFramebuffers(1, &amp;fbo);</code><br>在完整性检查执行之前，我们需要给帧缓冲附加一个附件。附件是一个内存位置，它能够作为帧缓冲的一个缓冲，可以将它想象为一个图像。当创建一个附件的时候我们有两个选项：<br><strong>纹理或渲染缓冲对象(Renderbuffer Object)</strong></p><h4 id="纹理附件"><a href="#纹理附件" class="headerlink" title="纹理附件"></a>纹理附件</h4><p>当把一个纹理附加到帧缓冲的时候，所有的渲染指令将会写入到这个纹理中，就想它是一个普通的颜色/深度或模板缓冲一样。使用纹理的优点是，所有渲染操作的结果将会被储存在一个纹理图像中，我们之后可以在着色器中很方便地使用它。</p><h5 id="为帧缓冲创建一个纹理和创建一个普通的纹理差不多："><a href="#为帧缓冲创建一个纹理和创建一个普通的纹理差不多：" class="headerlink" title="为帧缓冲创建一个纹理和创建一个普通的纹理差不多："></a>为帧缓冲创建一个纹理和创建一个普通的纹理差不多：</h5><pre><code>unsigned int texture;glGenTextures(1, &amp;texture);glBindTexture(GL_TEXTURE_2D, texture);glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);</code></pre><p>主要的区别就是，我们将维度设置为了屏幕大小（，并且我们给纹理的data参数传递了NULL。对于这个纹理，我们仅仅分配了内存而没有填充它。填充这个纹理将会在我们渲染到帧缓冲之后来进行。同样注意我们并不关心环绕方式或多级渐远纹理，我们在大多数情况下都不会需要它们。</p><p>如果你想将你的屏幕渲染到一个更小或更大的纹理上，你需要（在渲染到你的帧缓冲之前）再次调用glViewport，使用纹理的新维度作为参数，否则只有一小部分的纹理或屏幕会被渲染到这个纹理上。</p><h5 id="现在我们已经创建好一个纹理了，要做的最后一件事就是将它附加到帧缓冲上了"><a href="#现在我们已经创建好一个纹理了，要做的最后一件事就是将它附加到帧缓冲上了" class="headerlink" title="现在我们已经创建好一个纹理了，要做的最后一件事就是将它附加到帧缓冲上了"></a>现在我们已经创建好一个纹理了，要做的最后一件事就是将它附加到帧缓冲上了</h5><pre><code>glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);</code></pre><p>glFrameBufferTexture2D有以下的参数：</p><p>target：帧缓冲的目标（绘制、读取或者两者皆有）<br>attachment：我们想要附加的附件类型。当前我们正在附加一个颜色附件。注意最后的0意味着我们可以附加多个颜色附件。我们将在之后的教程中提到。<br>textarget：你希望附加的纹理类型<br>texture：要附加的纹理本身<br>level：多级渐远纹理的级别。我们将它保留为0。<br>除了颜色附件之外，我们还可以附加一个深度和模板缓冲纹理到帧缓冲对象中。要附加深度缓冲的话，我们将附件类型设置为GL_DEPTH_ATTACHMENT。注意纹理的格式(Format)和内部格式(Internalformat)类型将变为GL_DEPTH_COMPONENT，来反映深度缓冲的储存格式。要附加模板缓冲的话，你要将第二个参数设置为GL_STENCIL_ATTACHMENT，并将纹理的格式设定为GL_STENCIL_INDEX。</p><h5 id="也可以将深度缓冲和模板缓冲附加为一个单独的纹理。"><a href="#也可以将深度缓冲和模板缓冲附加为一个单独的纹理。" class="headerlink" title="也可以将深度缓冲和模板缓冲附加为一个单独的纹理。"></a>也可以将深度缓冲和模板缓冲附加为一个单独的纹理。</h5><p>纹理的每32位数值将包含24位的深度信息和8位的模板信息。要将深度和模板缓冲附加为一个纹理的话，我们使用GL_DEPTH_STENCIL_ATTACHMENT类型，并配置纹理的格式，让它包含合并的深度和模板值。将一个深度和模板缓冲附加为一个纹理到帧缓冲的例子可以在下面找到：</p><pre><code>glTexImage2D(  GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, 800, 600, 0,   GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture, 0);</code></pre><h4 id="渲染缓冲对象附件"><a href="#渲染缓冲对象附件" class="headerlink" title="渲染缓冲对象附件"></a>渲染缓冲对象附件</h4><p>渲染缓冲对象(Renderbuffer Object)是在纹理之后引入到OpenGL中，作为一个可用的帧缓冲附件类型的，所以在过去纹理是唯一可用的附件。和纹理图像一样，渲染缓冲对象是一个真正的缓冲，即一系列的字节、整数、像素等。渲染缓冲对象附加的好处是，它会将数据储存为OpenGL原生的渲染格式，它是为离屏渲染到帧缓冲优化过的。</p><p>渲染缓冲对象直接将所有的渲染数据储存到它的缓冲中，不会做任何针对纹理格式的转换，让它变为一个更快的可写储存介质。然而，渲染缓冲对象通常都是只写的，所以你不能读取它们（比如使用纹理访问）。当然你仍然还是能够使用glReadPixels来读取它，这会从当前绑定的帧缓冲，而不是附件本身，中返回特定区域的像素。</p><p>因为它的数据已经是原生的格式了，当写入或者复制它的数据到其它缓冲中时是非常快的。所以，交换缓冲这样的操作在使用渲染缓冲对象时会非常快。我们在每个渲染迭代最后使用的glfwSwapBuffers，也可以通过渲染缓冲对象实现：只需要写入一个渲染缓冲图像，并在最后交换到另外一个渲染缓冲就可以了。渲染缓冲对象对这种操作非常完美。</p><p>创建一个渲染缓冲对象的代码和帧缓冲的代码很类似：</p><pre><code>unsigned int rbo;glGenRenderbuffers(1, &amp;rbo);</code></pre><p>类似，我们需要绑定这个渲染缓冲对象，让之后所有的渲染缓冲操作影响当前的rbo：</p><pre><code>glBindRenderbuffer(GL_RENDERBUFFER, rbo);</code></pre><p>由于渲染缓冲对象通常都是只写的，它们会经常用于深度和模板附件，因为大部分时间我们都不需要从深度和模板缓冲中读取值，只关心深度和模板测试。我们需要深度和模板值用于测试，但不需要对它们进行采样，所以渲染缓冲对象非常适合它们。当我们不需要从这些缓冲中采样的时候，通常都会选择渲染缓冲对象，因为它会更优化一点。</p><p>创建一个深度和模板渲染缓冲对象可以通过调用glRenderbufferStorage函数来完成：</p><pre><code>glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);</code></pre><p>创建一个渲染缓冲对象和纹理对象类似，不同的是这个对象是专门被设计作为图像使用的，而不是纹理那样的通用数据缓冲(General Purpose Data Buffer)。这里我们选择GL_DEPTH24_STENCIL8作为内部格式，它封装了24位的深度和8位的模板缓冲。</p><p>最后一件事就是附加这个渲染缓冲对象：</p><pre><code>glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);</code></pre><p>渲染缓冲对象能为你的帧缓冲对象提供一些优化，但知道什么时候使用渲染缓冲对象，什么时候使用纹理是很重要的。通常的规则是，如果你不需要从一个缓冲中采样数据，那么对这个缓冲使用渲染缓冲对象会是明智的选择。如果你需要从缓冲中采样颜色或深度值等数据，那么你应该选择纹理附件。性能方面它不会产生非常大的影响的。</p><h4 id="渲染到纹理"><a href="#渲染到纹理" class="headerlink" title="渲染到纹理"></a>渲染到纹理</h4><p>既然我们已经知道帧缓冲（大概）是怎么工作的了，是时候实践它们了。我们将会将场景渲染到一个附加到帧缓冲对象上的颜色纹理中，之后将在一个横跨整个屏幕的四边形上绘制这个纹理。这样视觉输出和没使用帧缓冲时是完全一样的，但这次是打印到了一个四边形上。这为什么很有用呢？我们会在下一部分中知道原因。</p><ol><li>首先要创建一个帧缓冲对象，并绑定它，这些都很直观：</li></ol><pre><code>unsigned int framebuffer;glGenFramebuffers(1, &amp;framebuffer);glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);</code></pre><ol start="2"><li>接下来我们需要创建一个纹理图像，我们将它作为一个颜色附件附加到帧缓冲上。<br>我们将纹理的维度设置为窗口的宽度和高度，并且不初始化它的数据：</li></ol><pre><code>// 生成纹理unsigned int texColorBuffer;glGenTextures(1, &amp;texColorBuffer);glBindTexture(GL_TEXTURE_2D, texColorBuffer);glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glBindTexture(GL_TEXTURE_2D, 0);// 将它附加到当前绑定的帧缓冲对象glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);  </code></pre><ol start="3"><li>添加一个深度（和模板）附件到帧缓冲中。<br>由于我们只希望采样颜色缓冲，而不是其它的缓冲，我们可以为它们创建一个渲染缓冲对象。</li></ol><p>创建一个渲染缓冲对象不是非常复杂。我们需要记住的唯一事情是，我们将它创建为一个深度和模板附件渲染缓冲对象。我们将它的内部格式设置为GL_DEPTH24_STENCIL8。</p><pre><code>unsigned int rbo;glGenRenderbuffers(1, &amp;rbo);glBindRenderbuffer(GL_RENDERBUFFER, rbo); glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);  glBindRenderbuffer(GL_RENDERBUFFER, 0);</code></pre><p>当我们为渲染缓冲对象分配了足够的内存之后，我们可以解绑这个渲染缓冲。</p><ol start="4"><li>将渲染缓冲对象附加到帧缓冲的深度和模板附件上：</li></ol><pre><code>glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);</code></pre><p>要想绘制场景到一个纹理上，我们需要采取以下的步骤：</p><ul><li>将新的帧缓冲绑定为激活的帧缓冲，和往常一样渲染场景</li><li>绑定默认的帧缓冲</li><li>绘制一个横跨整个屏幕的四边形，将帧缓冲的颜色缓冲作为它的纹理。</li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;缓冲区&quot;&gt;&lt;a href=&quot;#缓冲区&quot; class=&quot;headerlink&quot; title=&quot;缓冲区&quot;&gt;&lt;/a&gt;缓冲区&lt;/h4&gt;&lt;p&gt;用于写入颜色值的颜色缓冲、用于写入深度信息的深度缓冲和允许我们根据一些条件丢弃特定片段的模板缓冲。这些缓冲结合起来叫做帧缓冲(Fra
+      
+    
+    </summary>
+    
+      <category term="opengl" scheme="https://bytemode.github.io/categories/opengl/"/>
+    
+    
+      <category term="opengl" scheme="https://bytemode.github.io/tags/opengl/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>opengl测试操作</title>
+    <link href="https://bytemode.github.io/2019/01/04/opengl%E6%B5%8B%E8%AF%95%E6%93%8D%E4%BD%9C/"/>
+    <id>https://bytemode.github.io/2019/01/04/opengl测试操作/</id>
+    <published>2019-01-04T09:19:45.000Z</published>
+    <updated>2019-01-04T09:38:05.122Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="深度测试"><a href="#深度测试" class="headerlink" title="深度测试"></a>深度测试</h4><p>深度缓冲(Depth Buffer)来防止被阻挡的面渲染到其它面的前面。在这一节中，我们将会更加深入地讨论这些储存在深度缓冲（或z缓冲(z-buffer)）中的深度值(Depth Value)，以及它们是如何确定一个片段是处于其它片段后方的。</p><p>深度缓冲就像颜色缓冲(Color Buffer)（储存所有的片段颜色：视觉输出）一样，在每个片段中储存了信息，并且（通常）和颜色缓冲有着一样的宽度和高度。深度缓冲是由窗口系统自动创建的，它会以16、24或32位float的形式储存它的深度值。在大部分的系统中，深度缓冲的精度都是24位的。</p><p>当深度测试(Depth Testing)被启用的时候，OpenGL会将一个片段的的深度值与深度缓冲的内容进行对比。OpenGL会执行一个深度测试，如果这个测试通过了的话，深度缓冲将会更新为新的深度值。如果深度测试失败了，片段将会被丢弃。</p><p>深度缓冲是在片段着色器运行之后（以及模板测试(Stencil Testing)运行之后，我们将在下一节中讨论）在屏幕空间中运行的。屏幕空间坐标与通过OpenGL的glViewport所定义的视口密切相关，并且可以直接使用GLSL内建变量gl_FragCoord从片段着色器中直接访问。gl_FragCoord的x和y分量代表了片段的屏幕空间坐标（其中(0, 0)位于左下角）。gl_FragCoord中也包含了一个z分量，它包含了片段真正的深度值。z值就是需要与深度缓冲内容所对比的那个值。</p><h5 id="开启关闭深度测试"><a href="#开启关闭深度测试" class="headerlink" title="开启关闭深度测试"></a>开启关闭深度测试</h5><p>深度测试默认是禁用的，所以如果要启用深度测试的话，我们需要用GL_DEPTH_TEST选项来启用它：</p><p><code>glEnable(GL_DEPTH_TEST);</code><br>当它启用的时候，如果一个片段通过了深度测试的话，OpenGL会在深度缓冲中储存该片段的z值；如果没有通过深度缓冲，则会丢弃该片段。如果你启用了深度缓冲，你还应该在每个渲染迭代之前使用GL_DEPTH_BUFFER_BIT来清除深度缓冲，否则你会仍在使用上一次渲染迭代中的写入的深度值：</p><p><code>glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);</code><br>可以想象，在某些情况下你会需要对所有片段都执行深度测试并丢弃相应的片段，但不希望更新深度缓冲。基本上来说，你在使用一个只读的(Read-only)深度缓冲。OpenGL允许我们禁用深度缓冲的写入，只需要设置它的深度掩码(Depth Mask)设置为GL_FALSE就可以了：</p><p><code>glDepthMask(GL_FALSE);</code><br>注意这只在深度测试被启用的时候才有效果。</p><h5 id="深度测试函数"><a href="#深度测试函数" class="headerlink" title="深度测试函数"></a>深度测试函数</h5><p>OpenGL允许我们修改深度测试中使用的比较运算符。这允许我们来控制OpenGL什么时候该通过或丢弃一个片段，什么时候去更新深度缓冲。我们可以调用glDepthFunc函数来设置比较运算符（或者说深度函数(Depth Function)）：</p><p><code>glDepthFunc(GL_LESS);</code><br>这个函数接受下面表格中的比较运算符：</p><p>函数    描述<br>GL_ALWAYS    永远通过深度测试<br>GL_NEVER    永远不通过深度测试<br>GL_LESS    在片段深度值小于缓冲的深度值时通过测试<br>GL_EQUAL    在片段深度值等于缓冲区的深度值时通过测试<br>GL_LEQUAL    在片段深度值小于等于缓冲区的深度值时通过测试<br>GL_GREATER    在片段深度值大于缓冲区的深度值时通过测试<br>GL_NOTEQUAL    在片段深度值不等于缓冲区的深度值时通过测试<br>GL_GEQUAL    在片段深度值大于等于缓冲区的深度值时通过测试<br>默认情况下使用的深度函数是GL_LESS，它将会丢弃深度值大于等于当前深度缓冲值的所有片段。</p><h4 id="模板测试"><a href="#模板测试" class="headerlink" title="模板测试"></a>模板测试</h4><p>当片段着色器处理完一个片段之后，模板测试(Stencil Test)会开始执行，和深度测试一样，它也可能会丢弃片段。接下来，被保留的片段会进入深度测试，它可能会丢弃更多的片段。模板测试是根据又一个缓冲来进行的，它叫做模板缓冲(Stencil Buffer)，我们可以在渲染的时候更新它来获得一些很有意思的效果。</p><p>一个模板缓冲中，（通常）每个模板值(Stencil Value)是8位的。所以每个像素/片段一共能有256种不同的模板值。我们可以将这些模板值设置为我们想要的值，然后当某一个片段有某一个模板值的时候，我们就可以选择丢弃或是保留这个片段了。</p><p>模板缓冲的一个简单的例子如下：<br><img src="https://img-blog.csdnimg.cn/20190104173216959.png" alt="模板测试"></p><p>模板缓冲首先会被清除为0，之后在模板缓冲中使用1填充了一个空心矩形。场景中的片段将会只在片段的模板值为1的时候会被渲染（其它的都被丢弃了）。</p><p>模板缓冲操作允许我们在渲染片段时将模板缓冲设定为一个特定的值。通过在渲染时修改模板缓冲的内容，我们写入了模板缓冲。在同一个（或者接下来的）渲染迭代中，我们可以读取这些值，来决定丢弃还是保留某个片段。使用模板缓冲的时候你可以尽情发挥，但大体的步骤如下：</p><ul><li>启用模板缓冲的写入。</li><li>渲染物体，更新模板缓冲的内容。</li><li>禁用模板缓冲的写入。</li><li>渲染（其它）物体，这次根据模板缓冲的内容丢弃特定的片段。<br>所以，通过使用模板缓冲，我们可以根据场景中已绘制的其它物体的片段，来决定是否丢弃特定的片段。</li></ul><h5 id="开启关闭模板测试"><a href="#开启关闭模板测试" class="headerlink" title="开启关闭模板测试"></a>开启关闭模板测试</h5><p>你可以启用GL_STENCIL_TEST来启用模板测试。在这一行代码之后，所有的渲染调用都会以某种方式影响着模板缓冲。</p><p><code>glEnable(GL_STENCIL_TEST);</code><br>注意，和颜色和深度缓冲一样，你也需要在每次迭代之前清除模板缓冲。</p><p><code>glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);</code><br>和深度测试的glDepthMask函数一样，模板缓冲也有一个类似的函数。glStencilMask允许我们设置一个位掩码(Bitmask)，它会与将要写入缓冲的模板值进行与(AND)运算。默认情况下设置的位掩码所有位都为1，不影响输出，但如果我们将它设置为0x00，写入缓冲的所有模板值最后都会变成0.这与深度测试中的glDepthMask(GL_FALSE)是等价的。</p><pre><code>glStencilMask(0xFF); // 每一位写入模板缓冲时都保持原样glStencilMask(0x00); // 每一位在写入模板缓冲时都会变成0（禁用写入）</code></pre><p>大部分情况下你都只会使用0x00或者0xFF作为模板掩码(Stencil Mask)，但是知道有选项可以设置自定义的位掩码总是好的。</p><h5 id="模板测试函数"><a href="#模板测试函数" class="headerlink" title="模板测试函数"></a>模板测试函数</h5><p>和深度测试一样，我们对模板缓冲应该通过还是失败，以及它应该如何影响模板缓冲，也是有一定控制的。一共有两个函数能够用来配置模板测试：glStencilFunc和glStencilOp。</p><p><code>glStencilFunc(GLenum func, GLint ref, GLuint mask)</code><br>一共包含三个参数：</p><ul><li>func：设置模板测试函数(Stencil Test Function)。这个测试函数将会应用到已储存的模板值上和glStencilFunc函数的ref值上。可用的选项有：GL_NEVER、GL_LESS、GL_LEQUAL、GL_GREATER、GL_GEQUAL、GL_EQUAL、GL_NOTEQUAL和GL_ALWAYS。它们的语义和深度缓冲的函数类似。</li><li>ref：设置了模板测试的参考值(Reference Value)。模板缓冲的内容将会与这个值进行比较。</li><li>mask：设置一个掩码，它将会与参考值和储存的模板值在测试比较它们之前进行与(AND)运算。初始情况下所有位都为1。</li></ul><p>在一开始的那个简单的模板例子中，函数被设置为：</p><p><code>glStencilFunc(GL_EQUAL, 1, 0xFF)</code><br>这会告诉OpenGL，只要一个片段的模板值等于(GL_EQUAL)参考值1，片段将会通过测试并被绘制，否则会被丢弃。</p><p>但是glStencilFunc仅仅描述了OpenGL应该对模板缓冲内容做什么，而不是我们应该如何更新缓冲。这就需要glStencilOp这个函数了。</p><p><code>glStencilOp(GLenum sfail, GLenum dpfail, GLenum dppass)</code><br>一共包含三个选项，我们能够设定每个选项应该采取的行为：</p><ul><li>sfail：模板测试失败时采取的行为。</li><li>dpfail：模板测试通过，但深度测试失败时采取的行为。</li><li>dppass：模板测试和深度测试都通过时采取的行为。<br>每个选项都可以选用以下的其中一种行为：</li></ul><p>行为    描述<br>GL_KEEP    保持当前储存的模板值<br>GL_ZERO    将模板值设置为0<br>GL_REPLACE    将模板值设置为glStencilFunc函数设置的ref值<br>GL_INCR    如果模板值小于最大值则将模板值加1<br>GL_INCR_WRAP    与GL_INCR一样，但如果模板值超过了最大值则归零<br>GL_DECR    如果模板值大于最小值则将模板值减1<br>GL_DECR_WRAP    与GL_DECR一样，但如果模板值小于0则将其设置为最大值<br>GL_INVERT    按位翻转当前的模板缓冲值<br>默认情况下glStencilOp是设置为(GL_KEEP, GL_KEEP, GL_KEEP)的，所以不论任何测试的结果是如何，模板缓冲都会保留它的值。默认的行为不会更新模板缓冲，所以如果你想写入模板缓冲的话，你需要至少对其中一个选项设置不同的值。</p><p>所以，通过使用glStencilFunc和glStencilOp，我们可以<strong>精确地指定更新模板缓冲的时机与行为了，我们也可以指定什么时候该让模板缓冲通过，即什么时候片段需要被丢弃</strong>.</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;深度测试&quot;&gt;&lt;a href=&quot;#深度测试&quot; class=&quot;headerlink&quot; title=&quot;深度测试&quot;&gt;&lt;/a&gt;深度测试&lt;/h4&gt;&lt;p&gt;深度缓冲(Depth Buffer)来防止被阻挡的面渲染到其它面的前面。在这一节中，我们将会更加深入地讨论这些储存在深度缓冲
+      
+    
+    </summary>
+    
+      <category term="opengl" scheme="https://bytemode.github.io/categories/opengl/"/>
+    
+    
+      <category term="opengl" scheme="https://bytemode.github.io/tags/opengl/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>opengl光照</title>
+    <link href="https://bytemode.github.io/2019/01/04/opengl%E5%85%89%E7%85%A7/"/>
+    <id>https://bytemode.github.io/2019/01/04/opengl光照/</id>
+    <published>2019-01-04T08:59:45.000Z</published>
+    <updated>2019-01-04T09:18:38.849Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="基础光照"><a href="#基础光照" class="headerlink" title="基础光照"></a>基础光照</h4><p>这些光照模型都是基于我们对光的物理特性的理解。其中一个模型被称为冯氏光照模型(Phong Lighting Model)。冯氏光照模型的主要结构由3个分量组成：环境(Ambient)、漫反射(Diffuse)和镜面(Specular)光照。下面这张图展示了这些光照分量看起来的样子：<br><img src="https://img-blog.csdnimg.cn/2019010417032766.png" alt="基础光照"></p><ul><li>环境光照(Ambient Lighting)：即使在黑暗的情况下，世界上通常也仍然有一些光亮（月亮、远处的光），所以物体几乎永远不会是完全黑暗的。为了模拟这个，我们会使用一个环境光照常量，它永远会给物体一些颜色。</li><li>漫反射光照(Diffuse Lighting)：模拟光源对物体的方向性影响(Directional Impact)。它是冯氏光照模型中视觉上最显著的分量。物体的某一部分越是正对着光源，它就会越亮。</li><li>镜面光照(Specular Lighting)：模拟有光泽物体上面出现的亮点。镜面光照的颜色相比于物体的颜色会更倾向于光的颜色。</li></ul><h4 id="材质"><a href="#材质" class="headerlink" title="材质"></a>材质</h4><p>在现实世界里，每个物体会对光产生不同的反应。比如说，钢看起来通常会比陶瓷花瓶更闪闪发光，木头箱子也不会像钢制箱子那样对光产生很强的反射。每个物体对镜面高光也有不同的反应。有些物体反射光的时候不会有太多的散射(Scatter)，因而产生一个较小的高光点，而有些物体则会散射很多，产生一个有着更大半径的高光点。如果我们想要在OpenGL中模拟多种类型的物体，我们必须为每个物体分别定义一个材质(Material)属性。</p><p>我们指定了一个物体和光的颜色，以及结合环境光和镜面强度分量，来定义物体的视觉输出。当描述一个物体的时候，我们可以用这三个分量来定义一个材质颜色(Material Color)：环境光照(Ambient Lighting)、漫反射光照(Diffuse Lighting)和镜面光照(Specular Lighting)。通过为每个分量指定一个颜色，我们就能够对物体的颜色输出有着精细的控制了。现在，我们再添加反光度(Shininess)这个分量到上述的三个颜色中，这就有我们需要的所有材质属性了.</p><h4 id="光照贴图"><a href="#光照贴图" class="headerlink" title="光照贴图"></a>光照贴图</h4><p>漫反射和镜面光贴图(Map)。这允许我们对物体的漫反射分量（以及间接地对环境光分量，它们几乎总是一样的）和镜面光分量有着更精确的控制。</p><h4 id="投光物"><a href="#投光物" class="headerlink" title="投光物"></a>投光物</h4><h5 id="平行光"><a href="#平行光" class="headerlink" title="平行光"></a>平行光</h5><p>当一个光源处于很远的地方时，来自光源的每条光线就会近似于互相平行。不论物体和/或者观察者的位置，看起来好像所有的光都来自于同一个方向。当我们使用一个假设光源处于无限远处的模型时，它就被称为定向光，因为它的所有光线都有着相同的方向，它与光源的位置是没有关系的。</p><p>定向光非常好的一个例子就是太阳。太阳距离我们并不是无限远，但它已经远到在光照计算中可以把它视为无限远了。所以来自太阳的所有光线将被模拟为平行光线，我们可以在下图看到：</p><p><img src="https://img-blog.csdnimg.cn/20190104171451975.png" alt="平行光"></p><p>因为所有的光线都是平行的，所以物体与光源的相对位置是不重要的，因为对场景中每一个物体光的方向都是一致的。由于光的位置向量保持一致，场景中每个物体的光照计算将会是类似的。</p><h5 id="点光源"><a href="#点光源" class="headerlink" title="点光源"></a>点光源</h5><p>定向光对于照亮整个场景的全局光源是非常棒的，但除了定向光之外我们也需要一些分散在场景中的点光源(Point Light)。点光源是处于世界中某一个位置的光源，它会朝着所有方向发光，但光线会随着距离逐渐衰减。想象作为投光物的灯泡和火把，它们都是点光源。<br><img src="https://img-blog.csdnimg.cn/20190104171517360.png" alt="点光源"></p><h5 id="聚光源"><a href="#聚光源" class="headerlink" title="聚光源"></a>聚光源</h5><p>聚光是位于环境中某个位置的光源，它只朝一个特定方向而不是所有方向照射光线。这样的结果就是只有在聚光方向的特定半径内的物体才会被照亮，其它的物体都会保持黑暗。聚光很好的例子就是路灯或手电筒。</p><p>OpenGL中聚光是用一个世界空间位置、一个方向和一个切光角(Cutoff Angle)来表示的，切光角指定了聚光的半径（译注：是圆锥的半径不是距光源距离那个半径）。对于每个片段，我们会计算片段是否位于聚光的切光方向之间（也就是在锥形内），如果是的话，我们就会相应地照亮片段。下面这张图会让你明白聚光是如何工作的：</p><p><img src="https://img-blog.csdnimg.cn/20190104171634805.png" alt="聚光源"></p><p>LightDir：从片段指向光源的向量。<br>SpotDir：聚光所指向的方向。<br>Phiϕ：指定了聚光半径的切光角。落在这个角度之外的物体都不会被这个聚光所照亮。<br>Thetaθ：LightDir向量和SpotDir向量之间的夹角。在聚光内部的话θ值应该比ϕ值小。<br>所以我们要做的就是计算LightDir向量和SpotDir向量之间的点积（还记得它会返回两个单位向量夹角的余弦值吗？），并将它与切光角ϕ值对比。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;基础光照&quot;&gt;&lt;a href=&quot;#基础光照&quot; class=&quot;headerlink&quot; title=&quot;基础光照&quot;&gt;&lt;/a&gt;基础光照&lt;/h4&gt;&lt;p&gt;这些光照模型都是基于我们对光的物理特性的理解。其中一个模型被称为冯氏光照模型(Phong Lighting Model)。冯
+      
+    
+    </summary>
+    
+      <category term="opengl" scheme="https://bytemode.github.io/categories/opengl/"/>
+    
+    
+      <category term="opengl" scheme="https://bytemode.github.io/tags/opengl/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>opengl摄像机</title>
+    <link href="https://bytemode.github.io/2019/01/04/opengl%E6%91%84%E5%83%8F%E6%9C%BA/"/>
+    <id>https://bytemode.github.io/2019/01/04/opengl摄像机/</id>
+    <published>2019-01-04T08:35:12.000Z</published>
+    <updated>2019-01-04T08:52:23.234Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="摄像机-观察空间"><a href="#摄像机-观察空间" class="headerlink" title="摄像机/观察空间"></a>摄像机/观察空间</h4><p>当我们讨论摄像机/观察空间(Camera/View Space)的时候，是在讨论以摄像机的视角作为场景原点时场景中所有的顶点坐标：观察矩阵把所有的世界坐标变换为相对于摄像机位置与方向的观察坐标。要定义一个摄像机，我们需要它在世界空间中的位置、观察的方向、一个指向它右测的向量以及一个指向它上方的向量。细心的读者可能已经注意到我们实际上创建了一个三个单位轴相互垂直的、以摄像机的位置为原点的坐标系。</p><ol><li>摄像机位置</li></ol><p>获取摄像机位置很简单。摄像机位置简单来说就是世界空间中一个指向摄像机位置的向量。我们把摄像机位置设置为上一节中的那个相同的位置：</p><p><code>glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);</code><br>不要忘记正z轴是从屏幕指向你的，如果我们希望摄像机向后移动，我们就沿着z轴的正方向移动。</p><ol start="2"><li>摄像机方向</li></ol><p>下一个需要的向量是摄像机的方向，这里指的是摄像机指向哪个方向。现在我们让摄像机指向场景原点：(0, 0, 0)。还记得如果将两个矢量相减，我们就能得到这两个矢量的差吗？用场景原点向量减去摄像机位置向量的结果就是摄像机的指向向量。由于我们知道摄像机指向z轴负方向，但我们希望方向向量(Direction Vector)指向摄像机的z轴正方向。如果我们交换相减的顺序，我们就会获得一个指向摄像机正z轴方向的向量：</p><pre><code>glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);</code></pre><p>方向向量(Direction Vector)并不是最好的名字，因为它实际上指向从它到目标向量的相反方向（译注：注意看前面的那个图，蓝色的方向向量大概指向z轴的正方向，与摄像机实际指向的方向是正好相反的）。</p><ol start="3"><li>右轴<br>我们需要的另一个向量是一个右向量(Right Vector)，它代表摄像机空间的x轴的正方向。为获取右向量我们需要先使用一个小技巧：先定义一个上向量(Up Vector)。接下来把上向量和第二步得到的方向向量进行叉乘。两个向量叉乘的结果会同时垂直于两向量，因此我们会得到指向x轴正方向的那个向量（如果我们交换两个向量叉乘的顺序就会得到相反的指向x轴负方向的向量）：</li></ol><pre><code>glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));</code></pre><ol start="4"><li>上轴<br>现在我们已经有了x轴向量和z轴向量，获取一个指向摄像机的正y轴向量就相对简单了：我们把右向量和方向向量进行叉乘：</li></ol><pre><code>glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);</code></pre><h4 id="LookAt"><a href="#LookAt" class="headerlink" title="LookAt"></a>LookAt</h4><p>你可以用这3个轴外加一个平移向量来创建一个矩阵，并且你可以用这个矩阵乘以任何向量来将其变换到那个坐标空间。这正是LookAt矩阵所做的，现在我们有了3个相互垂直的轴和一个定义摄像机空间的位置坐标，我们可以创建我们自己的LookAt矩阵了：<br><img src="https://img-blog.csdnimg.cn/20190104164558286.png" alt="lookat矩阵"></p><p>其中R是右向量，U是上向量，D是方向向量P是摄像机位置向量。注意，位置向量是相反的，因为我们最终希望把世界平移到与我们自身移动的相反方向。把这个LookAt矩阵作为观察矩阵可以很高效地把所有世界坐标变换到刚刚定义的观察空间。LookAt矩阵就像它的名字表达的那样：它会创建一个看着(Look at)给定目标的观察矩阵。</p><p>接着GLM就会创建一个LookAt矩阵，我们可以把它当作我们的观察矩阵：</p><pre><code>glm::mat4 view;view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),            glm::vec3(0.0f, 0.0f, 0.0f),            glm::vec3(0.0f, 1.0f, 0.0f));</code></pre><p>glm::LookAt函数需要一个位置、目标和上向量。它会创建一个和在上面使用的一样的观察矩阵。</p><h4 id="摄像机移动"><a href="#摄像机移动" class="headerlink" title="摄像机移动"></a>摄像机移动</h4><p>让摄像机绕着场景转的确很有趣，但是让我们自己移动摄像机会更有趣！首先我们必须设置一个摄像机系统，所以在我们的程序前面定义一些摄像机变量很有用：</p><pre><code>glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);</code></pre><p>我们首先将摄像机位置设置为之前定义的cameraPos。方向是当前的位置加上我们刚刚定义的方向向量。这样能保证无论我们怎么移动，摄像机都会注视着目标方向。让我们摆弄一下这些向量，在按下某些按钮时更新cameraPos向量。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;摄像机-观察空间&quot;&gt;&lt;a href=&quot;#摄像机-观察空间&quot; class=&quot;headerlink&quot; title=&quot;摄像机/观察空间&quot;&gt;&lt;/a&gt;摄像机/观察空间&lt;/h4&gt;&lt;p&gt;当我们讨论摄像机/观察空间(Camera/View Space)的时候，是在讨论以摄像机的视
+      
+    
+    </summary>
+    
+      <category term="opengl" scheme="https://bytemode.github.io/categories/opengl/"/>
+    
+    
+      <category term="opengl" scheme="https://bytemode.github.io/tags/opengl/"/>
+    
+  </entry>
   
   <entry>
     <title>opengl坐标系统</title>
@@ -400,106 +500,6 @@
     <summary type="html">
     
       TValue这个结构体是Lua的通用结构体,,Lua中的所有的数据都可以使用这个结构体来表示.这个结构体定义,总体来说分为两个部分:tt存放的数据类型,而value域存放的是各种数据.而在其中,又划分为两个部分,可gc的数据类型使用union放在一起,剩下的就是不可gc的数据类型了:void*,lua_Number,int. gc联合体部分就是GCobject
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua栈</title>
-    <link href="https://bytemode.github.io/2018/12/15/lua%E6%A0%88/"/>
-    <id>https://bytemode.github.io/2018/12/15/lua栈/</id>
-    <published>2018-12-15T06:56:54.000Z</published>
-    <updated>2018-12-27T08:12:07.824Z</updated>
-    
-    <content type="html"><![CDATA[<p>既然Lua虚拟机模拟的是CPU的运作,那么Lua栈模拟的就是内存的角色.在Lua内部,参数的传递是通过Lua栈,同时Lua与C等外部进行交互的时候也是使用的栈.,先关注的是Lua栈的分配,管理和相关的数据结构.</p><p>lua虚拟机在初始化创建lua_State结构体时,会走到stack_init函数中,这个函数主要就是对Lua栈和CallInfo数组的初始化:</p><pre><code>static void stack_init (lua_State *L1, lua_State *L) {  /* initialize CallInfo array */  L1-&gt;base_ci = luaM_newvector(L, BASIC_CI_SIZE, CallInfo);  L1-&gt;ci = L1-&gt;base_ci;  L1-&gt;size_ci = BASIC_CI_SIZE;  L1-&gt;end_ci = L1-&gt;base_ci + L1-&gt;size_ci - 1;  /* initialize stack array */  L1-&gt;stack = luaM_newvector(L, BASIC_STACK_SIZE + EXTRA_STACK, TValue);  L1-&gt;stacksize = BASIC_STACK_SIZE + EXTRA_STACK;  L1-&gt;top = L1-&gt;stack;  L1-&gt;stack_last = L1-&gt;stack+(L1-&gt;stacksize - EXTRA_STACK)-1;  /* initialize first ci */  L1-&gt;ci-&gt;func = L1-&gt;top;  setnilvalue(L1-&gt;top++);  /* `function&#39; entry for this `ci&#39; */  L1-&gt;base = L1-&gt;ci-&gt;base = L1-&gt;top;  L1-&gt;ci-&gt;top = L1-&gt;top + LUA_MINSTACK;}</code></pre><p>可以看到的是,初始化了两个数组,分别保存Lua栈和CallInfo结构体数组.<br>其中,与Lua栈相关的lua_State结构体成员变量有base,stack,top,lastfree,stack保存的是数组的初始位置,base会根据每次函数调用的情况发生变化,top指针指向的是当前第一个可用的栈位置,每次向栈中增加/删减元素都要对应的增减top指针,lastfee指针指向的书Lua栈的最后位置.</p><p>CallInfo结构体,是每次有函数调用时都会去初始化的一个结构体,它的成员变量中,也有top,base指针,同样的是指向Lua栈的位置,所不同的是,它关注的仅是函数调用时的相关位置.从代码中可以看出,CallInfo数组是有限制的,换言之,在Lua中的嵌套函数调用层次也是有限制,不能超过一定数量.<br><img src="https://img2018.cnblogs.com/blog/1560953/201812/1560953-20181215144229849-16830691.png" alt=""></p><p>首先看f_parser函数:</p><pre><code>static void f_parser (lua_State *L, void *ud) {  int i;  Proto *tf;  Closure *cl;  struct SParser *p = cast(struct SParser *, ud);  int c = luaZ_lookahead(p-&gt;z);  luaC_checkGC(L);  tf = ((c == LUA_SIGNATURE[0]) ? luaU_undump : luaY_parser)(L, p-&gt;z,                                                             &amp;p-&gt;buff, p-&gt;name);  cl = luaF_newLclosure(L, tf-&gt;nups, hvalue(gt(L)));  cl-&gt;l.p = tf;  for (i = 0; i &lt; tf-&gt;nups; i++)  /* initialize eventual upvalues */    cl-&gt;l.upvals[i] = luaF_newupval(L);  setclvalue(L, L-&gt;top, cl);  incr_top(L);}</code></pre><p>f_parser函数的最后两句,将分析完毕之后的结构Closure指针压入了Lua栈.</p><p>再来看luaD_precall函数,这里为将代码放入Lua虚拟机中执行准备了相关数据,我们只截取其中的一部分来看:</p><pre><code>int luaD_precall (lua_State *L, StkId func, int nresults) {  ….  if (!cl-&gt;isC) {  /* Lua function? prepare its call */    CallInfo *ci;    StkId st, base;    Proto *p = cl-&gt;p;// 1) 根据函数的参数类型,计算出该CallInfo的base指针位置    if (!p-&gt;is_vararg) {  /* no varargs? */      base = func + 1;      if (L-&gt;top &gt; base + p-&gt;numparams)        L-&gt;top = base + p-&gt;numparams;    }    else {  /* vararg function */      int nargs = cast_int(L-&gt;top - func) - 1;      base = adjust_varargs(L, p, nargs);      func = restorestack(L, funcr);  /* previous call may change the stack */}// 2) 分配一个新的CallInfo结构体,用于保存此次函数调用的相关信息:top,base指针,func函数    ci = inc_ci(L);  /* now `enter&#39; new function */    ci-&gt;func = func;    L-&gt;base = ci-&gt;base = base;    ci-&gt;top = L-&gt;base + p-&gt;maxstacksize;    lua_assert(ci-&gt;top &lt;= L-&gt;stack_last);    // 3) LuaState的PC指针指向函数原型的代码数组    L-&gt;savedpc = p-&gt;code;  /* starting point */    // …..    return PCRLUA;  }</code></pre><p>到这一步,跟某次具体的Lua代码执行相关的代码(保存在Proto的code数组中)和执行时所需环境(Lua栈),就已经准备完毕了.后面就是进入Lua虚拟机的主循环中解释执行代码了.</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;既然Lua虚拟机模拟的是CPU的运作,那么Lua栈模拟的就是内存的角色.在Lua内部,参数的传递是通过Lua栈,同时Lua与C等外部进行交互的时候也是使用的栈.,先关注的是Lua栈的分配,管理和相关的数据结构.&lt;/p&gt;
-&lt;p&gt;lua虚拟机在初始化创建lua_State结构体
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua函数与upavalue</title>
-    <link href="https://bytemode.github.io/2018/12/15/lua%E5%87%BD%E6%95%B0%E4%B8%8Eupavalue/"/>
-    <id>https://bytemode.github.io/2018/12/15/lua函数与upavalue/</id>
-    <published>2018-12-15T06:35:14.000Z</published>
-    <updated>2018-12-27T08:12:07.823Z</updated>
-    
-    <content type="html"><![CDATA[<p>Lua中的所谓upvalue是一类比较特殊的值，可以理解为在某函数内引用外部的数据。</p><p>函数定义中用到了pushclosure这个函数用于将函数的定义Proto结构体指针push到父函数的数组中，在这个函数内，还建立了有关upvalue相关的逻辑：</p><pre><code>static void pushclosure (LexState *ls, FuncState *func, expdesc *v) {  FuncState *fs = ls-&gt;fs;  Proto *f = fs-&gt;f;  int oldsize = f-&gt;sizep;  int i;  luaM_growvector(ls-&gt;L, f-&gt;p, fs-&gt;np, f-&gt;sizep, Proto *,                  MAXARG_Bx, &quot;constant table overflow&quot;);  while (oldsize &lt; f-&gt;sizep) f-&gt;p[oldsize++] = NULL;  f-&gt;p[fs-&gt;np++] = func-&gt;f;  luaC_objbarrier(ls-&gt;L, f, func-&gt;f);  init_exp(v, VRELOCABLE, luaK_codeABx(fs, OP_CLOSURE, 0, fs-&gt;np-1));  for (i=0; if-&gt;nups; i++) {    OpCode o = (func-&gt;upvalues[i].k == VLOCAL) ? OP_MOVE : OP_GETUPVAL;    luaK_codeABC(fs, o, 0, func-&gt;upvalues[i].info, 0);  }}</code></pre><p>注意在这个函数的最后，将遍历upvalue数组，根据该upvalue是否是局部变量，来决定紧跟着的是MOVE指令还是GETUPVAL指令。而这些是如何确定的呢？</p><p>Lua的分析器在解析到一个变量时，会调用singlevaraux函数进行查找：</p><pre><code>static int singlevaraux (FuncState *fs, TString *n, expdesc *var, int base) {  if (fs == NULL) {  /* no more levels? */    init_exp(var, VGLOBAL, NO_REG);  /* default is global variable */    return VGLOBAL;  }  else {    int v = searchvar(fs, n);  /* look up at current level */    if (v &gt;= 0) {      init_exp(var, VLOCAL, v);      if (!base)        markupval(fs, v);  /* local will be used as an upval */      return VLOCAL;    }    else {  /* not found at current level; try upper one */      if (singlevaraux(fs-&gt;prev, n, var, 0) == VGLOBAL)        return VGLOBAL;      var-&gt;u.s.info = indexupvalue(fs, n, var);  /* else was LOCAL or UPVAL */      var-&gt;k = VUPVAL;  /* upvalue in this level */      return VUPVAL;    }  }}</code></pre><p>可以看到，这个函数是一个递归函数，有以下几种情况：</p><ol><li>在函数的当前层找到该变量，则认为一个LOCAL变量</li><li>在函数的上层找到，则认为一个UPVAL</li><li>最后，则认为是一个全局变量。</li></ol><p>如何定义函数的“层次”？来看一个例子就知道了:</p><pre><code>local a = 1function test1()  local b = 100  function test2()     print(a)     print(b)  endendtest1()</code></pre><p>在这个例子中，函数test2与变量b是同层的，所以在调用函数test2时，singlevaraux查找变量b返回的LOCAL变量；而变量a是更上一层的LOCAL变量，对于函数test2而言，它就是UPVAL。</p><p>明白了解析部分是怎么处理upvalue的，来看看在虚拟机中是如何处理的。<br>对应的代码在lvm.c中的这一部分：</p><pre><code>      case OP_CLOSURE: {        Proto *p;        Closure *ncl;        int nup, j;        p = cl-&gt;p-&gt;p[GETARG_Bx(i)];        nup = p-&gt;nups;        ncl = luaF_newLclosure(L, nup, cl-&gt;env);        ncl-&gt;l.p = p;        for (j=0; jl.upvals[j] = cl-&gt;upvals[GETARG_B(*pc)];          else {            lua_assert(GET_OPCODE(*pc) == OP_MOVE);            ncl-&gt;l.upvals[j] = luaF_findupval(L, base + GETARG_B(*pc));          }        }        setclvalue(L, ra, ncl);        Protect(luaC_checkGC(L));        continue;      }</code></pre><p>当变量是UPVAL时，此时PC指令对应的B参数是函数结构体的upval数组的索引，根据它直接从upval数组中取出值来；否则，PC指令对应的B参数是基于函数基地址base的一个偏移量，根据它得到相应的变量；再调用函数luaF_findupval：</p><pre><code>UpVal *luaF_findupval (lua_State *L, StkId level) {  global_State *g = G(L);  GCObject **pp = &amp;L-&gt;openupval;  UpVal *p;  UpVal *uv;  while (*pp != NULL &amp;&amp; (p = ngcotouv(*pp))-&gt;v &gt;= level) {    lua_assert(p-&gt;v != &amp;p-&gt;u.value);    if (p-&gt;v == level) {  /* found a corresponding upvalue? */      if (isdead(g, obj2gco(p)))  /* is it dead? */        changewhite(obj2gco(p));  /* ressurect it */      return p;    }    pp = &amp;p-&gt;next;  }  uv = luaM_new(L, UpVal);  /* not found: create a new one */  uv-&gt;tt = LUA_TUPVAL;  uv-&gt;marked = luaC_white(g);  uv-&gt;v = level;  /* current value lives in the stack */  uv-&gt;next = *pp;  /* chain it in the proper position */  *pp = obj2gco(uv);  uv-&gt;u.l.prev = &amp;g-&gt;uvhead;  /* double link it in `uvhead&#39; list */  uv-&gt;u.l.next = g-&gt;uvhead.u.l.next;  uv-&gt;u.l.next-&gt;u.l.prev = uv;  g-&gt;uvhead.u.l.next = uv;  lua_assert(uv-&gt;u.l.next-&gt;u.l.prev == uv &amp;&amp; uv-&gt;u.l.prev-&gt;u.l.next == uv);  return uv;}</code></pre><p>注意到，传入这个函数的参数level，其实是前面已经根据base基址定位到的变量。这个函数分为两个部分：</p><ol><li>首先，遍历当前的openupval数组，查找这个变量。由于这个变量肯定是前面已经定义过的，所以查找的条件就是（(p = ngcotouv(*pp))-&gt;v &gt;= level）。当查找到这个变量时，如果是准备释放的变量，则将它重新置为不可释放。</li><li>如果在openval数组中没有找到，说明之前没有别的地方引用过这个upval。如此则重新分配一个upvalue指向待引用的值。</li><li>最后，当函数调用完毕时，有相应的close指令，将upvalue的引用关系去除。具体见函数luaF_close。</li></ol>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;Lua中的所谓upvalue是一类比较特殊的值，可以理解为在某函数内引用外部的数据。&lt;/p&gt;
-&lt;p&gt;函数定义中用到了pushclosure这个函数用于将函数的定义Proto结构体指针push到父函数的数组中，在这个函数内，还建立了有关upvalue相关的逻辑：&lt;/p&gt;
-&lt;p
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua虚拟机概述</title>
-    <link href="https://bytemode.github.io/2018/12/15/lua%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A6%82%E8%BF%B0/"/>
-    <id>https://bytemode.github.io/2018/12/15/lua虚拟机概述/</id>
-    <published>2018-12-15T05:42:38.000Z</published>
-    <updated>2018-12-27T08:12:07.825Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="何为虚拟机"><a href="#何为虚拟机" class="headerlink" title="何为虚拟机"></a>何为虚拟机</h4><p>用于模拟计算机运行的程序.是个中间层,它处于脚本语言和硬件之间的一个程序.每一门脚本语言都会有自己定义的opcode(”操作码”),可以理解为这门程序自己定义的”汇编语言”.一般的编译型语言,比如C等,经过编译器编译之后生成的都是与当前硬件环境相匹配的汇编代码;而脚本型的语言,经过前端的处理之后,生成的就是opcode,再将该opcode放在这门语言的虚拟机中执行.虚拟机是作为单独的程序独立存在,而Lua由于是一门嵌入式的语言是附着在宿主环境中的.   </p><h3 id="lua代码到虚拟机执行的流程"><a href="#lua代码到虚拟机执行的流程" class="headerlink" title="lua代码到虚拟机执行的流程"></a>lua代码到虚拟机执行的流程</h3><p><img src="https://img2018.cnblogs.com/blog/1560953/201812/1560953-20181215140547779-1286988518.png" alt=""></p><p>在Lua中,Lua代码从词法分析到语法分析再到生成opcode,最后进入虚拟机执行的大体流程是什么样子的呢？</p><p>Lua的API中提供了luaL_dofile函数,它实际上是个宏,内部首先调用luaL_loadfile函数,加载Lua代码进行语法,词法分析,生成Lua虚拟机可执行的代码,再调用lua_pcall函数,执行其中的代码:</p><pre><code>    #define luaL_dofile(L, fn) \        (luaL_loadfile(L, fn) || lua_pcall(L, 0, LUA_MULTRET, 0))</code></pre><p>前半部分调用luaL_loadfile函数对Lua代码进行词法和语法分析,后半部分调用lua_pcall将第一步中分析的结果(也就是opcode)到虚拟机中执行.</p><p>首先来看luaL_loadfile函数,暂时不深入其中研究它如何分析一个Lua代码文件,先看它最后输出了什么.它最终会调用f_parser函数,这是对一个Lua代码进行分析的入口函数:</p><pre><code>    static void f_parser (lua_State *L, void *ud) {      int i;      Proto *tf;      Closure *cl;      struct SParser *p = cast(struct SParser *, ud);      int c = luaZ_lookahead(p-&gt;z);      luaC_checkGC(L);      tf = ((c == LUA_SIGNATURE[0]) ? luaU_undump : luaY_parser)(L, p-&gt;z,                                                                 &amp;p-&gt;buff, p-&gt;name);      cl = luaF_newLclosure(L, tf-&gt;nups, hvalue(gt(L)));      cl-&gt;l.p = tf;      for (i = 0; i &lt; tf-&gt;nups; i++)  /* initialize eventual upvalues */        cl-&gt;l.upvals[i] = luaF_newupval(L);      setclvalue(L, L-&gt;top, cl);      incr_top(L);    }</code></pre><p>在完成词法分析之后,返回了Proto类型的指针tf,然后将其绑定在新创建的Closure指针上,初始化UpValue,最后压入Lua栈中.</p><p>不难想像,Lua词法分析之后产生的opcode等相关数据都在这个Proto类型的结构体中.</p><p>再来看lua_pcall函数是如何将产生的opcode放入虚拟机执行的.</p><p>lua_pcall函数中,首先获取需要调用的函数指针:</p><pre><code>    c.func = L-&gt;top - (nargs+1);  /* function to be called */</code></pre><p>这里的nargs是由函数参数传入的,luaL_dofile中调用lua_pcall时这里传入的参数是0,换句话说,这里得到的函数对象指针就是在f_parser函数中最后放入Lua栈的指针.</p><p>继续往下执行,走到luaD_call函数,有这一段代码:</p><pre><code>      if (luaD_precall(L, func, nResults) == PCRLUA)  /* is a Lua function? */        luaV_execute(L, 1);  /* call it */</code></pre><p>进入luaV_execute函数,这里是虚拟机执行代码的主函数:</p><pre><code>    void luaV_execute (lua_State *L, int nexeccalls) {      LClosure *cl;      StkId base;      TValue *k;      const Instruction *pc;     reentry:  /* entry point */      lua_assert(isLua(L-&gt;ci));      pc = L-&gt;savedpc;      cl = &amp;clvalue(L-&gt;ci-&gt;func)-&gt;l;      base = L-&gt;base;      k = cl-&gt;p-&gt;k;      /* main loop of interpreter */      for (;;) {        const Instruction i = *pc++;        StkId ra;        if ((L-&gt;hookmask &amp; (LUA_MASKLINE | LUA_MASKCOUNT)) &amp;&amp;            (--L-&gt;hookcount == 0 || L-&gt;hookmask &amp; LUA_MASKLINE)) {          traceexec(L, pc);          if (L-&gt;status == LUA_YIELD) {  /* did hook yield? */            L-&gt;savedpc = pc - 1;            return;          }          base = L-&gt;base;        }        /* warning!! several calls may realloc the stack and invalidate `ra&#39; */        ra = RA(i);    // 以下是各种opcode的情况处理    }</code></pre><p>可以看到,这里的pc指针里存放的是虚拟机opcode代码,它最开始从L-&gt;savepc初始化而来,而L-&gt;savepc在luaD_precall中赋值:</p><pre><code>    L-&gt;savedpc = p-&gt;code;  /* starting point */</code></pre><p>这里的p就是第一步f_parser中返回的Proto指针.</p><p>回顾一下整个流程:</p><ol><li><p>函数f_parser中,对Lua代码文件的分析返回了Proto指针</p></li><li><p>函数luaD_precall中,将Lua_state的savepc指针指向1中的Proto结构体的code指针</p></li><li><p>函数luaV_execute中,pc指针指向2中的savepc指针,紧跟着就是一个大的循环体,依次取出其中的opcode进行执行.<br><img src="https://img2018.cnblogs.com/blog/1560953/201812/1560953-20181215141251439-1865045097.png" alt=""></p></li></ol>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h4 id=&quot;何为虚拟机&quot;&gt;&lt;a href=&quot;#何为虚拟机&quot; class=&quot;headerlink&quot; title=&quot;何为虚拟机&quot;&gt;&lt;/a&gt;何为虚拟机&lt;/h4&gt;&lt;p&gt;用于模拟计算机运行的程序.是个中间层,它处于脚本语言和硬件之间的一个程序.每一门脚本语言都会有自己定义的opcode
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua函数定义</title>
-    <link href="https://bytemode.github.io/2018/12/15/lua%E5%87%BD%E6%95%B0%E5%AE%9A%E4%B9%89/"/>
-    <id>https://bytemode.github.io/2018/12/15/lua函数定义/</id>
-    <published>2018-12-15T05:24:49.000Z</published>
-    <updated>2018-12-27T08:12:07.823Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="FuncState"><a href="#FuncState" class="headerlink" title="FuncState"></a>FuncState</h4><p>proto结构数组保存函数原型信息;prev保存父函数体指针；actvar保存定义的局部变量；upvalues保存upvalue</p><p>Lua源码中,专门有一个结构体FuncState用来保存函数相关的信息.其实,即使没有创建任何函数,对于Lua而言也有一个最外层的FuncState数据.这个结构体的定义:</p><pre><code>typedef struct FuncState {  Proto *f;  /* current function header */  Table *h;  /* table to find (and reuse) elements in  */  struct FuncState *prev;  /* enclosing function */  struct LexState *ls;  /* lexical state */  struct lua_State *L;  /* copy of the Lua state */  struct BlockCnt *bl;  /* chain of current blocks */  int pc;  /* next position to code (equivalent to `ncode&#39;) */  int lasttarget;   /* `pc&#39; of last `jump target&#39;  */  int jpc;  /* list of pending jumps to `pc&#39; */  int freereg;  /* first free register */  int nk;  /* number of elements in `k&#39;  */  int np;  /* number of elements in `p&#39;  */  short nlocvars;  /* number of elements in `locvars&#39; */  lu_byte nactvar;  /* number of active local variables  */  upvaldesc upvalues[LUAI_MAXUPVALUES];  /* upvalues */  unsigned short actvar[LUAI_MAXVARS];  /* declared-variable stack */} FuncState;</code></pre><p>其中的Proto结构体数组用于保存函数原型信息,包括函数体代码(opcode),之所以使用数组,是因为在某个函数内,可能存在多个局部函数.而prev指针就是指向这个函数的”父函数体”的指针.</p><p>比如以下代码:</p><pre><code>function fun()   function test()   endend</code></pre><p>那么,在保存test函数原型的Proto数据就存放在保存fun函数的FuncState结构体的p数组中,反之,保存test函数的FuncState.prev指针就指向保存func函数的FuncState指针.</p><p>接着看Funcstate结构体的成员,actvar数组用于保存局部变量,比如函数的参数就是保存在这里.另外还有一个存放upval值的upvalues数组.这里有两种不同的处理.如果这个upval是父函数内的局部变量,则生成的是MOVE指令用于赋值;如果对于父函数而言也是它的upval,则生成GET_UPVAL指令用于赋值.</p><p>当开始处理一个函数的定义时,首先调用open_func函数,创建一个新的Proto结构体用于保存函数原型信息,接着将该函数的FuncState的prev指针指向父函数.<br>最后当函数处理完毕时,调用pushclosure函数将这个新的函数的信息push到父函数的Proto数组中.</p><h4 id="函数也是第一类值-可以存在变量里"><a href="#函数也是第一类值-可以存在变量里" class="headerlink" title="函数也是第一类值 可以存在变量里"></a>函数也是第一类值 可以存在变量里</h4><p>最后,由于函数在Lua中是所谓的”first class type”,所以其实以下两段Lua代码是等价的:</p><pre><code>local function test()  -- 可以testend--以上相当于 local test； test = function() ...  endlocal test = function ()   --不可以调用test 以为第一类之定义完成之后才可以使用end</code></pre><p>也就是说,其实是生成一段代码,用于保存函数test的相关信息,之后再将这些信息赋值给变量test,这里的test可以是local,也可以是global的,这一点跟一般的变量无异.</p><h4 id="函数定义词法分析"><a href="#函数定义词法分析" class="headerlink" title="函数定义词法分析"></a>函数定义词法分析</h4><p>所以在与函数定义相关的词法分析代码中:</p><pre><code>static void funcstat (LexState *ls, int line) {  /* funcstat -&gt; FUNCTION funcname body */  int needself;  expdesc v, b;  luaX_next(ls);  /* skip FUNCTION */  needself = funcname(ls, &amp;v);  body(ls, &amp;b, needself, line);  luaK_storevar(ls-&gt;fs, &amp;v, &amp;b);  luaK_fixline(ls-&gt;fs, line);  /* definition `happens&#39; in the first line */}</code></pre><p>上面的变量v首先在funcname函数中获得该函数的函数名,变量b在进入函数body之后可以得到函数体相关的内容.在这之后的luaK_storevar调用,就是把b的值赋值给v,也就是前面提到的函数体赋值给函数名.</p>]]></content>
-    
-    <summary type="html">
-    
-      函数是第一类值，函数定义有funcstate结构表示，其中包含父函数指针，函数原型数组信息；actvar局部变量数组，upvalues保存upvalue数组信息。
     
     </summary>
     
