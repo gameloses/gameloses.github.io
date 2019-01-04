@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="lua,">
+  <meta name="keywords" content="opengl,">
 
 
 
@@ -81,18 +81,27 @@
 
 
 
-<meta name="description" content="pcall() xpcall()  debug.traceback() debug.debug() assert() 错误 Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要尽可能的防止错误的发生，Lua经常作为扩展语言嵌入在别的应用中，所以不能当错误发生时简单的崩溃或者退出。相反，当错误发生时Lua结束当前的chunk并返回到应用中。 当Lua遇到不期望的情况时就会抛出">
-<meta name="keywords" content="lua">
+<meta name="description" content="顶点着色器的输出要求所有的顶点都在裁剪空间内，这正是模型视图投影矩阵使用变换矩阵所做的。OpenGL然后对裁剪坐标执行透视除法从而将它们变换到标准化设备坐标。OpenGL会使用glViewPort内部的参数来将标准化设备坐标映射到屏幕坐标，每个坐标都关联了一个屏幕上的点。这个过程称为视口变换。">
+<meta name="keywords" content="opengl">
 <meta property="og:type" content="article">
-<meta property="og:title" content="lua错误跟踪">
-<meta property="og:url" content="https://bytemode.github.io/2018/12/12/lua错误跟踪/index.html">
+<meta property="og:title" content="opengl坐标系统">
+<meta property="og:url" content="https://bytemode.github.io/2019/01/04/坐标系统/index.html">
 <meta property="og:site_name" content="小工知识库">
-<meta property="og:description" content="pcall() xpcall()  debug.traceback() debug.debug() assert() 错误 Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要尽可能的防止错误的发生，Lua经常作为扩展语言嵌入在别的应用中，所以不能当错误发生时简单的崩溃或者退出。相反，当错误发生时Lua结束当前的chunk并返回到应用中。 当Lua遇到不期望的情况时就会抛出">
+<meta property="og:description" content="顶点着色器的输出要求所有的顶点都在裁剪空间内，这正是模型视图投影矩阵使用变换矩阵所做的。OpenGL然后对裁剪坐标执行透视除法从而将它们变换到标准化设备坐标。OpenGL会使用glViewPort内部的参数来将标准化设备坐标映射到屏幕坐标，每个坐标都关联了一个屏幕上的点。这个过程称为视口变换。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-12-12T14:47:33.220Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190104114754479.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190104120203150.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190104120423164.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190104160059276.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190104160139427.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190104160431753.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190104160510251.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190104161222624.png">
+<meta property="og:updated_time" content="2019-01-04T08:22:14.599Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="lua错误跟踪">
-<meta name="twitter:description" content="pcall() xpcall()  debug.traceback() debug.debug() assert() 错误 Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要尽可能的防止错误的发生，Lua经常作为扩展语言嵌入在别的应用中，所以不能当错误发生时简单的崩溃或者退出。相反，当错误发生时Lua结束当前的chunk并返回到应用中。 当Lua遇到不期望的情况时就会抛出">
+<meta name="twitter:title" content="opengl坐标系统">
+<meta name="twitter:description" content="顶点着色器的输出要求所有的顶点都在裁剪空间内，这正是模型视图投影矩阵使用变换矩阵所做的。OpenGL然后对裁剪坐标执行透视除法从而将它们变换到标准化设备坐标。OpenGL会使用glViewPort内部的参数来将标准化设备坐标映射到屏幕坐标，每个坐标都关联了一个屏幕上的点。这个过程称为视口变换。">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20190104114754479.png">
 
 
 
@@ -122,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="https://bytemode.github.io/2018/12/12/lua错误跟踪/">
+  <link rel="canonical" href="https://bytemode.github.io/2019/01/04/坐标系统/">
 
 
 
 
 
-  <title>lua错误跟踪 | 小工知识库</title>
+  <title>opengl坐标系统 | 小工知识库</title>
   
 
 
@@ -317,7 +326,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/12/lua错误跟踪/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2019/01/04/坐标系统/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -334,7 +343,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">lua错误跟踪</h1>
+          <h1 class="post-title" itemprop="name headline">opengl坐标系统</h1>
         
 
         <div class="post-meta">
@@ -346,8 +355,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-12T21:35:21+08:00">
-                2018-12-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-04T11:44:40+08:00">
+                2019-01-04
               </time>
             
 
@@ -369,8 +378,8 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/opengl/" itemprop="url" rel="index">
+                    <span itemprop="name">opengl</span>
                   </a>
                 </span>
 
@@ -387,8 +396,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/12/lua错误跟踪/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/12/lua错误跟踪/" itemprop="commentCount"></span>
+                <a href="/2019/01/04/坐标系统/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/01/04/坐标系统/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -416,86 +425,65 @@
       
 
       
-        <p>pcall() xpcall()  debug.traceback() debug.debug() assert()</p>
-<p>错误</p>
-<p>Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要尽可能的防止错误的发生，Lua经常作为扩展语言嵌入在别的应用中，所以不能当错误发生时简单的崩溃或者退出。相反，当错误发生时Lua结束当前的chunk并返回到应用中。</p>
-<p>当Lua遇到不期望的情况时就会抛出错误，比如：两个非数字进行相加；调用一个非函数的变量；访问表中不存在的值等（可以通过metatables修改这种行为，后面介绍）。你也可以通过调用error函数显式地抛出错误，error的参数是要抛出的错误信息。</p>
-<p>print “enter a number:”</p>
-<p>n = io.read(“*number”)</p>
-<p>if not n then error(“invalid input”) end</p>
-<p>Lua提供了专门的内置函数assert来完成上面类似的功能：</p>
-<p>print “enter a number:”</p>
-<p>n = assert(io.read(“*number”), “invalid input”)</p>
-<p>assert首先检查第一个参数，若没问题，assert不做任何事情；否则，assert以第二个参数作为错误信息抛出。第二个参数是可选的。注意，assert会首先处理两个参数，然后才调用函数，所以下面代码，无论n是否为数字，字符串连接操作总会执行：</p>
-<p>n = io.read()</p>
-<p>assert(tonumber(n), “invalid input: “ .. n .. “ is not a number”)</p>
-<p>当函数遇到异常有两个基本的动作：返回错误代码或者抛出错误。选择哪一种方式，没有固定的规则，不过基本的原则是：对于程序逻辑上能够避免的异常，以抛出错误的方式处理之，否则返回错误代码。</p>
-<p>例如sin函数，假定我们让sin碰到错误时返回错误代码，则使用sin的代码可能变为：</p>
-<p>local res = math.sin(x)</p>
-<p>if not res then      – error</p>
-<p>​    …</p>
-<p>当然，我们也可以在调用sin前检查x是否为数字：</p>
-<p>if not tonumber(x) then     – error: x is not a number</p>
-<p>​    …</p>
-<p>而事实上，我们既不是检查参数也不是检查返回结果，因为参数错误可能意味着我们的程序某个地方存在问题，这种情况下，处理异常最简单最实际的方式是抛出错误并且终止代码的运行。</p>
-<p>再来看一个例子。io.open函数用于打开文件，如果文件不存在，结果会如何？很多系统中，我们通过“试着去打开文件”来判断文件是否存在。所以如果io.open不能打开文件（由于文件不存在或者没有权限），函数返回nil和错误信息。依据这种方式，我们可以通过与用户交互（比如：是否要打开另一个文件）合理地处理问题：</p>
-<pre><code>local file, msg
-
-repeat
-
-    print &quot;enter a file name:&quot;
-
-    local name = io.read()
-
-    if not name then return end     -- no input
-
-    file, msg = io.open(name, &quot;r&quot;)
-
-    if not file then print(msg) end
-
-until file
-</code></pre><p>如果你想偷懒不想处理这些情况，又想代码安全的运行，可以使用assert：</p>
-<p>file = assert(io.open(name, “r”))</p>
-<p>Lua中有一个习惯：如果io.open失败，assert将抛出错误。</p>
-<p>file = assert(io.open(“no-file”, “r”))</p>
-<p>​       –&gt; stdin:1: no-file: No such file or directory</p>
-<p>注意：io.open返回的第二个结果（错误信息）会作为assert的第二个参数。</p>
-<p>虽然你可以使用任何类型的值作为错误信息，通常情况下，我们使用字符串来描述遇到的错误。如果遇到内部错误（比如对一个非table的值使用索引下标访问）Lua将自己产生错误信息，否则Lua使用传递给error函数的参数作为错误信息。不管在什么情况下，Lua都尽可能清楚的描述问题发生的缘由。</p>
-<p>local status, err = pcall(function () a = ‘a’+1 end)</p>
-<p>print(err)</p>
-<p>–&gt; stdin:1: attempt to perform arithmetic on a string value</p>
-<p>local status, err = pcall(function () error(“my error”) end)</p>
-<p>print(err)</p>
-<p>–&gt; stdin:1: my error</p>
-<p>例子中错误信息给出了文件名（stdin）与行号。</p>
-<p>函数error还可以有第二个参数，表示错误发生的层级。比如，你写了一个函数用来检查“error是否被正确调用”：</p>
-<pre><code>function foo (str)
-
-    if type(str) ~= &quot;string&quot; then
-
-       error(&quot;string expected&quot;)
-
-    end
-
-    ...
-
-end
-</code></pre><p>可有人这样调用此函数：</p>
-<p>foo({x=1})</p>
-<p>Lua会指出发生错误的是foo而不是error，实际上，错误是调用error时产生的。为了纠正这个问题，修改前面的代码让error报告错误发生在第二级（你自己的函数是第一级）如下：</p>
-<pre><code>function foo (str)
-
-    if type(str) ~= &quot;string&quot; then
-
-       error(&quot;string expected&quot;, 2)
-
-    end
-
-    ...
-
-end
-</code></pre><p>当错误发生的时候，我们常常希望了解详细的信息，而不仅是错误发生的位置。若能了解到“错误发生时的栈信息”就好了，但pcall返回错误信息时，已经释放了保存错误发生情况的栈信息。因此，若想得到tracebacks，我们必须在pcall返回以前获取。Lua提供了xpcall来实现这个功能，xpcall接受两个参数：调用函数、错误处理函数。当错误发生时，Lua会在栈释放以前调用错误处理函数，因此可以使用debug库收集错误相关信息。有两个常用的debug处理函数：debug.debug和debug.traceback，前者给出Lua的提示符，你可以自己动手察看错误发生时的情况；后者通过traceback创建更多的错误信息，也是控制台解释器用来构建错误信息的函数。你可以在任何时候调用debug.traceback获取当前运行的traceback信息：</p>
-<p>print(debug.traceback())</p>
+        <h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p>为了将坐标从一个坐标系变换到另一个坐标系，我们需要用到几个变换矩阵，最重要的几个分别是模型(Model)、观察(View)、投影(Projection)三个矩阵。我们的顶点坐标起始于局部空间(Local Space)，在这里它称为局部坐标(Local Coordinate)，它在之后会变为世界坐标(World Coordinate)，观察坐标(View Coordinate)，裁剪坐标(Clip Coordinate)，并最后以屏幕坐标(Screen Coordinate)的形式结束。下面的这张图展示了整个流程以及各个变换过程做了什么：</p>
+<p><img src="https://img-blog.csdnimg.cn/20190104114754479.png" alt="坐标系统"></p>
+<ol>
+<li>局部坐标是对象相对于局部原点的坐标，也是物体起始的坐标。</li>
+<li>下一步是将局部坐标变换为世界空间坐标，世界空间坐标是处于一个更大的空间范围的。这些坐标相对于世界的全局原点，它们会和其它物体一起相对于世界的原点进行摆放。</li>
+<li>接下来我们将世界坐标变换为观察空间坐标，使得每个坐标都是从摄像机或者说观察者的角度进行观察的。</li>
+<li>坐标到达观察空间之后，我们需要将其投影到裁剪坐标。裁剪坐标会被处理至-1.0到1.0的范围内，并判断哪些顶点将会出现在屏幕上。</li>
+<li>最后，我们将裁剪坐标变换为屏幕坐标，我们将使用一个叫做视口变换(Viewport Transform)的过程。视口变换将位于-1.0到1.0范围的坐标变换到由glViewport函数所定义的坐标范围内。最后变换出来的坐标将会送到光栅器，将其转化为片段。</li>
+</ol>
+<p>局部空间<br>局部空间是指物体所在的坐标空间，即对象最开始所在的地方。想象你在一个建模软件（比如说Blender）中创建了一个立方体。你创建的立方体的原点有可能位于(0, 0, 0)，即便它有可能最后在程序中处于完全不同的位置。甚至有可能你创建的所有模型都以(0, 0, 0)为初始位置（译注：然而它们会最终出现在世界的不同位置）。所以，你的模型的所有顶点都是在局部空间中：它们相对于你的物体来说都是局部的。</p>
+<p>我们一直使用的那个箱子的顶点是被设定在-0.5到0.5的坐标范围中，(0, 0)是它的原点。这些都是局部坐标。</p>
+<h5 id="世界空间"><a href="#世界空间" class="headerlink" title="世界空间"></a>世界空间</h5><p>如果我们将我们所有的物体导入到程序当中，它们有可能会全挤在世界的原点(0, 0, 0)上，这并不是我们想要的结果。我们想为每一个物体定义一个位置，从而能在更大的世界当中放置它们。世界空间中的坐标正如其名：是指顶点相对于（游戏）世界的坐标。如果你希望将物体分散在世界上摆放（特别是非常真实的那样），这就是你希望物体变换到的空间。<strong>物体的坐标将会从局部变换到世界空间；该变换是由模型矩阵(Model Matrix)实现的</strong>。</p>
+<p><strong>模型矩阵是一种变换矩阵，它能通过对物体进行位移、缩放、旋转来将它置于它本应该在的位置或朝向</strong>。你可以将它想像为变换一个房子，你需要先将它缩小（它在局部空间中太大了），并将其位移至郊区的一个小镇，然后在y轴上往左旋转一点以搭配附近的房子。</p>
+<h5 id="观察空间"><a href="#观察空间" class="headerlink" title="观察空间"></a>观察空间</h5><p>观察空间经常被人们称之OpenGL的摄像机(Camera)（所以有时也称为摄像机空间(Camera Space)或视觉空间(Eye Space)）。<strong>观察空间是将世界空间坐标转化为用户视野前方的坐标而产生的结果。因此观察空间就是从摄像机的视角所观察到的空间</strong>。而这通常是由一系列的位移和旋转的组合来完成，平移/旋转场景从而使得特定的对象被变换到摄像机的前方。<strong>这些组合在一起的变换通常存储在一个观察矩阵(View Matrix)里，它被用来将世界坐标变换到观察空间</strong>。</p>
+<h5 id="裁剪空间"><a href="#裁剪空间" class="headerlink" title="裁剪空间"></a>裁剪空间</h5><p>在一个顶点着色器运行的最后，OpenGL期望所有的坐标都能落在一个特定的范围内，且任何在这个范围之外的点都应该被裁剪掉(Clipped)。被裁剪掉的坐标就会被忽略，所以剩下的坐标就将变为屏幕上可见的片段。这也就是裁剪空间(Clip Space)名字的由来。</p>
+<p>因为将所有可见的坐标都指定在-1.0到1.0的范围内不是很直观，所以我们会指定自己的坐标集(Coordinate Set)并将它变换回标准化设备坐标系，就像OpenGL期望的那样。</p>
+<p><strong>为了将顶点坐标从观察变换到裁剪空间，我们需要定义一个投影矩阵(Projection Matrix)</strong>，它指定了一个范围的坐标，比如在每个维度上的-1000到1000。<strong>投影矩阵接着会将在这个指定的范围内的坐标变换为标准化设备坐标的范围(-1.0, 1.0)</strong>。所有在范围外的坐标不会被映射到在-1.0到1.0的范围之间，所以会被裁剪掉。在上面这个投影矩阵所指定的范围内，坐标(1250, 500, 750)将是不可见的，这是由于它的x坐标超出了范围，它被转化为一个大于1.0的标准化设备坐标，所以被裁剪掉了。</p>
+<p>如果只是图元(Primitive)，例如三角形，的一部分超出了裁剪体积(Clipping Volume)，则OpenGL会重新构建这个三角形为一个或多个三角形让其能够适合这个裁剪范围。</p>
+<p>由投影矩阵创建的观察箱(Viewing Box)被称为平截头体(Frustum)，每个出现在平截头体范围内的坐标都会最终出现在用户的屏幕上。将特定范围内的坐标转化到标准化设备坐标系的过程（而且它很容易被映射到2D观察空间坐标）被称之为投影(Projection)，因为使用投影矩阵能将3D坐标投影(Project)到很容易映射到2D的标准化设备坐标系中。</p>
+<p>一旦所有顶点被变换到裁剪空间，最终的操作——透视除法(Perspective Division)将会执行，在这个过程中我们将位置向量的x，y，z分量分别除以向量的齐次w分量；透视除法是将4D裁剪空间坐标变换为3D标准化设备坐标的过程。这一步会在每一个顶点着色器运行的最后被自动执行。</p>
+<p>在这一阶段之后，最终的坐标将会被映射到屏幕空间中（使用glViewport中的设定），并被变换成片段。</p>
+<blockquote>
+<p>将观察坐标变换为裁剪坐标的投影矩阵可以为两种不同的形式，每种形式都定义了不同的平截头体。我们可以选择创建一个正射投影矩阵(Orthographic Projection Matrix)或一个透视投影矩阵(Perspective Projection Matrix)。</p>
+</blockquote>
+<h6 id="正射投影"><a href="#正射投影" class="headerlink" title="正射投影"></a>正射投影</h6><p>正射投影矩阵定义了一个类似立方体的平截头箱，它定义了一个裁剪空间，在这空间之外的顶点都会被裁剪掉。创建一个正射投影矩阵需要指定可见平截头体的宽、高和长度。在使用正射投影矩阵变换至裁剪空间之后处于这个平截头体内的所有坐标将不会被裁剪掉。它的平截头体看起来像一个容器：</p>
+<p><img src="https://img-blog.csdnimg.cn/20190104120203150.png" alt="正射投影"></p>
+<p>上面的平截头体定义了可见的坐标，它由由宽、高、近(Near)平面和远(Far)平面所指定。任何出现在近平面之前或远平面之后的坐标都会被裁剪掉。正射平截头体直接将平截头体内部的所有坐标映射为标准化设备坐标，因为每个向量的w分量都没有进行改变；如果w分量等于1.0，透视除法则不会改变这个坐标。</p>
+<p>要创建一个正射投影矩阵，我们可以使用GLM的内置函数glm::ortho：</p>
+<p><code>glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);</code><br>前两个参数指定了平截头体的左右坐标，第三和第四参数指定了平截头体的底部和顶部。通过这四个参数我们定义了近平面和远平面的大小，然后第五和第六个参数则定义了近平面和远平面的距离。这个投影矩阵会将处于这些x，y，z值范围内的坐标变换为标准化设备坐标。</p>
+<p>正射投影矩阵直接将坐标映射到2D平面中，即你的屏幕，但实际上一个直接的投影矩阵会产生不真实的结果，因为这个投影没有将透视(Perspective)考虑进去。所以我们需要透视投影矩阵来解决这个问题。</p>
+<h6 id="透视投影"><a href="#透视投影" class="headerlink" title="透视投影"></a>透视投影</h6><p>如果你曾经体验过实际生活给你带来的景象，你就会注意到离你越远的东西看起来更小。这个奇怪的效果称之为透视(Perspective)。透视的效果在我们看一条无限长的高速公路或铁路时尤其明显，正如下面图片显示的那样：</p>
+<p><img src="https://img-blog.csdnimg.cn/20190104120423164.png" alt="透视投影"></p>
+<p>正如你看到的那样，由于透视，这两条线在很远的地方看起来会相交。这正是透视投影想要模仿的效果，它是使用透视投影矩阵来完成的。这个投影矩阵将给定的平截头体范围映射到裁剪空间，除此之外还修改了每个顶点坐标的w值，从而使得离观察者越远的顶点坐标w分量越大。被变换到裁剪空间的坐标都会在-w到w的范围之间（任何大于这个范围的坐标都会被裁剪掉）。OpenGL要求所有可见的坐标都落在-1.0到1.0范围内，作为顶点着色器最后的输出，因此，一旦坐标在裁剪空间内之后，透视除法就会被应用到裁剪空间坐标上：</p>
+<p><img src="https://img-blog.csdnimg.cn/20190104160059276.png" alt="w"><br>顶点坐标的每个分量都会除以它的w分量，距离观察者越远顶点坐标就会越小。这是也是w分量非常重要的另一个原因，它能够帮助我们进行透视投影。最后的结果坐标就是处于标准化设备空间中的。</p>
+<p>在GLM中可以这样创建一个透视投影矩阵：</p>
+<pre><code>glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)width/(float)height, 0.1f, 100.0f);
+</code></pre><p>同样，glm::perspective所做的其实就是创建了一个定义了可视空间的大平截头体，任何在这个平截头体以外的东西最后都不会出现在裁剪空间体积内，并且将会受到裁剪。一个透视平截头体可以被看作一个不均匀形状的箱子，在这个箱子内部的每个坐标都会被映射到裁剪空间上的一个点。下面是一张透视平截头体的图片：</p>
+<p><img src="https://img-blog.csdnimg.cn/20190104160139427.png" alt="视椎体"></p>
+<p>它的第一个参数定义了fov的值，它表示的是视野(Field of View)，并且设置了观察空间的大小。如果想要一个真实的观察效果，它的值通常设置为45.0f，但想要一个末日风格的结果你可以将其设置一个更大的值。第二个参数设置了宽高比，由视口的宽除以高所得。第三和第四个参数设置了平截头体的近和远平面。我们通常设置近距离为0.1f，而远距离设为100.0f。所有在近平面和远平面内且处于平截头体内的顶点都会被渲染。</p>
+<p>当你把透视矩阵的 near 值设置太大时（如10.0f），OpenGL会将靠近摄像机的坐标（在0.0f和10.0f之间）都裁剪掉，这会导致一个你在游戏中很熟悉的视觉效果：在太过靠近一个物体的时候你的视线会直接穿过去。</p>
+<p>当使用正射投影时，<strong>每一个顶点坐标都会直接映射到裁剪空间中而不经过任何精细的透视除法（它仍然会进行透视除法，只是w分量没有被改变（它保持为1），因此没有起作用）。因为正射投影没有使用透视，远处的物体不会显得更小，所以产生奇怪的视觉效果。</strong>由于这个原因，正射投影主要用于二维渲染以及一些建筑或工程的程序，在这些场景中我们更希望顶点不会被透视所干扰。某些如 Blender 等进行三维建模的软件有时在建模时也会使用正射投影，因为它在各个维度下都更准确地描绘了每个物体。下面你能够看到在Blender里面使用两种投影方式的对比：</p>
+<p><img src="https://img-blog.csdnimg.cn/20190104160431753.png" alt="透视投影正交投影"></p>
+<p>你可以看到，使用透视投影的话，远处的顶点看起来比较小，而在正射投影中每个顶点距离观察者的距离都是一样的。</p>
+<h4 id="模型视图投影矩阵"><a href="#模型视图投影矩阵" class="headerlink" title="模型视图投影矩阵"></a>模型视图投影矩阵</h4><p>我们为上述的每一个步骤都创建了一个变换矩阵：模型矩阵、观察矩阵和投影矩阵。一个顶点坐标将会根据以下过程被变换到裁剪坐标：</p>
+<p><img src="https://img-blog.csdnimg.cn/20190104160510251.png" alt="模型视图投影矩阵"><br>注意矩阵运算的顺序是相反的（记住我们需要从右往左阅读矩阵的乘法）。最后的顶点应该被赋值到顶点着色器中的gl_Position，OpenGL将会自动进行透视除法和裁剪。</p>
+<p><strong>顶点着色器的输出要求所有的顶点都在裁剪空间内，这正是我们刚才使用变换矩阵所做的。OpenGL然后对裁剪坐标执行透视除法从而将它们变换到标准化设备坐标。OpenGL会使用glViewPort内部的参数来将标准化设备坐标映射到屏幕坐标，每个坐标都关联了一个屏幕上的点。这个过程称为视口变换。</strong></p>
+<h4 id="右手坐标系-Right-handed-System"><a href="#右手坐标系-Right-handed-System" class="headerlink" title="右手坐标系(Right-handed System)"></a>右手坐标系(Right-handed System)</h4><p>OpenGL是一个右手坐标系。简单来说，就是正x轴在你的右手边，正y轴朝上，而正z轴是朝向后方的。想象你的屏幕处于三个轴的中心，则正z轴穿过你的屏幕朝向你。坐标系画起来如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/20190104161222624.png" alt="右手坐标系"></p>
+<p>为了理解为什么被称为右手坐标系，按如下的步骤做：</p>
+<ul>
+<li>沿着正y轴方向伸出你的右臂，手指着上方。</li>
+<li>大拇指指向右方。</li>
+<li>食指指向上方。</li>
+<li>中指向下弯曲90度。<br>如果你的动作正确，那么你的大拇指指向正x轴方向，食指指向正y轴方向，中指指向正z轴方向。如果你用左臂来做这些动作，你会发现z轴的方向是相反的。这个叫做左手坐标系，它被DirectX广泛地使用。注意在标准化设备坐标系中OpenGL实际上使用的是左手坐标系（投影矩阵交换了左右手）。</li>
+</ul>
+<h4 id="Z缓冲"><a href="#Z缓冲" class="headerlink" title="Z缓冲"></a>Z缓冲</h4><p>OpenGL存储它的所有深度信息于一个Z缓冲(Z-buffer)中，也被称为深度缓冲(Depth Buffer)。GLFW会自动为你生成这样一个缓冲（就像它也有一个颜色缓冲来存储输出图像的颜色）。深度值存储在每个片段里面（作为片段的z值），当片段想要输出它的颜色时，OpenGL会将它的深度值和z缓冲进行比较，如果当前的片段在其它片段之后，它将会被丢弃，否则将会覆盖。这个过程称为深度测试(Depth Testing)，它是由OpenGL自动完成的。</p>
+<p>然而，如果我们想要确定OpenGL真的执行了深度测试，首先我们要告诉OpenGL我们想要启用深度测试；它默认是关闭的。我们可以通过glEnable函数来开启深度测试。glEnable和glDisable函数允许我们启用或禁用某个OpenGL功能。这个功能会一直保持启用/禁用状态，直到另一个调用来禁用/启用它。现在我们想启用深度测试，需要开启GL_DEPTH_TEST：</p>
+<p><code>glEnable(GL_DEPTH_TEST);</code><br>因为我们使用了深度测试，我们也想要在每次渲染迭代之前清除深度缓冲（否则前一帧的深度信息仍然保存在缓冲中）。就像清除颜色缓冲一样，我们可以通过在glClear函数中指定DEPTH_BUFFER_BIT位来清除深度缓冲：</p>
+<p><code>glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);</code></p>
 
       
     </div>
@@ -542,7 +530,7 @@ end
       
         <div class="post-tags">
           
-            <a href="/tags/lua/" rel="tag"># lua</a>
+            <a href="/tags/opengl/" rel="tag"># opengl</a>
           
         </div>
       
@@ -555,8 +543,8 @@ end
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/12/12/lua用法2/" rel="next" title="lua用法2">
-                <i class="fa fa-chevron-left"></i> lua用法2
+              <a href="/2019/01/03/opengl矩阵向量/" rel="next" title="opengl矩阵向量">
+                <i class="fa fa-chevron-left"></i> opengl矩阵向量
               </a>
             
           </div>
@@ -564,10 +552,6 @@ end
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/12/12/lua require机制/" rel="prev" title="lua require机制">
-                lua require机制 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -622,8 +606,17 @@ end
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -720,6 +713,22 @@ end
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#世界空间"><span class="nav-number">1.1.</span> <span class="nav-text">世界空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#观察空间"><span class="nav-number">1.2.</span> <span class="nav-text">观察空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#裁剪空间"><span class="nav-number">1.3.</span> <span class="nav-text">裁剪空间</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#正射投影"><span class="nav-number">1.3.1.</span> <span class="nav-text">正射投影</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#透视投影"><span class="nav-number">1.3.2.</span> <span class="nav-text">透视投影</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#模型视图投影矩阵"><span class="nav-number">2.</span> <span class="nav-text">模型视图投影矩阵</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#右手坐标系-Right-handed-System"><span class="nav-number">3.</span> <span class="nav-text">右手坐标系(Right-handed System)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Z缓冲"><span class="nav-number">4.</span> <span class="nav-text">Z缓冲</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
