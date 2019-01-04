@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://bytemode.github.io/2019/01/03/opengl%E7%9F%A9%E9%98%B5%E5%90%91%E9%87%8F/</loc>
+    
+    <lastmod>2019-01-04T03:32:23.033Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/17/cocos2dx%E6%B8%B2%E6%9F%93%E6%9E%B6%E6%9E%84/</loc>
+    
+    <lastmod>2019-01-03T09:23:12.285Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://bytemode.github.io/2019/01/01/openglGLSL/</loc>
     
     <lastmod>2019-01-03T09:11:00.460Z</lastmod>
@@ -51,7 +65,7 @@
   </url>
   
   <url>
-    <loc>https://bytemode.github.io/2018/12/17/cocos2dx%E6%B8%B2%E6%9F%93%E6%9E%B6%E6%9E%84/</loc>
+    <loc>https://bytemode.github.io/2018/12/17/tolua%E5%8E%9F%E7%90%86/</loc>
     
     <lastmod>2018-12-27T08:12:07.826Z</lastmod>
     
@@ -59,13 +73,6 @@
   
   <url>
     <loc>https://bytemode.github.io/2018/12/15/lua%E9%97%AD%E5%8C%85/</loc>
-    
-    <lastmod>2018-12-27T08:12:07.826Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://bytemode.github.io/2018/12/17/tolua%E5%8E%9F%E7%90%86/</loc>
     
     <lastmod>2018-12-27T08:12:07.826Z</lastmod>
     
