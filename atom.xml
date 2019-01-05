@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://bytemode.github.io/"/>
-  <updated>2019-01-04T09:59:58.636Z</updated>
+  <updated>2019-01-05T09:14:58.008Z</updated>
   <id>https://bytemode.github.io/</id>
   
   <author>
@@ -15,6 +15,116 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>cocos2d分辨率适配</title>
+    <link href="https://bytemode.github.io/2019/01/04/cocos2d%E5%88%86%E8%BE%A8%E7%8E%87%E9%80%82%E9%85%8D/"/>
+    <id>https://bytemode.github.io/2019/01/04/cocos2d分辨率适配/</id>
+    <published>2019-01-04T10:56:53.000Z</published>
+    <updated>2019-01-05T09:14:58.008Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
+    
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>cocos2dx接入sdk方案</title>
+    <link href="https://bytemode.github.io/2019/01/04/cocos2dx%E6%8E%A5%E5%85%A5sdk%E6%96%B9%E6%A1%88/"/>
+    <id>https://bytemode.github.io/2019/01/04/cocos2dx接入sdk方案/</id>
+    <published>2019-01-04T10:55:46.000Z</published>
+    <updated>2019-01-05T09:14:46.427Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
+    
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>cocos2dx网络模块</title>
+    <link href="https://bytemode.github.io/2019/01/04/cocos2dx%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9D%97/"/>
+    <id>https://bytemode.github.io/2019/01/04/cocos2dx网络模块/</id>
+    <published>2019-01-04T10:55:15.000Z</published>
+    <updated>2019-01-05T09:14:17.539Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
+    
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>cocos2dx热更新机制</title>
+    <link href="https://bytemode.github.io/2019/01/04/cocos2dx%E7%83%AD%E6%9B%B4%E6%96%B0%E6%9C%BA%E5%88%B6/"/>
+    <id>https://bytemode.github.io/2019/01/04/cocos2dx热更新机制/</id>
+    <published>2019-01-04T10:55:04.000Z</published>
+    <updated>2019-01-05T09:14:30.582Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
+    
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>cocos2dx资源管理</title>
+    <link href="https://bytemode.github.io/2019/01/04/cocos2dx%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/"/>
+    <id>https://bytemode.github.io/2019/01/04/cocos2dx资源管理/</id>
+    <published>2019-01-04T10:54:51.000Z</published>
+    <updated>2019-01-05T09:13:49.068Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
+    
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>cocos2dx中使用ecs框架</title>
+    <link href="https://bytemode.github.io/2019/01/04/cocos2dx%E4%B8%AD%E4%BD%BF%E7%94%A8ecs%E6%A1%86%E6%9E%B6/"/>
+    <id>https://bytemode.github.io/2019/01/04/cocos2dx中使用ecs框架/</id>
+    <published>2019-01-04T10:37:14.000Z</published>
+    <updated>2019-01-04T10:37:44.850Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
+    
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
+    
+      <category term="ecs" scheme="https://bytemode.github.io/tags/ecs/"/>
+    
+  </entry>
   
   <entry>
     <title>opengl帧缓冲</title>
@@ -268,11 +378,11 @@
   </entry>
   
   <entry>
-    <title>cocos2dx批处理渲染</title>
+    <title>cocos2dx源码分析-批处理渲染</title>
     <link href="https://bytemode.github.io/2018/12/27/cocos2dx%E6%89%B9%E5%A4%84%E7%90%86%E6%B8%B2%E6%9F%93/"/>
     <id>https://bytemode.github.io/2018/12/27/cocos2dx批处理渲染/</id>
     <published>2018-12-27T08:32:40.000Z</published>
-    <updated>2018-12-27T10:00:34.643Z</updated>
+    <updated>2019-01-04T10:30:07.347Z</updated>
     
     <summary type="html">
     
@@ -311,11 +421,11 @@
   </entry>
   
   <entry>
-    <title>cocos2dx是如何绘制图片的</title>
+    <title>cocos2dx源码分析-如何绘制图片</title>
     <link href="https://bytemode.github.io/2018/12/18/cocos2dx%E6%98%AF%E5%A6%82%E4%BD%95%E7%BB%98%E5%88%B6%E5%9B%BE%E7%89%87%E7%9A%84/"/>
     <id>https://bytemode.github.io/2018/12/18/cocos2dx是如何绘制图片的/</id>
     <published>2018-12-18T13:56:58.000Z</published>
-    <updated>2018-12-29T13:53:10.763Z</updated>
+    <updated>2019-01-04T10:29:56.042Z</updated>
     
     <content type="html"><![CDATA[<p>cocos2dx绘制单个图片的渲染命令是QUAD_COMMAND,通过分析这个命令可以学习opengl es是如何处理图片渲染的.</p><h4 id="关于VAO和VBO"><a href="#关于VAO和VBO" class="headerlink" title="关于VAO和VBO"></a>关于VAO和VBO</h4><p>顶点数组对象（Vertex Array Object  即VAO）是一个包含多个顶点缓冲区对象（Vertex Buffer Object， 即 VBO）的对象，一般存储一个可渲染物体的顶点信息. 顶点缓冲区对象（ VBO）是你显卡内存中的一块高速内存缓冲区，用来存储顶点的所有信息。</p><p>顶点数组指定的顶点数据保存在客户内存中,在进行glDrawArray或者glDrawElements等绘图调用时，这些数据必须同客户内存复制到图形内存中,没必要每次绘图时都复制顶点数据，而是在图形内存中缓存这些数据，这样可以显著改善渲染性能，也可以降低内存带宽和电力消耗需求,这就是顶点缓冲区对象发挥作用的地方.在OpenGL3.0中，出现了更进一步的VAO，VBO通过绘制上下文获得绘制状态，VAO可以拥有多个VBO，它记录所有绘制状态，它的代码更简洁，效率更高.</p><pre><code>void Renderer::setupBuffer(){    if(Configuration::getInstance()-&gt;supportsShareableVAO())    {        //初始化VBO和VAO        setupVBOAndVAO();    }    else    {        //不支持VAO，只初始化VBO        setupVBO();    }}void Renderer::setupVBOAndVAO(){    //一个VAO    glGenVertexArrays(1, &amp;_quadVAO);    //绑定VAO    GL::bindVAO(_quadVAO);    //创建生成两个VBO    glGenBuffers(2, &amp;_buffersVBO[0]);    //顶点Buffer    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);    glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) * VBO_SIZE, _quads, GL_DYNAMIC_DRAW);    //这里就是VAO和VBO的区别，VAO把这些放到初始化中，无论后面绘制多少次，只要他不被改变，这段代码只会被调用一次，而VBO中，这个功能的代码会在每次被绘制时调用，这样就节约了效率    //位置    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, vertices));    //颜色    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, colors));    //纹理坐标数据    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORDS);    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORDS, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, texCoords));    //索引Buffer    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * VBO_SIZE * 6, _indices, GL_STATIC_DRAW);    //取消VAO    GL::bindVAO(0);    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);    glBindBuffer(GL_ARRAY_BUFFER, 0);    CHECK_GL_ERROR_DEBUG();}void Renderer::setupVBO(){    //创建生成两个VBO    glGenBuffers(2, &amp;_buffersVBO[0]);    //调用函数绑定buffer    mapBuffers();}void Renderer::mapBuffers(){    //GL_ARRAY_BUFFER 表示顶点数据    //GL_ELEMENT_ARRAY_BUFFER 表示索引数据    //避免改变buffer元素    GL::bindVAO(0);    //绑定id 顶点数据    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);    //为改id制定一段内存区域    glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) * VBO_SIZE, _quads, GL_DYNAMIC_DRAW);    glBindBuffer(GL_ARRAY_BUFFER, 0);    //第二个VBO 索引数据    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * VBO_SIZE * 6, _indices, GL_STATIC_DRAW);    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);    CHECK_GL_ERROR_DEBUG();}</code></pre><p>0l;需要介绍的两个关键的函数</p><p>glBindBuffer：它绑定缓冲区对象表示选择未来的操作将影响哪个缓冲区对象。如果应用程序有多个缓冲区对象，就需要多次调用glBindBuffer()函数：一次用于初始化缓冲区对象以及它的数据，以后的调用要么选择用于渲染的缓冲区对象，要么对缓冲区对象的数据进行更新。</p><p>当传入的第二个参数第一次使用一个非零无符号整数时，创建一个新的缓冲区对象；当第二个参数是之前使用过的，这个缓冲区对象成为活动缓冲区对象；如果第二个参数值为0时，停止使用缓冲区对象</p><p>glBufferData：保留空间存储数据，他分配一定大小的（第二个参数）的openGL服务端内存，用于存储顶点数据或索引。这个被绑定的对象之前相关联的数据都会被清除。</p><p>glBufferData参数介绍</p><p>参数1，目标GL_ARRAY_BUFFER或者GL_ELEMENT_ARRAY_BUFFER</p><p>参数2，内存容量</p><p>参数3，用于初始化缓冲区对象，可以使一个指针，也可以是空</p><p>参数4，如何读写，可以选择如下几种</p><pre><code>GL_DYNAMIC_DRAW:多次指定，多次作为绘图和图像指定函数的源数据，缓冲区对象的数据不仅常常需要进行更新，而且使用频率也非常高GL_STATIC_DRAW:数据只指定一次，多次作为绘图和图像指定函数的源数据，缓冲区对象的数据只指定1次，但是这些数据被使用的频率很高GL_STREAM_DRAW:数据只指定一次，最多只有几次作为绘图和图像指定函数的源数据，缓冲区对象中的数据常常需要更新，但是在绘图或其他操作中使用这些数据的次数较少</code></pre><p>从初始化的代码上，为什么VAO反倒复杂了呢？因为他只是把绘制时需要做的一些事情提前放到初始化函数中，来看一下绘制流程。</p><pre><code>//当前的openGL是否支持VAOif (Configuration::getInstance()-&gt;supportsShareableVAO()){    //绑定顶点数组    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);    //向缓冲区申请空间并指定数据传输方式    glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) * (_numQuads), nullptr, GL_DYNAMIC_DRAW);    //提供缓冲区对象包含整个数据集合的更新    void *buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);    memcpy(buf, _quads, sizeof(_quads[0])* (_numQuads));    //缓冲区对象的更新完成    glUnmapBuffer(GL_ARRAY_BUFFER);    //为了禁用缓冲区对象，可以用0作为缓冲区对象的标识符来调用glBindBuffer()函数。这将把OpenGL切换为默认的不使用缓冲区对象的模式。    glBindBuffer(GL_ARRAY_BUFFER, 0);    //Bind VAO    GL::bindVAO(_quadVAO);}else{</code></pre><p>#define kQuadSize sizeof(_quads[0].bl)<br>        glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);<br>        glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) <em> _numQuads , _quads, GL_DYNAMIC_DRAW);<br>        //激活顶点颜色纹理坐标的属性<br>        GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);<br>        //顶点<br>        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid</em>) offsetof(V3F_C4B_T2F, vertices));<br>        //颜色<br>        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, kQuadSize, (GLvoid<em>) offsetof(V3F_C4B_T2F, colors));<br>        //纹理坐标<br>        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORDS, 2, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid</em>) offsetof(V3F_C4B_T2F, texCoords));</p><pre><code>    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);}</code></pre><p>可以看到，这些设置属性的函数放在了绘制函数里，虽然看似是一样的，但是绘制函数会被调用的更频繁，所以把这些函数放到初始化函数中可以大幅提高程序的效率。</p><p>这里介绍VAO的两个函数：</p><p>glMapBuffer函数返回一个指针，指向与第一个参数相关联的当前绑定缓冲区对象的数据存储。第一个参数与glBufferData的第一个参数一致。第二个参数是GL_READ_ONLY、GL_WRITE_ONLY或GL_READ_WRITE之一，表示可以对数据进行的操作。</p><p>glUnmapBuffer表示对当前绑定缓冲区对象的更新已经完成，并且这个缓冲区可以释放。</p><p>enableVertexAttribs激活相关属性，激活的属性可以调用glVertexAttribPointer指定数据源，可选的有VERTEX_ATTRIB_FLAG_POSITION，VERTEX_ATTRIB_FLAG_COLOR和VERTEX_ATTRIB_FLAG_TEX_COORDS，这里这个参数是激活这三个。</p><p>glVertexAttribPointer指定了渲染时第一个参数代表的索引值的顶点属性数组的数据格式和位置。</p><p>第一个参数指定要修改的顶点属性的索引值，包括VERTEX_ATTRIB_POSITION（位置），VERTEX_ATTRIB_COLOR（颜色），VERTEX_ATTRIB_TEX_COORDS（纹理坐标）。</p><p>第二个参数指定每个属性值的组件数量且必须为1、2、3、4之一。</p><p>第三个参数指定数组中每个组件的数据类型。可用的符号常量有GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT,GL_UNSIGNED_SHORT,GL_FIXED, 和 GL_FLOAT，初始值为GL_FLOAT。</p><p>第四个参数指定当被访问时，固定点数据值是否应该被归一化（GL_TRUE，意味着整数型的值会被映射至区间<a href="有符号整数">-1,1</a>，或者区间[0,1]（无符号整数））或者直接转换为固定点值（GL_FALSE）。</p><p>第五个参数指定了一个属性到下一个属性之间的步长（这就允许属性值被存储在单一数组或者不同的数组中）。也就是连续顶点属性之间的偏移量。如果为0，那么它们是紧密排列在一起的。初始值为0。</p><p>第六个参数指定一个指针，指向数组中第一个顶点属性的第一个组件。初始值为0。</p><p>最后需要调用绘制元素函数，绘制这些信息</p><p>glDrawElements(GL_TRIANGLES, (GLsizei) quadsToDraw<em>6, GL_UNSIGNED_SHORT, (GLvoid</em>) (startQuad<em>6</em>sizeof(_indices[0])) );<br>它根据索引绘图(注意：顶点数据和索引各自使用不同的缓冲区)</p><pre><code>需要注意的是在Renderer的析构函数中要调用glDeleteBuffers来释放它的资源，并使它的标识可以其他缓冲区对象使用。</code></pre><h3 id="QUAD-COMMAND的绘制函数"><a href="#QUAD-COMMAND的绘制函数" class="headerlink" title="QUAD_COMMAND的绘制函数"></a>QUAD_COMMAND的绘制函数</h3><p>QUAD_COMMAND命令回调用drawBatchedQuads调用绘制函数</p><pre><code>else if ( RenderCommand::Type::QUAD_COMMAND == commandType )        {            flush3D();            if(_filledIndex &gt; 0)            {                drawBatchedTriangles();                _lastMaterialID = 0;            }            auto cmd = static_cast&lt;QuadCommand*&gt;(command);            //Batch quads            if( (_numberQuads + cmd-&gt;getQuadCount()) * 4 &gt; VBO_SIZE )            {                drawBatchedQuads();            }            _batchQuadCommands.push_back(cmd);            fillQuads(cmd);        }void Renderer::flush(){    //绘制    drawBatchedQuads();    //清空    _lastMaterialID = 0;}</code></pre><p>这个处理主要是把命令存入_batchedQuadCommands中，如果如果Quad数据量超过VBO的大小，那么调用绘制，将缓存的命令全部绘制.如果一直没有超过VBO的大小，drawBatchedQuads绘制函数将在flush被调用时调用</p><hr>]]></content>
     
@@ -337,11 +447,11 @@
   </entry>
   
   <entry>
-    <title>cocos2dx渲染架构</title>
+    <title>cocos2dx源码分析-渲染架构</title>
     <link href="https://bytemode.github.io/2018/12/17/cocos2dx%E6%B8%B2%E6%9F%93%E6%9E%B6%E6%9E%84/"/>
     <id>https://bytemode.github.io/2018/12/17/cocos2dx渲染架构/</id>
     <published>2018-12-17T12:13:14.000Z</published>
-    <updated>2019-01-03T09:23:12.285Z</updated>
+    <updated>2019-01-04T10:29:37.966Z</updated>
     
     <content type="html"><![CDATA[<p>2dx的时代UI树便利和渲染是没有分开的，遍历UI树的时候就渲染.3dx版本为了分离了ui树的遍历和渲染，先遍历生成渲染命令发到渲染队列，之后遍历渲染命令队列开始渲染.这样做的好处是渲染命令可以重用，单独的渲染可以做优化例如自动批绘制.本篇首先介绍cocos2D-X 3.x版本的渲染结构，之后会深入opengl es.</p><h4 id="mainLoop"><a href="#mainLoop" class="headerlink" title="mainLoop"></a>mainLoop</h4><pre><code>void DisplayLinkDirector::mainLoop(){    if (_purgeDirectorInNextLoop)    {        //只有一种情况会调用到这里来，就是导演类调用end函数        _purgeDirectorInNextLoop = false;        //清除导演类        purgeDirector();    }    else if (! _invalid)    {        //绘制        drawScene();        //清除内存        PoolManager::getInstance()-&gt;getCurrentPool()-&gt;clear();    }}</code></pre><p>分析的起点是mainLoop函数，这是在主线程里面会调用的循环，其中drawScene函数进行绘制。那么就进一步来看drawScene函数。mainLoop实在opengl的ondrawframe调用过来的即平台每帧渲染会调用.</p><h4 id="drawScene"><a href="#drawScene" class="headerlink" title="drawScene"></a>drawScene</h4><pre><code>void Director::drawScene(){    //计算间隔时间    calculateDeltaTime();    //如果间隔时间过小会被忽略    if(_deltaTime &lt; FLT_EPSILON){ return;}    //空函数，也许之后会有作用    if (_openGLView)    {        _openGLView-&gt;pollInputEvents();    }    //非暂停状态    if (! _paused)    {        //scheduler更新 会使actionmanager更新和相关的schedule更新 引擎物理模拟都是在绘制之前做的        _scheduler-&gt;update(_deltaTime);        _eventDispatcher-&gt;dispatchEvent(_eventAfterUpdate);    }    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);    //切换下一场景，必须放在逻辑后绘制前，否则会出bug    if (_nextScene)    {        setNextScene();    }    kmGLPushMatrix();    //创建单位矩阵    kmMat4 identity;    kmMat4Identity(&amp;identity);    //绘制场景    if (_runningScene)    {        //递归的遍历scene中的每个node的visit生成渲染命令放入渲染队列        _runningScene-&gt;visit(_renderer, identity, false);        _eventDispatcher-&gt;dispatchEvent(_eventAfterVisit);    }    //绘制观察节点，如果你需要在场景中设立观察节点，请调用摄像机的setNotificationNode函数     if (_notificationNode)    {        _notificationNode-&gt;visit(_renderer, identity, false);//这是一个常驻节点    }    //绘制屏幕左下角的状态    if (_displayStats)    {        showStats();    }    //渲染    _renderer-&gt;render();    //渲染后    _eventDispatcher-&gt;dispatchEvent(_eventAfterDraw);    kmGLPopMatrix();    _totalFrames++;    if (_openGLView)    {        _openGLView-&gt;swapBuffers(); //交换缓冲区    }    //计算绘制时间    if (_displayStats)    {        calculateMPF();    }}</code></pre><p>其中和绘制相关的是visit的调用和render的调用，其中visit函数会调用节点的draw函数，在3.x之前的版本中draw函数就会直接调用绘制代码，3.x版本是在draw函数中生成将绘制命令放入到renderer队列中，然后renderer函数去进行真正的绘制，首先来看sprite的draw函数.</p><h4 id="渲染命令"><a href="#渲染命令" class="headerlink" title="渲染命令"></a>渲染命令</h4><pre><code>void Sprite::draw(Renderer *renderer, const kmMat4 &amp;transform, bool transformUpdated){    //检查是否超出边界，自动裁剪    _insideBounds = transformUpdated ? renderer-&gt;checkVisibility(transform, _contentSize) : _insideBounds;    if(_insideBounds)    {        //初始化        _quadCommand.init(_globalZOrder, _texture-&gt;getName(), _shaderProgram, _blendFunc, &amp;_quad, 1, transform);        renderer-&gt;addCommand(&amp;_quadCommand);        //物理引擎相关绘制边界if CC_SPRITE_DEBUG_DRAW        _customDebugDrawCommand.init(_globalZOrder);        //自定义函数        _customDebugDrawCommand.func = CC_CALLBACK_0(Sprite::drawDebugData, this);        renderer-&gt;addCommand(&amp;_customDebugDrawCommand);endif    }}</code></pre><p>这里面用了两种不同的绘制命令quadCommand初始化后就可以加入到绘制命令中，customDebugDrawCommand传入了一个回调函数，具体的命令种类会在后面介绍。其中自定义的customDebugDrawCommand命令在初始化的时候只传入了全局z轴坐标，因为它的绘制函数全部都在传入的回调函数里面，_quadCommand则需要传入<strong>全局z轴坐标，贴图名称，shader，混合，坐标点集合，坐标点集个数，变换</strong>。</p><h4 id="Render"><a href="#Render" class="headerlink" title="Render"></a>Render</h4><pre><code>void Renderer::render(){    _isRendering = true;    if (_glViewAssigned)    {        //清除        _drawnBatches = _drawnVertices = 0;        //排序        for (auto &amp;renderqueue : _renderGroups)        {            renderqueue.sort();        }        //绘制        visitRenderQueue(_renderGroups[0]);        flush();    }    clean();    _isRendering = false;}</code></pre><p>Render类中的render函数进行真正的绘制，<strong>首先排序，再进行绘制</strong>，从列表中的第一个组开始绘制。在visitRenderQueue函数中可以看到五种不同类型的绘制命令类型，分别对应五个类，这五个类都继承自RenderCommand。</p><h5 id="绘制命令"><a href="#绘制命令" class="headerlink" title="绘制命令"></a>绘制命令</h5><ol><li><p>QUAD_COMMAND：</p><p>QuadCommand类绘制精灵等。所有绘制图片的命令都会调用到这里，处理这个类型命令的代码就是绘制贴图的openGL代码，</p></li><li><p>CUSTOM_COMMAND：</p><p>自定义绘制，自己定义绘制函数，在调用绘制时只需调用已经传进来的回调函数就可以，裁剪节点，绘制图形节点都采用这个绘制，把绘制函数定义在自己的类里。这种类型的绘制命令不会在处理命令的时候调用任何一句openGL代码，而是调用你写好并设置给func的绘制函数，并自己实现一个自定义的绘制。</p></li><li><p>BATCH_COMMAND：</p><p>批处理绘制，批处理精灵和粒子,其实它类似于自定义绘制，也不会再render函数中出现任何一句openGL函数，它调用一个固定的函数。</p></li><li><p>GROUP_COMMAND：</p><p>绘制组，一个节点包括两个以上绘制命令的时候，把这个绘制命令存储到另外一个renderGroups中的元素中，并把这个元素的指针作为一个节点存储到renderGroups[0]中。</p></li></ol><h5 id="render流程"><a href="#render流程" class="headerlink" title="render流程"></a>render流程</h5><pre><code>void Renderer::addCommand(RenderCommand* command){    //获得栈顶的索引    int renderQueue =_commandGroupStack.top();    //调用真正的addCommand    addCommand(command, renderQueue);}void Renderer::addCommand(RenderCommand* command, int renderQueue){    //将命令加入到数组中    _renderGroups[renderQueue].push_back(command);}</code></pre><p>addCommand它是获得需要把命令加入到renderGroups位置中的索引，这个索引是从commandGroupStack获得的，commandGroupStack是个栈，当我们创建一个GROUP_COMMAND时，需要调用pushGroup函数，它是把当前这个命令在_renderGroups的索引位置压到栈顶，当addCommand时，调用top，获得这个位置</p><pre><code>groupCommand.init(globalZOrder);renderer-&gt;addCommand(&amp;_groupCommand);renderer-&gt;pushGroup(_groupCommand.getRenderQueueID());</code></pre><p>GROUP_COMMAND一般用于绘制的节点有一个以上的绘制命 令，把这些命令组织在一起，无需排定它们之间的顺序，他们作为一个整体被调用，所以一定要记住，栈是push，pop对应的，关于这个节点的所有的绘制命令被添加完成后，请调用pop，将这个值从栈顶弹出，否则后面的命令也会被添加到这里。</p><p> 为什么调用的起始只需调用为什么只是0，其他的呢？</p><p><code>visitRenderQueue(_renderGroups[0]);</code></p><p>它们会在处理GROUP_COMMAND被调用</p><pre><code>else if(RenderCommand::Type::GROUP_COMMAND == commandType) {    flush();    int renderQueueID = ((GroupCommand*) command)-&gt;getRenderQueueID();    visitRenderQueue(_renderGroups[renderQueueID]);}</code></pre>]]></content>
     
@@ -358,155 +468,6 @@
     
     
       <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>tolua原理</title>
-    <link href="https://bytemode.github.io/2018/12/17/tolua%E5%8E%9F%E7%90%86/"/>
-    <id>https://bytemode.github.io/2018/12/17/tolua原理/</id>
-    <published>2018-12-17T03:03:17.000Z</published>
-    <updated>2018-12-27T08:12:07.826Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="tolua-如何将c-对象导入到lua里？lua如何能够访问c-对象成员？"><a href="#tolua-如何将c-对象导入到lua里？lua如何能够访问c-对象成员？" class="headerlink" title="tolua++如何将c++对象导入到lua里？lua如何能够访问c++对象成员？"></a>tolua++如何将c++对象导入到lua里？lua如何能够访问c++对象成员？</h4><p>创建一个 userdata ，存放 C/C++ 对象指针，然后给 userdata 添加元表，用<strong>index</strong> 和<strong>newindex</strong> 元方法映射 C/C++ 中的对象方法。</p><ol><li>c++层新建一个元表作为类型（通过tolua_usertype）放在注册表中（_R[mt] = name），并且设置这些类型的继承关系(通过_R.tolua_super).</li><li>创建一个类表(newtable)，并且设置_R中的原型表为元表（通过tolua_usertype），这个类表是放在全局表中的.</li><li>在注册类型的时候metatable里新建了.get和.set表。</li></ol><p>​      成员变量：在.set和.get表里存储以变量名为键一读取设置c函数为值的键值对。</p><p>​      变量的读取赋值会在在metatable的<strong>index和</strong>newindex里，以变量名为键，从.get和.set表里取得读取设置函数并调用。</p><p>​      成员函数：只需要以函数名为键，函数为值存储在metatable里。</p><ol start="3"><li>因为c++类型已经在注册表里，所以可以直接访问。</li></ol><p>​     lua里调用c++创建一个对象之后，c++需要返回这个对象：</p><p>​     新建userdata,将c++指针放入userdata;以对象地址为key，userdata为值放入tolua_ubox表里；设置此类型对象的元表为userdata的元表。</p><p>   经过上面4个步骤，就可以在lua里面调用类表。</p><p>传入c++对象的tolua++函数是tolua_pushusertype。一般情况下，第一次使用这个函数将一个c++对象push到lua堆栈上时，才会新建userdata。tolua++会以c++对象地址为键，userdata为值，将键值对存储在tolua_ubox表里。下次推入同样的c++对象时，从这个表里取出userdata推入堆栈即可。</p><h4 id="tolua-如何处理类型的继承"><a href="#tolua-如何处理类型的继承" class="headerlink" title="tolua++如何处理类型的继承"></a>tolua++如何处理类型的继承</h4><p>父类的metatable,是子类metatable的metatable。这样调用父类方法时，就会去父类的metatable里查找了。</p><p>tolua++还维护了一个tolua_super表，这个表以c++类型的metatable为键，以一个表格为值。这个值表格以类型名称为键，以true为值，记录了metatable对应c++类型的父类有哪些。这个表格可以用来帮助判断对象是否是某一个类型。</p><h4 id="tolua-如何管理对象的生命周期"><a href="#tolua-如何管理对象的生命周期" class="headerlink" title="tolua++如何管理对象的生命周期"></a>tolua++如何管理对象的生命周期</h4><p>一般情况下，当lua里对c++对象的引用变量可以被垃圾回收时，tolua++只是简单的释放userdata占用的4字节指针地址内存。但是也可以通过绑定或者代码指定的方式，让tolua++真正释放对象所占内存。</p><p>绑定的方式，是指在将c++类型构造函数使用tolua++导出到lua里时，tolua++会自动生成new_local方法。如果在lua代码里，用这个方法新建对象时，tolua++会调用tolua_register_gc方法，指明回收对象时回收对象内存。</p><p>在c++代码里，使用tolua_pushusertype_and_takeownership；在lua代码里，使用tolua.takeownership，都可以达到同样的目的。</p><p>对于这些指定由tolua++回收内存的对象，如果其类型的析构函数也通过tolua++导出了，则在回收内存时，会通过delete运算符，调用对象的析构函数。否则只会使用free方法回收。</p><p>tolua_register_gc方法，做的事情，是以对象指针为键，以对象metatable为值，将键值对存储在tolua_gc表里。在对象类型的metatable表的__gc方法里，tolua++会检查tolua_gc表是否包含以这个地址为键的表项。包含的话才会进行上述的内存回收工作。</p><h4 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h4><p>有的时候，在lua里取得一个c++对象后，我们想赋给它一些只在lua环境下有意义的属性。或者，我们想在lua里扩展一个c++类。tolua++也提供了实现这种需求的机制。</p><p>tolua++在LUA_REGISTRY里维护了一张tolua_peers表。这张表以表示c++对象的userdata为键，以一张表格t为值。t里面就记录了这个对象在lua里扩展的属性。</p><h5 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h5><p>C++在进行函数调用的时候是this指针+函数地址, Lua提供用户自定义的userdata.</p><p> 一般lua中持有c++对象是使用userdata来实现的(userdata 类型用来将任意 C 数据保存在 Lua 变量中. 这个类型相当于一块原生的内存, 除了赋值和相同性判断, Lua 没有为之预定义任何操作.通过使用 metatable （元表）, 可以为 userdata 自定义一组操作. metatable 中还可以定义一个函数gc让 userdata 作垃圾收集时调用它。</p><p>​     因此，metatable可以用来模拟C++里面的函数，通过替换它来实现函数，类成员的查找。Userdata可以很方便的获取到转换成C++里面this指针。通过this指针+类的函数地址即可调用C++里面的类成员函数。</p><h5 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h5><p>tolua_open()创建很多用于管理的内部变量， 如记录所有基类；</p><p>tolua_usertype() 创建两个表分别问type和 const type类型， const type 继承自 type;</p><p>tolua_cclass()注册类设置元表建立父子类关系；</p><p>tolua_beginmodule（）注册一个模块</p><p>tolua_function()函数绑定到lua表中</p><p>tolua_beginmodule（）结束模块注册。</p><h5 id="tolua-open是入口点，它创建很多用于管理的内部变量，以下用-G指代全局表，-R指定registry-table："><a href="#tolua-open是入口点，它创建很多用于管理的内部变量，以下用-G指代全局表，-R指定registry-table：" class="headerlink" title="tolua_open是入口点，它创建很多用于管理的内部变量，以下用_G指代全局表，_R指定registry table："></a>tolua_open是入口点，它创建很多用于管理的内部变量，以下用_G指代全局表，_R指定registry table：</h5><p>1、_R.TOLUA_VALUE_ROOT={}， 这个表是cocos2dx自己加的，它把所有传入lua的cppobj/userdata都塞到这个表里，而且这还不是一个弱表，也就意味着cocos2dx创建的cpp obj，永远都不会被gc！只有在c++层面被delete时，才会去这个表里删除自己。因此，每一个cocos2dx cpp obj，是不可能依赖lua gc来释放的，必须纯手动管理（retain/release）。当然，根据cocos2dx自身的设计，每个obj在new出来refcount为1，并且会添加autorelease pool里去，因此只要它不在场景树上，下一帧就会被自动删除掉。通常情况下，lua代码是不会干涉其生命期的。但是有些时候我们会把某些节点从场景树上摘下，过一段时间又挂上去，这时就必须先调一下它的retain，如果之后忘记调release，那么它就永远不会销毁了。</p><p>2、_R.tolua_peers={}，这是个弱表，用来缓存所有cppobj的ptr-&gt;peer table，所谓peer table，就是给每个cpp obj userdata关联的一个lua table，用来提供lua层面的额外的kv存储。tolua++把每个userdata的peer table设成该userdata的env，目的当然是为了方便找到它。因为在lua实现里，userdata的env是没有内定用途的，于是tolua++就拿来存peer table了。</p><p>3、_R.tolua_ubox={}，也是个弱表，用来缓存所有cppobj的ptr-&gt;userdata映射，userdata里面存放的值其实就是ptr。这个表的用途是记录所有已经push到lua里的cppobj，每个cppobj第一次进入lua时，会去做创建userdata、关联metatable、设置peertable(env)等等一大堆操作，然后把ptr-&gt;userdata的映射关系记到这个表里，下次再被返回进lua时，就从这表里去查找，查到的话就直接拿已创建好的userdata用了。但是有一种特殊情况，就是第二次push时的类型是上一次的子类，也就是一个“特化类型”，那么需要改设metatable，以使子类的新函数能被访问到。</p><p>4、_R.tolua_super={}，用来记录每个类型的所有基类，key是子类的mt，value则是个map，其中每个kv都是一个pair&lt;基类名,1&gt;。通过这个表可以快速知道两个类之间有无继承关系。</p><p>5、_R.tolua_gc={}</p><p>6、_R.tolua_gc_event = closure{ func:class_gc_event, upvalue:上述两个表格 }， 这是挂在每个类对应的metatable上的__gc方法。</p><p>7、_G.tolua={}，里面存放tolua自己的一些工具函数</p><h5 id="类的注册。"><a href="#类的注册。" class="headerlink" title="类的注册。"></a>类的注册。</h5><p>1、对每个用户类，首先要用tolua_usertype声明这是个用户类型：</p><p>​     tolua_usertype(tolua_S, “<a href="http://www.java123.net/web/" target="_blank" rel="noopener">Web</a>Socket”)</p><p>它里面的做事情很简单，就是分别为type和const type“两个类”建表（这个表也就是其实例userdata的元表），然后设置type继承const type，从数据的角度来看也就是：</p><p>//先用tolua_newmetatable分别创建创建两个元表，其内又调用tolua_classevents挂上各种属性</p><p>_R[“WebSocket”]={</p><p>  __index = cfunc:class_index_event,</p><p>  __newindex = cfunc:class_newindex_event,</p><p>  __gc=_R.tolua_gc_event //上面之&lt;一.6&gt;</p><p>  //其它各种add/sub/lt/eq等方法……</p><p>}</p><p>_R[“const WebSocket”]= ……同上</p><p>//mapsuper(L,type,ctype) 设置两者的继承关系</p><p>_R.tolua_super[_R[“WebSocket”]] ={ “const WebSocket” = 1,} //上面之&lt;一.4&gt;</p><p>//这个过程会递归执行，即把基类的所有基类都添到子类里</p><p>for k,v in pairs(_R.tolua_super[_R[“const WebSocket”]]) do</p><p>_R.tolua_super[_R[“WebSocket”]][k] = v</p><p>end</p><p> //在这一步里，mapsuper只是设置type-&gt;const type，但是在后续步骤里会添加大量type-&gt;base type，因此递归下来，每个type的_R.tolua_super[type]表还是有很多内容的。</p><p>2、然后用tolua_cclass来注册类。</p><p>​    tolua_cclass主要做两件事，一是把基类和父类（以及各const变种）之间的关系建立起来，二是注册类的析构函数（构造函数由普通的create静态函数替代了）。</p><p>关于继承关系，总共四对：</p><p>mapinheritance(L,name,base);</p><p>mapinheritance(L,cname,name);</p><p>mapsuper(L,cname,cbase);</p><p>mapsuper(L,name,base);</p><p>其中c指const。除了上面提到的mapsuper，又来了个mapinheritance， 再次对比说明下：</p><p>mapsuper是：在_R.tolua_super记录每个类(k)有哪些父类(v)，所有父类以v[类名]=1的形式记录着。</p><p>mapinheritance是：把父类元表表设成子类元表表的元表，同时给基类表上挂一个用以记录该类objptr-&gt;userdata映射的弱表，大致是：</p><p>setmetatable( _R.type, _R.base_type )，</p><p>_R.type.tolua_ubox = _R.base_type.tolua_ubox or weak({})</p><p>其中第二句与前述之&lt;一.3&gt;有点相似，只是那是放在_R上的一个总表，而这里是为每个类单独建表，但子类与基类是共用的，也就是每次调用tolua_cclass注册一个类，就有“3个类”的表中的tolua_ubox字段指向了同一个表，这3个类从上到下是：base type -&gt; type -&gt; const type，至于const base type，那是在之前注册基类时处理的了。</p><p>不过这里还有个另外的问题！注意和第2条里的对比：</p><p>mapinheritance(L,cname,name) //tolua_cclass里</p><p>mapsuper(L,type,ctype) //tolua_usertype里</p><p>到底type和const type谁是“基类”呢？这主要看不同场合里“基类”这个概念是用于解决什么问题了：</p><p>对mapsuper而言：在c++里一个声明为const的参数，实际是对函数本身的约束而不是对实参的约束：它只是强调函数内部不会去修改这个参数，至于传进来的实参本身是不是const的根本不重要，因为反正函数已经承诺不会去修改它了。所以要把一个类型为type的obj传给某个带有const type参数的函数，是没有问题的，但反过来，一个const type对象要传给接受type参数的函数是不行的，因为不知道它到底会不会修改（没有承诺不修改就意味着会修改）。再加上tolua++在生成胶水代码时，对每个参数都要做类型匹配检测（也就是在生成代码中大量的lua_isusertype调用），一个usertype变量是否合格，就是检查它所在位置的参数类型，是否是它可以“扮演”的角色，这些角色一是它的所有父类，二就是它以及所有父类的const变种了，而这些可以扮演的类型，恰好就是mapsuper所建立的_R.tolua_super体系中记录的内容了。</p><p>对mapinheritance而言：它将基类表设成子类表的元表，这是为了在子类表里可以找到基类的函数（在class_index_event函数里，有一个while循环，通过这里建立的链条不断向上级查找）。就这个目的而言，type和const type谁做基类是一样的。但是，type还有真正的基类base，按照base-&gt;type-&gt;const type的继承顺序是恰好满足的：</p><p>classA -&gt; const classA</p><p>​          -&gt; classB -&gt; const classB</p><p>​                         -&gt; classC -&gt; const classC</p><p>​                                       -&gt; classD -&gt; const classD</p><p>也就是说const类型在当前层次的链上是一个叶，下一层次不是从它继承，而是与它并级。</p><p>而如果按照base-&gt;const type-&gt;type-&gt;const subtype-&gt;sub type，那么问题就麻烦了，因为在注册函数时，所有函数都是挂在不带const的类表上的，如CCNode的函数都在_R[“CCNode”]里，这也符合脚本里创建类实例时的习惯：直接以“纯粹的”（不带const的）类名来操作，比如CCNode:create，而不会写作const_CCNode:create()。那么在后者的继承链上，每一个const type实际成了断点，没有得到这个type自身的函数！</p><p>3.tolua_beginmodule（） tolua_endmodule()  tolua_function()</p><p>tolua_beginmodule(m_pState, “CTest”);是只注册一个模块，比如，我们管CTest叫做”CTest”，保持和C++的名称一样。这样在Lua的对象库中就会多了一个CTest的对象描述，等同于string,number等等基本类型，同tolua_beginmodule()和tolua_endmodule()对象必须成对出现，如果出现不成对的，你注册的C++类型将会失败。 </p><p>tolua_function(m_pState, “SetData”, tolua_SetData_CTest);指的是将Lua里面CTest对象的”SetData”绑定到你的tolua_SetData_CTest()函数中去。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h4 id=&quot;tolua-如何将c-对象导入到lua里？lua如何能够访问c-对象成员？&quot;&gt;&lt;a href=&quot;#tolua-如何将c-对象导入到lua里？lua如何能够访问c-对象成员？&quot; class=&quot;headerlink&quot; title=&quot;tolua++如何将c++对象导入到
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua闭包</title>
-    <link href="https://bytemode.github.io/2018/12/15/lua%E9%97%AD%E5%8C%85/"/>
-    <id>https://bytemode.github.io/2018/12/15/lua闭包/</id>
-    <published>2018-12-15T10:47:01.000Z</published>
-    <updated>2018-12-27T08:12:07.826Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="lua中有两种闭包-c闭包和lua闭包"><a href="#lua中有两种闭包-c闭包和lua闭包" class="headerlink" title="lua中有两种闭包, c闭包和lua闭包"></a>lua中有两种闭包, c闭包和lua闭包</h4><p>两种闭包的公共部分:</p><pre><code>#define ClosureHeader CommonHeader;\lu_byte isC; \  是否c闭包lua_byte nupvalues; \ upvalue的个数GCObject* gclist; \struct Table env 闭包的环境</code></pre><p>C闭包的结构</p><pre><code>struct CClosure{   ClosureHeader;   lua_CFunction f;   TValue upvalue[1];}</code></pre><p>结构比较简单, f是一个满足 int lua_func(lua_State*) 类型的c函数</p><p>upvalue是创建C闭包时压入的upvalue, 类型是TValue, 可以得知, upvalue可以是任意的lua类型 </p><p>Lua闭包结构</p><pre><code>struct LClosure{  ClosureHeader;  strcut Proto* p;  UpVal* upvals[1];}</code></pre><p>Proto的结构比较复杂, 这里先不做分析</p><p>统一的闭包结构, 一个联合体, 说明一个闭包要么是C闭包, 要么是lua闭包, 这个是用isC表识出来的.</p><pre><code>union Closure{    CClosure c;    LClosure  l;}</code></pre><p> <strong>闭包 == {功能抽象, upvalue, env}</strong> </p><h4 id="向lua中注册c函数的过程是通过lua-pushcclosure-L-f-n-函数实现的"><a href="#向lua中注册c函数的过程是通过lua-pushcclosure-L-f-n-函数实现的" class="headerlink" title="向lua中注册c函数的过程是通过lua_pushcclosure(L, f, n)函数实现的"></a>向lua中注册c函数的过程是通过lua_pushcclosure(L, f, n)函数实现的</h4><p>流程: </p><ol><li><p>创建一个 sizeof(CClosure) + (n - 1) * sizeof(TValue)大小的内存, 这段内存是 CClosure + TValue[n],,  isC= 1 标示其是一个C闭包.</p></li><li><p>c-&gt;f = f绑定c函数.         ———  <strong>闭包.功能抽象 = f</strong></p></li><li><p>env = 当前闭包的env.  ———- <strong>闭包.env = env</strong></p></li><li><p>把栈上的n个元素赋值到c-&gt;upvalue[]数组中, 顺序是越先入栈的值放在upvalue数组的越开始位置, c-&gt;nupvalues指定改闭包upvalue的个数.  ———- <strong>闭包.upvalue = upvalue</strong></p></li><li><p>弹出栈上n个元素, 并压入新建的Closure到栈顶.</p></li></ol><p>整个流程是: 分配内存, 填写属性, 链入gc监控, 绑定c函数, 绑定upvalue, 绑定env一个C闭包就ok了</p><h4 id="C闭包被调用的过程"><a href="#C闭包被调用的过程" class="headerlink" title="C闭包被调用的过程"></a>C闭包被调用的过程</h4><p>lua 闭包调用信息结构:</p><pre><code>struct CallInfo{    StkId base; ----闭包调用的栈基    StkId func; ----要调用的闭包在栈上的位置    StkId top;  ----闭包的栈使用限制    const Instruction *savedpc; ----如果在本闭包中再次调用别的闭包, 那么该值就保存下一条指令以便在返回时继续执行    int nresults; ----闭包要返回的值个数    int tailcalls;----尾递归用, 暂时不管}</code></pre><p>这个结构是比较简单的, 它的作用就是维护一个函数调用的有关信息, 其实和c函数调用的栈帧是一样的, 重要的信息base –&gt; ebp, func –&gt; 要调用的函数的栈index, savedpc –&gt; eip, top, nresults和tailcalls没有明显的对应.</p><p><strong>在lua初始化的时候, 分配了一个CallInfo数组, 并用L-&gt;base_ci指向该数组第一个元素, 用L-&gt;end_ci指向该数组最后一个指针, 用L-&gt;size_ci记录数组当前的大小, L-&gt;ci记录的是当前被调用的闭包的调用信息.</strong></p><p>下面讲解一个c闭包的调用的过程:<br>情景: c 函数</p><pre><code>int lua_test(lua_State* L){    int a = lua_tonumber(L, 1);    int b = lua_tonumber(L, 2);    a = a + b;    lua_pushnumber(L, a);}</code></pre><p>已经注册到了lua 中, 形成了一个C闭包, 起名为”test”, 下面去调用它<br><code>luaL_dostring(L, &quot;c = test(3, 4)&quot;)</code></p><p>调用过程堆栈变化情况如下：</p><p>1.初始栈</p><p><img src="https://thumbnail0.baidupcs.com/thumbnail/da6b672bfe31efd925d1b07252d8d61f?fid=1259087893-250528-828474891656030&amp;time=1544878800&amp;rt=sh&amp;sign=FDTAER-DCb740ccc5511e5e8fedcff06b081203-2cCI6%2FKUHKD74rb5zUmgnkHU678%3D&amp;expires=8h&amp;chkv=0&amp;chkbd=0&amp;chkpc=&amp;dp-logid=21047001409346822&amp;dp-callid=0&amp;size=c710_u400&amp;quality=100&amp;vuk=-&amp;ft=video" alt=""></p><p>2.压入了函数和参数的堆栈 </p><pre><code>lua_getglobal(L, “test”)lua_pushnumber(L, 3)lua_pushnumber(L, 4) </code></pre><p><img src="https://thumbnail0.baidupcs.com/thumbnail/fbb22d3ec714edd9bbe59e9f1a727f5b?fid=1259087893-250528-1072131023144167&amp;time=1544878800&amp;rt=sh&amp;sign=FDTAER-DCb740ccc5511e5e8fedcff06b081203-RE7mQ7%2BV8SIVj7JObpxAupx2Kt0%3D&amp;expires=8h&amp;chkv=0&amp;chkbd=0&amp;chkpc=&amp;dp-logid=8092046924209033410&amp;dp-callid=0&amp;size=c710_u400&amp;quality=100&amp;vuk=-&amp;ft=video" alt=""></p><p>3.调用lua_test开始时的堆栈    lua_call(L,3, 4) </p><p><img src="https://thumbnail0.baidupcs.com/thumbnail/88d243fb39e38c3d56cefd3a5b2e3459?fid=1259087893-250528-712458354988681&amp;time=1544878800&amp;rt=sh&amp;sign=FDTAER-DCb740ccc5511e5e8fedcff06b081203-QKj7KqKkVTuusQ8o0UkkVwLDB%2B0%3D&amp;expires=8h&amp;chkv=0&amp;chkbd=0&amp;chkpc=&amp;dp-logid=8092063733828165106&amp;dp-callid=0&amp;size=c710_u400&amp;quality=100&amp;vuk=-&amp;ft=video" alt=""></p><p>4.调用结束的堆栈 </p><p><img src="https://thumbnail0.baidupcs.com/thumbnail/ca3dd633932be0c1bb59256e44276e6d?fid=1259087893-250528-574814416488756&amp;time=1544878800&amp;rt=sh&amp;sign=FDTAER-DCb740ccc5511e5e8fedcff06b081203-4jo1Tky2%2FALRP0b%2Bv49ptjJVAgw%3D&amp;expires=8h&amp;chkv=0&amp;chkbd=0&amp;chkpc=&amp;dp-logid=8092105420285105960&amp;dp-callid=0&amp;size=c710_u400&amp;quality=100&amp;vuk=-&amp;ft=video" alt=""></p><ol start="5"><li>取出结果的栈 lua_setglobal(L, “c”)     </li></ol><p><img src="https://thumbnail0.baidupcs.com/thumbnail/da6b672bfe31efd925d1b07252d8d61f?fid=1259087893-250528-381860168682101&amp;time=1544878800&amp;rt=sh&amp;sign=FDTAER-DCb740ccc5511e5e8fedcff06b081203-WW5zL3p%2Bf6EDOcBSTdSYtECt4cw%3D&amp;expires=8h&amp;chkv=0&amp;chkbd=0&amp;chkpc=&amp;dp-logid=8092179093472688280&amp;dp-callid=0&amp;size=c710_u400&amp;quality=100&amp;vuk=-&amp;ft=video" alt=""></p><h4 id="lua-call函数的过程"><a href="#lua-call函数的过程" class="headerlink" title="lua_call函数的过程"></a>lua_call函数的过程</h4><ol><li>lua具有很强一致性, 不管是dostring, 还是dofile, 都会形成一个闭包, 也就是说, 闭包是lua中用来组织结构的基本构件, 这个特点使得lua中的结构具有一致性, 是一种简明而强大的概念.</li><li>根据1， a = test(3, 4)其实是被组织成为一个闭包放在lua栈顶[方便期间, 给这个lua闭包起名为bb], 也就说dostring真正调用的是bb闭包, 然后bb闭包执行时才调用的是test[保存当前信息到当前函数的CallInfo中]</li><li>在调用test的时刻, L-&gt;ci记载着bb闭包的调用信息, 所以, 先把下一个要执行的指令放在L-&gt;ci-&gt;savedpc中, 以供从test返回后继续执行.</li><li>取栈上的test C闭包 cl, 用 cl-&gt;isC == 1断定它的确是一个C闭包[进入一个新的CallInfo, 布置堆栈]</li><li><p>从L中新分配一个CallInfo ci来记录test的调用信息, 并把它的值设置到L-&gt;ci, 这表明一个新的函数调用开始了, 这里还要指定test在栈中的位置, L-&gt;base = ci-&gt;base = ci-&gt;func+1, 注意, 这几个赋值很重要, 导致的堆栈状态由图2转化到图3, 从图中可以看出, L-&gt;base指向了第一个参数, ci-&gt;base也指向了第一个参数, 所以在test中, 我们调用lua_gettop函数返回的值就是2， 因为在调用它的时候, 它的栈帧上只有2个元素, 实现了lua向c语言中传参数.<br>[调用实际的函数]</p></li><li><p>安排好堆栈, 下面就是根据L-&gt;ci-&gt;func指向的栈上的闭包(及test的C闭包), 找到对应的cl-&gt;c-&gt;f, 并调用, 就进入了c函数lua_test [获取返回值调整堆栈, 返回原来的CallInfo]</p></li><li><p>根据lua_test的返回值, 把test闭包和参数弹出栈, 并把返回值压入并调整L-&gt;top</p></li><li><p>恢复 L-&gt;base, L-&gt;ci 和 L-&gt;savedpc, 继续执行.</p></li></ol><h4 id="调用一个新的闭包时："><a href="#调用一个新的闭包时：" class="headerlink" title="调用一个新的闭包时："></a>调用一个新的闭包时：</h4><ol><li>保存当前信息到当前函数的CallInfo中 （CallInfo函数调用的状态信息）</li><li>进入一个新的CallInfo, 布置堆栈  </li><li>调用实际的函数  </li><li>获取返回值调整堆栈, 返回原来的CallInfo</li></ol>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h4 id=&quot;lua中有两种闭包-c闭包和lua闭包&quot;&gt;&lt;a href=&quot;#lua中有两种闭包-c闭包和lua闭包&quot; class=&quot;headerlink&quot; title=&quot;lua中有两种闭包, c闭包和lua闭包&quot;&gt;&lt;/a&gt;lua中有两种闭包, c闭包和lua闭包&lt;/h4&gt;&lt;p&gt;
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua模块注册</title>
-    <link href="https://bytemode.github.io/2018/12/15/lua%E6%A8%A1%E5%9D%97%E6%B3%A8%E5%86%8C/"/>
-    <id>https://bytemode.github.io/2018/12/15/lua模块注册/</id>
-    <published>2018-12-15T10:19:25.000Z</published>
-    <updated>2018-12-27T08:12:07.825Z</updated>
-    
-    <content type="html"><![CDATA[<p>Lua自带的模块并不多,好处就是Lua足够的小,毕竟它的设计目标是定位成一个嵌入式的轻量级语言的.</p><h4 id="相关的函数index2adr"><a href="#相关的函数index2adr" class="headerlink" title="相关的函数index2adr"></a>相关的函数index2adr</h4><pre><code>static TValue *index2adr (lua_State *L, int idx) {  if (idx &gt; 0) {    TValue *o = L-&gt;base + (idx - 1);    api_check(L, idx &lt;= L-&gt;ci-&gt;top - L-&gt;base);    if (o &gt;= L-&gt;top) return cast(TValue *, luaO_nilobject);    else return o;  }  else if (idx &gt; LUA_REGISTRYINDEX) {    api_check(L, idx != 0 &amp;&amp; -idx &lt;= L-&gt;top - L-&gt;base);    return L-&gt;top + idx;  }  else switch (idx) {  /* pseudo-indices */    case LUA_REGISTRYINDEX: return registry(L);    case LUA_ENVIRONINDEX: {      Closure *func = curr_func(L);      sethvalue(L, &amp;L-&gt;env, func-&gt;c.env);      return &amp;L-&gt;env;    }    case LUA_GLOBALSINDEX: return gt(L);    default: {      Closure *func = curr_func(L);      idx = LUA_GLOBALSINDEX - idx;      return (idx &lt;= func-&gt;c.nupvalues)                ? &amp;func-&gt;c.upvalue[idx-1]                : cast(TValue *, luaO_nilobject);    }  }}</code></pre><p>一个Lua函数栈由两个指针base和top来指定,base指向函数栈底,top则指向栈顶.<br>回到index2addr函数中,几种情况:</p><ol><li>如果索引为正,则从函数栈底为起始位置向上查找数据</li><li>如果索引为负,则从函数栈顶为起始位置向下查找数据</li><li>紧跟着是几种特殊的索引值,都定义了非常大的数据,由于Lua栈限定了函数的栈尺寸,所以不会有那么大的索引,大可放心使用.</li></ol><p>索引值为LUA_REGISTRYINDEX时,则返回的是全局数据global_state的l_registry表;如果索引值为LUA_GLOBALSINDEX,则返回该Lua_State的l_gt表.</p><h4 id="lua模块注册"><a href="#lua模块注册" class="headerlink" title="lua模块注册"></a>lua模块注册</h4><p>Lua内部所有模块的注册都在linit.c的函数luaL_openlibs中提供.可以看到的是,它依次访问一个数组,数组中定义了每个模块的模块名及相应的模块注册函数,依次调用函数就完成了模块的注册.</p><pre><code>static const luaL_Reg lualibs[] = {  {&quot;&quot;, luaopen_base},  {LUA_LOADLIBNAME, luaopen_package},  {LUA_TABLIBNAME, luaopen_table},  {LUA_IOLIBNAME, luaopen_io},  {LUA_OSLIBNAME, luaopen_os},  {LUA_STRLIBNAME, luaopen_string},  {LUA_MATHLIBNAME, luaopen_math},  {LUA_DBLIBNAME, luaopen_debug},  {NULL, NULL}};LUALIB_API void luaL_openlibs (lua_State *L) {  const luaL_Reg *lib = lualibs;  for (; lib-&gt;func; lib++) {    lua_pushcfunction(L, lib-&gt;func);    lua_pushstring(L, lib-&gt;name);    lua_call(L, 1, 0);  }}</code></pre><p>我没有详细的查看每个模块的注册函数,不过还是以最简单的例子来讲解,就是最常用的print函数.</p><p>由于这个函数没有前缀,因此的它所在的模块是””,也就是一个空字符串,因此它是在base模块中注册的,调用的注册函数是luaopen_base.</p><p>紧跟着继续看luaopen_base内部调用的第一个函数base_open:</p><pre><code>static void base_open (lua_State *L) {  /* set global _G */  lua_pushvalue(L, LUA_GLOBALSINDEX);  lua_setglobal(L, &quot;_G&quot;);  /* open lib into global table */  luaL_register(L, &quot;_G&quot;, base_funcs);  // ....}</code></pre><p>首先来看最前面的两句:</p><pre><code>  /* set global _G */  lua_pushvalue(L, LUA_GLOBALSINDEX);  lua_setglobal(L, &quot;_G&quot;);</code></pre><p>这两句首先将LUA_GLOBALSINDEX对应的值压入栈中,其次调用”lua_setglobal(L, “_G”);”,这句代码的意思是在Lua_state的l_gt表中,当查找”_G”时,查找到的是索引值为LUA_GLOBALSINDEX的表.如果觉得有点绕,可以简单这个理解,在Lua中的G表,也就是全局表,满足这个等式”_G = _G[“_G”]“,也就是这个叫”_G”的表,内部有一个key为”_G”的表是指向自己的.怀疑这个结论的,可以在Lua命令行中执行print(_G)和print(_G[“_G”])看看输出结果是不是一致的.</p><p>Lua中要这么处理的理由是:为了让G表和处理其它表使用同样的机制.查找一个变量时,最终会一直查到G表中,这是很自然的事情;所以为了也能按照这个机制顺利的查找到自己,于是在G表中有一个同名成员指向自己.</p><p>好了,前面两句的作用已经分析完毕.其结果有两个:</p><ol><li>_G = _G[“_G”]</li><li>_G表的值压入函数栈中方便了下面的调用.</li></ol><p>继续看下面的语句:<br><strong>luaL_register(L, “_G”, base_funcs);</strong><br><strong>它最终会将base_funcs中的函数注册到G表中,但是里面还有些细节需要看看的.</strong></p><pre><code>LUALIB_API void luaI_openlib (lua_State *L, const char *libname,                              const luaL_Reg *l, int nup) {  if (libname) {    int size = libsize(l);    /* check whether lib already exists */    luaL_findtable(L, LUA_REGISTRYINDEX, &quot;_LOADED&quot;, 1);    lua_getfield(L, -1, libname);  /* get _LOADED[libname] */    if (!lua_istable(L, -1)) {  /* not found? */      lua_pop(L, 1);  /* remove previous result */      /* try global variable (and create one if it does not exist) */      if (luaL_findtable(L, LUA_GLOBALSINDEX, libname, size) != NULL)        luaL_error(L, &quot;name conflict for module &quot; LUA_QS, libname);      lua_pushvalue(L, -1);      lua_setfield(L, -3, libname);  /* _LOADED[libname] = new table */    }    lua_remove(L, -2);  /* remove _LOADED table */    lua_insert(L, -(nup+1));  /* move library table to below upvalues */  }// ...}</code></pre><p>注册这些函数之前,首先会到l_registry表的成员_LOADED表中查找该库,如果不存在则再在G表中查找这个库,不存在则创建一个表.因此,不管是lua中内部的库或者是外部使用require引用的库,都会走这个流程并最终在G表和l_registry[“_LOADED”]中存放该库的表.最后,再遍历传进来的函数指针数组,完成库函数的注册.</p><p>比如,注册os.print时,首先将print函数绑定在一个函数指针上,再去l_registry[“_LOADED”]和G表中查询该名为”os”的库是否存在,不存在则创建一个表,即:<br>G[“os”] = {}</p><p>紧跟着注册print函数,即: G[“os”][“print”] = 待注册的函数指针.这样,在调用lua代码os.print(1)时,首先根据”os”到G表中查找对应的表,再在这个表中查找”print”成员得到函数指针,最后完成函数的调用.</p><h4 id="注册外部模块"><a href="#注册外部模块" class="headerlink" title="注册外部模块"></a>注册外部模块</h4><p><strong>luaL_newlibtable</strong> 它仅仅是创建了一个table,然后把数组里的函数放进去而已 </p><p><strong>luaL_setfuncs</strong>它把数组l中的所有函数注册入<strong>栈顶</strong>的table，并给所有函数绑上<strong>nup</strong>个<strong>upvalue</strong> </p><p>define luaL_newlibtable(L, l)</p><pre><code>lua_createtble(L, 0, sizeof(l)/sizeof((l)[0]) - 1)</code></pre><p>define luaL_newlib(L, l)</p><pre><code>(luaL_newlibtable(L,l), luaL_setfuncs(L,l,0)</code></pre><pre><code>LUALIB_API void luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup){    luaL_checkversion(L);    luaL_checkstack(L, nup, &quot;too_many_upvalue&quot;);    for(; l-&gt;name != NULL; i++){/* fill the table with given functions*/        int i;        for(i = 0; i &lt; nup; i++)/copy upvalues to the top/            lua_pushvalue(L, -nup);        lua_pushclosure(L, l-&gt;func, nup);/closure with those upvalues/        lua_setfield(L, -(nup + 2), l-&gt;name);    }    lua_pop(L, nup);/remove upvalues/}</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;Lua自带的模块并不多,好处就是Lua足够的小,毕竟它的设计目标是定位成一个嵌入式的轻量级语言的.&lt;/p&gt;
-&lt;h4 id=&quot;相关的函数index2adr&quot;&gt;&lt;a href=&quot;#相关的函数index2adr&quot; class=&quot;headerlink&quot; title=&quot;相关的函数in
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua协程</title>
-    <link href="https://bytemode.github.io/2018/12/15/lua%E5%8D%8F%E7%A8%8B/"/>
-    <id>https://bytemode.github.io/2018/12/15/lua协程/</id>
-    <published>2018-12-15T09:56:15.000Z</published>
-    <updated>2018-12-27T08:12:07.824Z</updated>
-    
-    <content type="html"><![CDATA[<p>协程是个很好的东西，它能做的事情与线程相似，区别在于：协程是使用者可控的，有API给使用者来暂停和继续执行，而线程由操作系统内核控制；另外，协程也更加轻量级。这样，在遇到某些可能阻塞的操作时，可以使用暂停协程让出CPU；而当条件满足时，可以继续执行这个协程。目前在网络服务器领域，使用Lua协程最好的范例就是ngx_lua了</p><p>来看看Lua协程内部是如何实现的。</p><p>本质上，每个Lua协程其实也是对应一个LuaState指针，所以其实它内部也是一个完整的Lua虚拟机—有完整的Lua堆栈结构，函数调用栈等等等等，绝大部分之前对Lua虚拟机的分析都可以直接套用到Lua协程中。于是，由Lua虚拟机管理着这些隶属于它的协程，当需要暂停当前运行协程的时候，就保存它的运行环境，切换到别的协程继续执行。很简单的实现。</p><p>来看看相关的API。</p><ol><li>lua_newthread</li></ol><p>创建一个Lua协程，最终会调用的API是luaE_newthread，Lua协程在Lua中也是一个独立的Lua类型数据，它的类型是LUA_TTHREAD，创建完毕之后会照例初始化Lua的栈等结构，有一点需要注意的是，调用preinit_state初始化Lua协程的时候，传入的global表指针是来自于Lua虚拟机，换句话说，任何在Lua协程修改的全局变量，也会影响到其他的Lua协程包括Lua虚拟机本身。</p><ol start="2"><li>加载一个Lua文件并且执行</li></ol><p>对于一般的Lua虚拟机，大可以直接调用luaL_dofile即可，它其实是一个宏：</p><pre><code>#define luaL_dofile(L, fn) \        (luaL_loadfile(L, fn) || lua_pcall(L, 0, LUA_MULTRET, 0))</code></pre><p>展开来也就是当调用luaL_loadfile函数完成对该Lua文件的解析，并且没有错误时，调用lua_pcall函数执行这个Lua脚本。</p><p>但是对于Lua协程而言，却不能这么做，需要调用luaL_loadfile然后再调用lua_resume函数。所以两者的区别在于lua_pcall函数和lua_resume函数。来看看lua_resume函数的实现。这个函数做的几件事情：首先查看当前Lua协程的状态对不对，然后修改计数器：</p><pre><code> L-&gt;baseCcalls = ++L-&gt;nCcalls;</code></pre><p>其次调用status = luaD_rawrunprotected(L, resume, L-&gt;top – nargs);，可以看到这个保护Lua函数堆栈的调用luaD_rawrunprotected最终调用了函数resume:</p><pre><code>static void resume (lua_State *L, void *ud) {  StkId firstArg = cast(StkId, ud);  CallInfo *ci = L-&gt;ci;  if (L-&gt;status == 0) {  /* start coroutine? */    lua_assert(ci == L-&gt;base_ci &amp;&amp; firstArg &gt; L-&gt;base);    if (luaD_precall(L, firstArg - 1, LUA_MULTRET) != PCRLUA)      return;  }  else {  /* resuming from previous yield */    lua_assert(L-&gt;status == LUA_YIELD);    L-&gt;status = 0;    if (!f_isLua(ci)) {  /* `common&#39; yield? */      /* finish interrupted execution of `OP_CALL&#39; */      lua_assert(GET_OPCODE(*((ci-1)-&gt;savedpc - 1)) == OP_CALL ||                 GET_OPCODE(*((ci-1)-&gt;savedpc - 1)) == OP_TAILCALL);      if (luaD_poscall(L, firstArg))  /* complete it... */        L-&gt;top = L-&gt;ci-&gt;top;  /* and correct top if not multiple results */    }    else  /* yielded inside a hook: just continue its execution */      L-&gt;base = L-&gt;ci-&gt;base;  }  luaV_execute(L, cast_int(L-&gt;ci - L-&gt;base_ci));}</code></pre><p>这个函数将执行Lua代码的流程划分成了几个阶段，如果调用</p><pre><code>luaD_precall(L, firstArg - 1, LUA_MULTRET) != PCRLUA</code></pre><p>那么说明这次调用返回的结果小于0，可以跟进luaD_precall函数看看什么情况下会出现这样的情况：</p><pre><code>    n = (*curr_func(L)-&gt;c.f)(L);  /* do the actual call */    lua_lock(L);    if (n &lt; 0)  /* yielding? */      return PCRYIELD;    else {      luaD_poscall(L, L-&gt;top - n);      return PCRC;    }</code></pre><p>继续回到resume函数中，如果之前该Lua协程的状态是YIELD，那么说明之前被中断了，则调用luaD_poscall完成这个函数的调用。<br>然后紧跟着调用luaV_execute继续Lua虚拟机的继续执行。</p><p>可以看到，resume函数做的事情其实有那么几件：</p><ol><li>如果调用C函数时被YIELD了，则直接返回</li><li>如果之前被YIELD了，则调用luaD_poscall完成这个函数的执行，接着调用luaV_execute继续Lua虚拟机的执行。</li></ol><p>因此，这个函数对于函数执行中可能出现的YIELD，有充分的准备和判断，因此它不像一般的pcall那样，一股脑的往下执行，而是会在出现YIELD的时候保存现场返回，在继续执行的时候恢复现场。<br>3）同时，由于resume函数是由luaD_rawrunprotected进行保护调用的，即使执行出错，也不会造成整个程序的退出。</p><p>这就是Lua协程中，比一般的Lua操作过程做的更多的地方。</p><p>最后给出一个Lua协程的例子：<br>co.lua</p><pre><code>print(&quot;before&quot;)test(&quot;123&quot;)print(&quot;after resume&quot;)</code></pre><p>co.c</p><pre><code> #include     #include &quot;lua.h&quot;    #include &quot;lualib.h&quot;    #include &quot;lauxlib.h&quot;    static int panic(lua_State *state) {      printf(&quot;PANIC: unprotected error in call to Lua API (%s)\n&quot;,              lua_tostring(state, -1));      return 0;    }    static int test(lua_State *state) {      printf(&quot;in test\n&quot;);      printf(&quot;yielding\n&quot;);      return lua_yield(state, 0);    }    int main(int argc, char *argv[]) {      char *name = NULL;      name = &quot;co.lua&quot;;      lua_State*  L1 = NULL;      L1 = lua_open();      lua_atpanic(L1, panic);      luaL_openlibs( L1 );      lua_register(L1, &quot;test&quot;, test);      lua_State*  L = lua_newthread(L1);      luaL_loadfile(L, name);      lua_resume(L, 0);      printf(&quot;sleeping\n&quot;);      sleep(1);      lua_resume(L, 0);      printf(&quot;after resume test\n&quot;);      return 0;    }</code></pre><p>你可以使用coroutine.create来创建协程,协程有三种状态：挂起，运行，停止。创建后是挂起状态，即不自动运行。status函数可以查看当前状态。协程真正强大的地方在于他可以通过yield函数将一段正在运行的代码挂起。</p><p>lua的resume-yield可以互相交换数据</p><pre><code>co = coroutine.create(function (a, b)     coroutine.yield(a+b, a-b)end)print(coroutine.resume(co, 3, 8))</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;协程是个很好的东西，它能做的事情与线程相似，区别在于：协程是使用者可控的，有API给使用者来暂停和继续执行，而线程由操作系统内核控制；另外，协程也更加轻量级。这样，在遇到某些可能阻塞的操作时，可以使用暂停协程让出CPU；而当条件满足时，可以继续执行这个协程。目前在网络服务器
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua表类型</title>
-    <link href="https://bytemode.github.io/2018/12/15/lua%E8%A1%A8%E7%B1%BB%E5%9E%8B/"/>
-    <id>https://bytemode.github.io/2018/12/15/lua表类型/</id>
-    <published>2018-12-15T09:51:02.000Z</published>
-    <updated>2018-12-27T08:12:07.825Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="Lua的表的定义"><a href="#Lua的表的定义" class="headerlink" title="Lua的表的定义:"></a>Lua的表的定义:</h4><pre><code>typedef struct Table {  CommonHeader;  lu_byte flags;  lu_byte lsizenode;  /* log2 of size of `node&#39; array */  struct Table *metatable;  TValue *array;  /* array part */  Node *node;  Node *lastfree;  /* any free position is before this position */  GCObject *gclist;  int sizearray;  /* size of `array&#39; array */} Table;</code></pre><p>这里将Table分为了两个部分:数组部分,array指针指向数组部分的首地址,sizearray是数组的尺寸,绝大部分(注意:不是全部)正整数为key的数据都存放在数组部分;node指针指向一个hash桶,对于不能存放在数组部分的数据,都存放在hash中.如下图所示:<br><img src="https://thumbnail0.baidupcs.com/thumbnail/46eff62f24b48c0dd2380abaa949cb84?fid=1259087893-250528-534280502274275&amp;time=1544864400&amp;rt=sh&amp;sign=FDTAER-DCb740ccc5511e5e8fedcff06b081203-KcBURzIEUOljxyzUWcN5%2FL3uieo%3D&amp;expires=8h&amp;chkv=0&amp;chkbd=0&amp;chkpc=&amp;dp-logid=17866885042028318&amp;dp-callid=0&amp;size=c710_u400&amp;quality=100&amp;vuk=-&amp;ft=video" alt=""></p><p>hash部分需要特别注意的一点是:在物理上,所有hash部分的数据,其实是存放一块连续的内存中的,即node指针指向的数组;但是从逻辑上来看,如果几块数据在同一个hash桶上,那么又是通过next指针串联起来的.<br>以图中的示例来分析,node数组的第一个和第三个元素,在物理上是第一和第三个元素,但是在逻辑上,它们是通过next指针串联起来的.</p><h4 id="Table查找数据"><a href="#Table查找数据" class="headerlink" title="Table查找数据"></a>Table查找数据</h4><p>有了以上的了解,从Table中查找一个数据的伪代码就很显而易见了:</p><p>如果输入的Key是一个正整数,并且它的值 &gt; 0 &amp;&amp; &lt;= 数组大小<br>    尝试在数组部分查找<br>否则尝试在Hash部分进行查找:<br>    计算出该Key的Hash值(ltable.c中的mainposition函数),根据此Hash值访问node数组得到Hash桶所在位置<br>    遍历该Hash桶下的所有链表元素,直到找到该Key为止<br>以上已经明白了Table的大致结构,来看看Table中如果新加入新的数据会怎么处理.这里有一些内容,要留到后面讲解到Lua虚拟机的时候才触及,这里先讲解一下,当新插入数据时,Table内的数组和Hash部分,做了哪些变化.</p><p>这部分中,核心的算法在ltable.c的rehash函数中,这个函数是计算当新添加数据时,数组和hash重新分配之后各自的尺寸是多少,伪代码如下:</p><p>首先分配一个位图nums,将其中的所有位置0,这个位图的意义在于:nums数组中第i个元素存放的是key在2^(i-1), 2^i之间的元素数量<br>遍历lua Table中的数组部分,计算在数组部分中的元素数量,更新对应的nums数组元素数量.(numusearray函数)<br>遍历lua Table中的Hash部分,因为其中也可能存放了正整数,也根据这里的正整数数量更新对应的nums数组元素数量.(numusehash函数)<br>此时nums数组已经有了当前这个Table中所有正整数的分配统计,逐个遍历nums数组,如果当前已经有的根据新的数组大小和Hash大小重新分配table的大小(computesizes函数)<br>这里要特别讲解的是computesizes函数,在前面的两个函数调用numusearray函数和numusehash函数之后,此时在nums位图中,已经存放了所有有关整数key的信息,即在[2^(i-1), 2^i]范围内,有多少数据.前面曾经提到过,并不是所有的正整数,都会存放在数组部分的,即使它曾经在,也有可能在之后被分配到hash部分,那么判断的依据是什么?到底怎样的数据,在重新分配之后会从数组部分挪到hash部分?<br>来看computesizes函数的实现:</p><pre><code>static int computesizes (int nums[], int *narray) {  int i;  int twotoi;  /* 2^i */  int a = 0;  /* number of elements smaller than 2^i */  int na = 0;  /* number of elements to go to array part */  int n = 0;  /* optimal size for array part */  for (i = 0, twotoi = 1; twotoi/2 &lt; *narray; i++, twotoi *= 2) {    if (nums[i] &gt; 0) {      a += nums[i];      if (a &gt; twotoi/2) {  /* more than half elements present? */        n = twotoi;  /* optimal size (till now) */        na = a;  /* all elements smaller than n will go to array part */      }    }    if (a == *narray) break;  /* all elements already counted */  }  *narray = n;  lua_assert(*narray/2 &lt;= na &amp;&amp; na &lt;= *narray);  return na;}</code></pre><p>注意到这样的细节:这个函数在遍历nums位图数组的时候,会将当前数据数量存放在变量a中,如果a &gt; twotoi/2,也就是当前有一半以上的空间被利用上了,那么这部分数据会继续留在数组部分,否则就会在之后挪到hash部分了.</p><h4 id="纯粹的使用数组或者hash表性能更高"><a href="#纯粹的使用数组或者hash表性能更高" class="headerlink" title="纯粹的使用数组或者hash表性能更高"></a>纯粹的使用数组或者hash表性能更高</h4><p>为了证实这里的判断,简单的写一段lua代码做为实验:</p><pre><code>function print_ipairs(t)  print(&quot;in print_ipairs&quot;)  for k, v in ipairs(t) do    print(k)  endend function print_pairs(t)  print(&quot;in print_pairs&quot;)  for k, v in pairs(t) do    print(k)  endend a = {}a={1,2,3,4,5,6,7,8,9,10}print_ipairs(a)a[2] = nila[3] = nila[4] = nila[6] = nila[&quot;k&quot;] = &quot;e&quot;print_ipairs(a)print_pairs(a)输出为:in print_ipairs12345678910in print_ipairs1in print_pairs17810k59</code></pre><p>在这里,首先对表a赋值,有1-10共十个元素,通过调用函数print_ipairs可知,这些元素都是存放在数组部分的,这是因为ipairs取的是Table的数组部分元素.<br>在这之后,人为的将其中2,3,4,6元素删除,造成原来数组不满一半元素被利用上的现象,然后再插入一个新key “k”,以让这个Table重新分配空间.再此之后,再次调用ipairs遍历a的数组部分,可以看到只有1被打印出来了,也就是说,在重新分配空间之后,除去已经被删除的2,3,4,6之外,只有1还在数组里面,剩下的5,7,8,9,10已经不在数组部分了.紧接着调用pairs遍历这个表,可以看出这些已经不在数组部分的值又被打印出来了,并且它们的顺序已经被打乱,不再按照数字大小顺序来排列了,它们在这次重新分配中被挪动到了hash部分.</p><p>这个实验既验证了我们前面的分析,同时也告诉我们,Table的重新分配,实际上代价是很大的,因此不建议在实际程序中,一个Table即有数组部分,也有Hash部分,纯粹一些,性能上会有提升.</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h4 id=&quot;Lua的表的定义&quot;&gt;&lt;a href=&quot;#Lua的表的定义&quot; class=&quot;headerlink&quot; title=&quot;Lua的表的定义:&quot;&gt;&lt;/a&gt;Lua的表的定义:&lt;/h4&gt;&lt;pre&gt;&lt;code&gt;typedef struct Table {
-  CommonHeade
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua通用数据类型</title>
-    <link href="https://bytemode.github.io/2018/12/15/LUA%E7%9A%84%E9%80%9A%E7%94%A8%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/"/>
-    <id>https://bytemode.github.io/2018/12/15/LUA的通用数据类型/</id>
-    <published>2018-12-15T06:57:00.000Z</published>
-    <updated>2018-12-27T08:12:07.823Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="TValue结构"><a href="#TValue结构" class="headerlink" title="TValue结构"></a>TValue结构</h4><p>TValue这个结构体是Lua的通用结构体,,Lua中的所有的数据都可以使用这个结构体来表示.很容易想到,在面向对象中,这个结构体是一个基类,派生出来的都是其他的子类.</p><p>TValue结构体内部有几个宏, 展开之后就是这样的:</p><pre><code>typedef struct lua_TValue {    union {      union GCObject {        struct GCheader {          GCObject *next; lu_byte tt; lu_byte marked;        } gch;        union TString ts;        union Udata u;        union Closure cl;        struct Table h;        struct Proto p;        struct UpVal uv;        struct lua_State th;  /* thread */      } gc;      void *p;      lua_Number n;      int b;    } value;    int tt;} TValue;</code></pre><p>这个结构体定义,总体来说分为两个部分:tt存放的数据类型,而value域存放的是各种数据.而在其中,又划分为两个部分,可gc的数据类型使用union放在一起,剩下的就是不可gc的数据类型了:void*,lua_Number,int.</p><h4 id="gc-union"><a href="#gc-union" class="headerlink" title="gc union"></a>gc union</h4><p>gc union的定义,可以看到各种可gc的类型(Tstring,Udata..etc)和一个GCHeader放在 一起,也就是说,当这部分还是数据的时候,数据部分启用,否则就是gc部分了.这里的GCHeader包括了三个部分:next指针将可gc的数据串联成链表,tt表示数据类型,marked存放的gc处理时的颜色值.<br>这是另一种方式的使用C语言实现的面向对象,对外部而言,TValue结构体可以看作是”基类”,真正进行处理时,再根据数据类型决定到底使用value union中的哪个数据部分.可以看到lua源代码中定义了很多宏就是这样操作Tvalue数据指针的,比如:</p><pre><code>#define hvalue(o)    check_exp(ttistable(o), &amp;(o)-&gt;value.gc-&gt;h)</code></pre><p>这个宏定义了如何从TValue指针得到Table结构体:首先判断数据类型是Table,然后将value的gc union中Table *h取出.</p><p>反之,要从一个具体的类型转换再赋值为相应的TValue,Lua源代码中也提供了相应的宏.因为TValue结构体的中的value域是一个union,所以其实随便强制转换为其中的哪一种类型都可以,不过看上去最舒服的写法还是直接转换为公共类型GCObject了,比如:</p><pre><code>#define setsvalue(L,obj,x) \  { TValue *i_o=(obj); \    i_o-&gt;value.gc=cast(GCObject *, (x)); i_o-&gt;tt=LUA_TSTRING; \checkliveness(G(L),i_o); }</code></pre><h4 id="GCObject"><a href="#GCObject" class="headerlink" title="GCObject"></a>GCObject</h4><pre><code>union GCObject {  GCheader gch;  union TString ts;  union Udata u;  union Closure cl;  struct Table h;  struct Proto p;  struct UpVal uv;  struct lua_State th;  /* thread */};</code></pre><p>其中的GCheader展开是这样的:</p><pre><code>typedef struct GCheader {  CommonHeader;} GCheader;</code></pre><p>而随便抽在GCObject结构体中的数据类型结构体定义,都发现也包含了一个CommonHeader结构体,比如:</p><pre><code>typedef struct Table {  CommonHeader;  lu_byte flags;  lu_byte lsizenode;  /* log2 of size of `node&#39; array */  struct Table *metatable;  TValue *array;  /* array part */  Node *node;  Node *lastfree;  /* any free position is before this position */  GCObject *gclist;  int sizearray;  /* size of `array&#39; array */} Table;</code></pre><p>换言之,在GCObject中,无论是哪个数据结构体,都自己有一份CommonHeader.仔细观察,其实GCObject这个union的内存分布,最开始部分无论如何都是留给CommonHeader的.这样做,就保证了一个存放在TValue结构体中的数据,既可以使用CommonHeader关于GC的部分,也可以使用到自己本身的数据部分了.</p>]]></content>
-    
-    <summary type="html">
-    
-      TValue这个结构体是Lua的通用结构体,,Lua中的所有的数据都可以使用这个结构体来表示.这个结构体定义,总体来说分为两个部分:tt存放的数据类型,而value域存放的是各种数据.而在其中,又划分为两个部分,可gc的数据类型使用union放在一起,剩下的就是不可gc的数据类型了:void*,lua_Number,int. gc联合体部分就是GCobject
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
     
   </entry>
   
