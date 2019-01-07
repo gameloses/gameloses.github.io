@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="cocos2dx,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="小工知识库" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="cocos2dx绘制单个图片的渲染命令是QUAD_COMMAND,通过分析这个命令可以学习opengl es是如何处理图片渲染的. 关于VAO和VBO顶点数组对象（Vertex Array Object  即VAO）是一个包含多个顶点缓冲区对象（Vertex Buffer Object， 即 VBO）的对象，一般存储一个可渲染物体的顶点信息. 顶点缓冲区对象（ VBO）是你显卡内存中的一块高速内存">
+<meta name="keywords" content="cocos2dx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cocos2dx源码分析-如何绘制图片">
+<meta property="og:url" content="https://bytemode.github.io/2017/12/18/cocos2dx是如何绘制图片的/index.html">
+<meta property="og:site_name" content="小工知识库">
+<meta property="og:description" content="cocos2dx绘制单个图片的渲染命令是QUAD_COMMAND,通过分析这个命令可以学习opengl es是如何处理图片渲染的. 关于VAO和VBO顶点数组对象（Vertex Array Object  即VAO）是一个包含多个顶点缓冲区对象（Vertex Buffer Object， 即 VBO）的对象，一般存储一个可渲染物体的顶点信息. 顶点缓冲区对象（ VBO）是你显卡内存中的一块高速内存">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-01-07T11:11:34.166Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="cocos2dx源码分析-如何绘制图片">
+<meta name="twitter:description" content="cocos2dx绘制单个图片的渲染命令是QUAD_COMMAND,通过分析这个命令可以学习opengl es是如何处理图片渲染的. 关于VAO和VBO顶点数组对象（Vertex Array Object  即VAO）是一个包含多个顶点缓冲区对象（Vertex Buffer Object， 即 VBO）的对象，一般存储一个可渲染物体的顶点信息. 顶点缓冲区对象（ VBO）是你显卡内存中的一块高速内存">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bytemode.github.io/2017/12/18/cocos2dx是如何绘制图片的/">
+
+
+
+
+
+  <title>cocos2dx源码分析-如何绘制图片 | 小工知识库</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小工知识库</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">coding wiki</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-golang">
+          <a href="/golang/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            golang
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-cocos">
+          <a href="/cocos2dx/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            cocos
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/12/18/cocos2dx是如何绘制图片的/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sunfeng">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小工知识库">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">cocos2dx源码分析-如何绘制图片</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-18T21:56:58+08:00">
+                2017-12-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/cocos2dx/" itemprop="url" rel="index">
+                    <span itemprop="name">cocos2dx</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/18/cocos2dx是如何绘制图片的/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/12/18/cocos2dx是如何绘制图片的/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>cocos2dx绘制单个图片的渲染命令是QUAD_COMMAND,通过分析这个命令可以学习opengl es是如何处理图片渲染的.</p>
+<h4 id="关于VAO和VBO"><a href="#关于VAO和VBO" class="headerlink" title="关于VAO和VBO"></a>关于VAO和VBO</h4><p>顶点数组对象（Vertex Array Object  即VAO）是一个包含多个顶点缓冲区对象（Vertex Buffer Object， 即 VBO）的对象，一般存储一个可渲染物体的顶点信息. 顶点缓冲区对象（ VBO）是你显卡内存中的一块高速内存缓冲区，用来存储顶点的所有信息。</p>
+<p>顶点数组指定的顶点数据保存在客户内存中,在进行glDrawArray或者glDrawElements等绘图调用时，这些数据必须同客户内存复制到图形内存中,没必要每次绘图时都复制顶点数据，而是在图形内存中缓存这些数据，这样可以显著改善渲染性能，也可以降低内存带宽和电力消耗需求,这就是顶点缓冲区对象发挥作用的地方.在OpenGL3.0中，出现了更进一步的VAO，VBO通过绘制上下文获得绘制状态，VAO可以拥有多个VBO，它记录所有绘制状态，它的代码更简洁，效率更高.</p>
+<pre><code>void Renderer::setupBuffer()
+{
+    if(Configuration::getInstance()-&gt;supportsShareableVAO())
+    {
+        //初始化VBO和VAO
+        setupVBOAndVAO();
+    }
+    else
+    {
+        //不支持VAO，只初始化VBO
+        setupVBO();
+    }
+}
+
+void Renderer::setupVBOAndVAO()
+{
+    //一个VAO
+    glGenVertexArrays(1, &amp;_quadVAO);
+
+    //绑定VAO
+    GL::bindVAO(_quadVAO);
+
+    //创建生成两个VBO
+    glGenBuffers(2, &amp;_buffersVBO[0]);
+
+    //顶点Buffer
+    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) * VBO_SIZE, _quads, GL_DYNAMIC_DRAW);
+    //这里就是VAO和VBO的区别，VAO把这些放到初始化中，无论后面绘制多少次，只要他不被改变，这段代码只会被调用一次，而VBO中，这个功能的代码会在每次被绘制时调用，这样就节约了效率
+
+    //位置
+    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
+
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, vertices));
+
+    //颜色
+    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
+
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, colors));
+
+    //纹理坐标数据
+    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORDS);
+
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORDS, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, texCoords));
+
+    //索引Buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
+
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * VBO_SIZE * 6, _indices, GL_STATIC_DRAW);
+
+    //取消VAO
+    GL::bindVAO(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    CHECK_GL_ERROR_DEBUG();
+}
+
+void Renderer::setupVBO()
+{
+
+    //创建生成两个VBO
+    glGenBuffers(2, &amp;_buffersVBO[0]);
+
+    //调用函数绑定buffer
+    mapBuffers();
+}
+
+void Renderer::mapBuffers()
+{
+    //GL_ARRAY_BUFFER 表示顶点数据
+    //GL_ELEMENT_ARRAY_BUFFER 表示索引数据
+
+    //避免改变buffer元素
+    GL::bindVAO(0);
+
+    //绑定id 顶点数据
+    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
+
+    //为改id制定一段内存区域
+    glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) * VBO_SIZE, _quads, GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //第二个VBO 索引数据
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
+
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * VBO_SIZE * 6, _indices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    CHECK_GL_ERROR_DEBUG();
+}
+
+</code></pre><p>0l;需要介绍的两个关键的函数</p>
+<p>glBindBuffer：它绑定缓冲区对象表示选择未来的操作将影响哪个缓冲区对象。如果应用程序有多个缓冲区对象，就需要多次调用glBindBuffer()函数：一次用于初始化缓冲区对象以及它的数据，以后的调用要么选择用于渲染的缓冲区对象，要么对缓冲区对象的数据进行更新。</p>
+<p>当传入的第二个参数第一次使用一个非零无符号整数时，创建一个新的缓冲区对象；当第二个参数是之前使用过的，这个缓冲区对象成为活动缓冲区对象；如果第二个参数值为0时，停止使用缓冲区对象</p>
+<p>glBufferData：保留空间存储数据，他分配一定大小的（第二个参数）的openGL服务端内存，用于存储顶点数据或索引。这个被绑定的对象之前相关联的数据都会被清除。</p>
+<p>glBufferData参数介绍</p>
+<p>参数1，目标GL_ARRAY_BUFFER或者GL_ELEMENT_ARRAY_BUFFER</p>
+<p>参数2，内存容量</p>
+<p>参数3，用于初始化缓冲区对象，可以使一个指针，也可以是空</p>
+<p>参数4，如何读写，可以选择如下几种</p>
+<pre><code>GL_DYNAMIC_DRAW:多次指定，多次作为绘图和图像指定函数的源数据，缓冲区对象的数据不仅常常需要进行更新，而且使用频率也非常高
+
+GL_STATIC_DRAW:数据只指定一次，多次作为绘图和图像指定函数的源数据，缓冲区对象的数据只指定1次，但是这些数据被使用的频率很高
+
+GL_STREAM_DRAW:数据只指定一次，最多只有几次作为绘图和图像指定函数的源数据，缓冲区对象中的数据常常需要更新，但是在绘图或其他操作中使用这些数据的次数较少
+</code></pre><p>从初始化的代码上，为什么VAO反倒复杂了呢？因为他只是把绘制时需要做的一些事情提前放到初始化函数中，来看一下绘制流程。</p>
+<pre><code>//当前的openGL是否支持VAO
+if (Configuration::getInstance()-&gt;supportsShareableVAO())
+{
+    //绑定顶点数组
+    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
+    //向缓冲区申请空间并指定数据传输方式
+    glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) * (_numQuads), nullptr, GL_DYNAMIC_DRAW);
+    //提供缓冲区对象包含整个数据集合的更新
+    void *buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+    memcpy(buf, _quads, sizeof(_quads[0])* (_numQuads));
+    //缓冲区对象的更新完成
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+    //为了禁用缓冲区对象，可以用0作为缓冲区对象的标识符来调用glBindBuffer()函数。这将把OpenGL切换为默认的不使用缓冲区对象的模式。
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //Bind VAO
+    GL::bindVAO(_quadVAO);
+}
+else
+{
+</code></pre><p>#define kQuadSize sizeof(_quads[0].bl)<br>        glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);<br>        glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) <em> _numQuads , _quads, GL_DYNAMIC_DRAW);<br>        //激活顶点颜色纹理坐标的属性<br>        GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);<br>        //顶点<br>        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid</em>) offsetof(V3F_C4B_T2F, vertices));<br>        //颜色<br>        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, kQuadSize, (GLvoid<em>) offsetof(V3F_C4B_T2F, colors));<br>        //纹理坐标<br>        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORDS, 2, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid</em>) offsetof(V3F_C4B_T2F, texCoords));</p>
+<pre><code>    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
+}
+</code></pre><p>可以看到，这些设置属性的函数放在了绘制函数里，虽然看似是一样的，但是绘制函数会被调用的更频繁，所以把这些函数放到初始化函数中可以大幅提高程序的效率。</p>
+<p>这里介绍VAO的两个函数：</p>
+<p>glMapBuffer函数返回一个指针，指向与第一个参数相关联的当前绑定缓冲区对象的数据存储。第一个参数与glBufferData的第一个参数一致。第二个参数是GL_READ_ONLY、GL_WRITE_ONLY或GL_READ_WRITE之一，表示可以对数据进行的操作。</p>
+<p>glUnmapBuffer表示对当前绑定缓冲区对象的更新已经完成，并且这个缓冲区可以释放。</p>
+<p>enableVertexAttribs激活相关属性，激活的属性可以调用glVertexAttribPointer指定数据源，可选的有VERTEX_ATTRIB_FLAG_POSITION，VERTEX_ATTRIB_FLAG_COLOR和VERTEX_ATTRIB_FLAG_TEX_COORDS，这里这个参数是激活这三个。</p>
+<p>glVertexAttribPointer指定了渲染时第一个参数代表的索引值的顶点属性数组的数据格式和位置。</p>
+<p>第一个参数指定要修改的顶点属性的索引值，包括VERTEX_ATTRIB_POSITION（位置），VERTEX_ATTRIB_COLOR（颜色），VERTEX_ATTRIB_TEX_COORDS（纹理坐标）。</p>
+<p>第二个参数指定每个属性值的组件数量且必须为1、2、3、4之一。</p>
+<p>第三个参数指定数组中每个组件的数据类型。可用的符号常量有GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT,GL_UNSIGNED_SHORT,GL_FIXED, 和 GL_FLOAT，初始值为GL_FLOAT。</p>
+<p>第四个参数指定当被访问时，固定点数据值是否应该被归一化（GL_TRUE，意味着整数型的值会被映射至区间<a href="有符号整数">-1,1</a>，或者区间[0,1]（无符号整数））或者直接转换为固定点值（GL_FALSE）。</p>
+<p>第五个参数指定了一个属性到下一个属性之间的步长（这就允许属性值被存储在单一数组或者不同的数组中）。也就是连续顶点属性之间的偏移量。如果为0，那么它们是紧密排列在一起的。初始值为0。</p>
+<p>第六个参数指定一个指针，指向数组中第一个顶点属性的第一个组件。初始值为0。</p>
+<p>最后需要调用绘制元素函数，绘制这些信息</p>
+<p>glDrawElements(GL_TRIANGLES, (GLsizei) quadsToDraw<em>6, GL_UNSIGNED_SHORT, (GLvoid</em>) (startQuad<em>6</em>sizeof(_indices[0])) );<br>它根据索引绘图(注意：顶点数据和索引各自使用不同的缓冲区)</p>
+<pre><code>需要注意的是在Renderer的析构函数中要调用glDeleteBuffers来释放它的资源，并使它的标识可以其他缓冲区对象使用。
+</code></pre><h3 id="QUAD-COMMAND的绘制函数"><a href="#QUAD-COMMAND的绘制函数" class="headerlink" title="QUAD_COMMAND的绘制函数"></a>QUAD_COMMAND的绘制函数</h3><p>QUAD_COMMAND命令回调用drawBatchedQuads调用绘制函数</p>
+<pre><code>else if ( RenderCommand::Type::QUAD_COMMAND == commandType )
+        {
+            flush3D();
+            if(_filledIndex &gt; 0)
+            {
+                drawBatchedTriangles();
+                _lastMaterialID = 0;
+            }
+            auto cmd = static_cast&lt;QuadCommand*&gt;(command);
+            //Batch quads
+            if( (_numberQuads + cmd-&gt;getQuadCount()) * 4 &gt; VBO_SIZE )
+            {
+                drawBatchedQuads();
+            }
+
+            _batchQuadCommands.push_back(cmd);
+            fillQuads(cmd);
+        }
+
+void Renderer::flush()
+{
+    //绘制
+    drawBatchedQuads();
+    //清空
+    _lastMaterialID = 0;
+}
+</code></pre><p>这个处理主要是把命令存入_batchedQuadCommands中，如果如果Quad数据量超过VBO的大小，那么调用绘制，将缓存的命令全部绘制.如果一直没有超过VBO的大小，drawBatchedQuads绘制函数将在flush被调用时调用</p>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/WechatIMG73.jpg" alt="sunfeng 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/WechatIMG74.jpg" alt="sunfeng 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cocos2dx/" rel="tag"># cocos2dx</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/17/cocos2dx渲染架构/" rel="next" title="cocos2dx源码分析-渲染架构">
+                <i class="fa fa-chevron-left"></i> cocos2dx源码分析-渲染架构
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/27/opengl基础/" rel="prev" title="opengl基础">
+                opengl基础 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="sunfeng">
+            
+              <p class="site-author-name" itemprop="name">sunfeng</p>
+              <p class="site-description motion-element" itemprop="description">stay hungry stay foolish</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">64</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/bytemode" target="_blank" title="github">
+                      
+                        <i class="fa fa-fw fa-github"></i>github</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:sunfeng45@163.com" target="_blank" title="email">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>email</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://blog.csdn.net/blogsun" target="_blank" title="csdn">
+                      
+                        <i class="fa fa-fw fa-csdn"></i>csdn</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.cnblogs.com/bytemode" target="_blank" title="cnblogs">
+                      
+                        <i class="fa fa-fw fa-cnblogs"></i>cnblogs</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#关于VAO和VBO"><span class="nav-number">1.</span> <span class="nav-text">关于VAO和VBO</span></a></li></ol><li class="nav-item nav-level-3"><a class="nav-link" href="#QUAD-COMMAND的绘制函数"><span class="nav-number"></span> <span class="nav-text">QUAD_COMMAND的绘制函数</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2013 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">stephen.sun</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'BQ4UGsgJKS9xQ9AJz8mWuMNS-gzGzoHsz',
+        appKey: '6xMqIauHFPgEPXAGQTFLojxr',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

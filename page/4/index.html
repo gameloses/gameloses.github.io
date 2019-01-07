@@ -317,7 +317,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/15/lua虚拟机概述/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/12/28/opengl绘制三角形/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -336,7 +336,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/12/15/lua虚拟机概述/" itemprop="url">lua虚拟机概述</a></h1>
+                <a class="post-title-link" href="/2017/12/28/opengl绘制三角形/" itemprop="url">opengl绘制三角形</a></h1>
         
 
         <div class="post-meta">
@@ -348,8 +348,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-15T13:42:38+08:00">
-                2018-12-15
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-28T15:15:06+08:00">
+                2017-12-28
               </time>
             
 
@@ -371,8 +371,8 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/opengl/" itemprop="url" rel="index">
+                    <span itemprop="name">opengl</span>
                   </a>
                 </span>
 
@@ -389,8 +389,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/15/lua虚拟机概述/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/15/lua虚拟机概述/" itemprop="commentCount"></span>
+                <a href="/2017/12/28/opengl绘制三角形/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/12/28/opengl绘制三角形/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -420,11 +420,18 @@
       
         
           
-          何为虚拟机用于模拟计算机运行的程序.是个中间层,它处于脚本语言和硬件之间的一个程序.每一门脚本语言都会有自己定义的opcode(”操作码”),可以理解为这门程序自己定义的”汇编语言”.一般的编译型语言,比如C等,经过编译器编译之后生成的都是与当前硬件环境相匹配的汇编代码;而脚本型的语言,经过前端的处
+          
+
+顶点数组对象：Vertex Array Object，VAO
+顶点缓冲对象：Vertex Buffer Object，VBO
+索引缓冲对象：Element Buffer Object，EBO或Index Buffer Object，IBO
+
+
+渲染管线在OpenGL中，任何事物都在3D空间中，而
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/12/15/lua虚拟机概述/#more" rel="contents">
+            <a class="btn" href="/2017/12/28/opengl绘制三角形/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -475,7 +482,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/15/lua函数定义/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/12/27/opengl纹理/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -494,7 +501,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/12/15/lua函数定义/" itemprop="url">lua函数定义</a></h1>
+                <a class="post-title-link" href="/2017/12/27/opengl纹理/" itemprop="url">opengl纹理</a></h1>
         
 
         <div class="post-meta">
@@ -506,8 +513,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-15T13:24:49+08:00">
-                2018-12-15
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-27T16:59:39+08:00">
+                2017-12-27
               </time>
             
 
@@ -529,8 +536,8 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/opengl/" itemprop="url" rel="index">
+                    <span itemprop="name">opengl</span>
                   </a>
                 </span>
 
@@ -547,320 +554,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/15/lua函数定义/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/15/lua函数定义/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          函数是第一类值，函数定义有funcstate结构表示，其中包含父函数指针，函数原型数组信息；actvar局部变量数组，upvalues保存upvalue数组信息。
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/12/15/lua函数定义/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/14/lua字符串/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="sunfeng">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小工知识库">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/12/14/lua字符串/" itemprop="url">lua字符串类型</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-14T22:25:11+08:00">
-                2018-12-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/12/14/lua字符串/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/14/lua字符串/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          lua字符串结构体是TString，TString里的记录了hash值和字符串长度，真正的字符串是存储在全局globale_state的stringtable里面，这是一个gcobject组成的hash表.
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/12/14/lua字符串/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/13/lua-pcall的实现/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="sunfeng">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小工知识库">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/12/13/lua-pcall的实现/" itemprop="url">lua-pcall的实现</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-13T13:24:24+08:00">
-                2018-12-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/12/13/lua-pcall的实现/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/13/lua-pcall的实现/" itemprop="commentCount"></span>
+                <a href="/2017/12/27/opengl纹理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/12/27/opengl纹理/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -890,13 +585,12 @@
       
         
           
-          Lua支持两种形式的函数调用，一种对调用过程的堆栈进行保护，即使中间过程出错，也不至于让进程退出，也就是pcall，一般在使用C调用Lua写的脚本函数时，都采用pcall方式。
-对比起一般的函数调用方式，pcall多做了这些事情：
-对函数调用前的Lua堆栈进行保护在调用完毕之后恢复，支持传入出错时的
+          关于纹理可以为每个顶点添加颜色来增加图形的细节，从而创建出丰富的图像。想让图形看起来更真实，我们就必须有足够多的顶点，从而指定足够多的颜色。这将会产生很多额外开销.纹理是一个2D图片，它可以用来添加物体的细节，这样就可以让物体非常精细而不用指定额外的顶点。
+为了能够把纹理映射(Map)到三角形上，我
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/12/13/lua-pcall的实现/#more" rel="contents">
+            <a class="btn" href="/2017/12/27/opengl纹理/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -947,7 +641,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/13/lua表的创建和初始化/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/12/27/cocos2dx批处理渲染/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -966,7 +660,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/12/13/lua表的创建和初始化/" itemprop="url">lua表的创建和初始化</a></h1>
+                <a class="post-title-link" href="/2017/12/27/cocos2dx批处理渲染/" itemprop="url">cocos2dx源码分析-批处理渲染</a></h1>
         
 
         <div class="post-meta">
@@ -978,8 +672,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-13T13:11:44+08:00">
-                2018-12-13
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-27T16:32:40+08:00">
+                2017-12-27
               </time>
             
 
@@ -1001,8 +695,8 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/cocos2dx/" itemprop="url" rel="index">
+                    <span itemprop="name">cocos2dx</span>
                   </a>
                 </span>
 
@@ -1019,8 +713,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/13/lua表的创建和初始化/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/13/lua表的创建和初始化/" itemprop="commentCount"></span>
+                <a href="/2017/12/27/cocos2dx批处理渲染/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/12/27/cocos2dx批处理渲染/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1050,15 +744,11 @@
       
         
           
-          表的基本实现在Lua中，表是唯一的数据结构，可以使用它，模拟hash表，数组，链表，树等一切常用的数据结构。Lua表分为数组部分和hash部分。比如：
-local t = {1,2,3,4,5}
-以上分配一个Lua数组，依次为1到5.
-而如果要初始化hash部分，则需要指定key，有两种方式：
-lo
-          ...
+          
+          
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/12/13/lua表的创建和初始化/#more" rel="contents">
+            <a class="btn" href="/2017/12/27/cocos2dx批处理渲染/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1109,7 +799,7 @@ lo
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/12/lua require机制/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/12/27/opengl基础/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -1128,7 +818,7 @@ lo
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/12/12/lua require机制/" itemprop="url">lua require机制</a></h1>
+                <a class="post-title-link" href="/2017/12/27/opengl基础/" itemprop="url">opengl基础</a></h1>
         
 
         <div class="post-meta">
@@ -1140,8 +830,8 @@ lo
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-12T21:45:37+08:00">
-                2018-12-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-27T16:13:48+08:00">
+                2017-12-27
               </time>
             
 
@@ -1163,8 +853,8 @@ lo
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/opengl/" itemprop="url" rel="index">
+                    <span itemprop="name">opengl</span>
                   </a>
                 </span>
 
@@ -1181,8 +871,8 @@ lo
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/12/lua require机制/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/12/lua require机制/" itemprop="commentCount"></span>
+                <a href="/2017/12/27/opengl基础/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/12/27/opengl基础/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1212,14 +902,12 @@ lo
       
         
           
-          require(modname)
-加载给定的模块.函数首先检查表package.loaded来判定modname是否已经存在.
-如果存在,则require返回package.loaded[modname]所存储的值否则它尝试为模块找到一个加载器(loader).
-要找到一个加载器,require首先
+          openglopengl是一个由Khronos组织制定并维护的规范(Specification) 。是一系列的图形软件编程接口，和gdi类似。opengl有很多封装的库最有名的GLFW库。接下来很多东西以GLFW 为例子来说明一些api的使用问题，但这并不影响opengl本身的逻辑表述。
+状态机Op
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/12/12/lua require机制/#more" rel="contents">
+            <a class="btn" href="/2017/12/27/opengl基础/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1270,7 +958,7 @@ lo
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/12/lua错误跟踪/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/12/18/cocos2dx是如何绘制图片的/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -1289,7 +977,7 @@ lo
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/12/12/lua错误跟踪/" itemprop="url">lua错误跟踪</a></h1>
+                <a class="post-title-link" href="/2017/12/18/cocos2dx是如何绘制图片的/" itemprop="url">cocos2dx源码分析-如何绘制图片</a></h1>
         
 
         <div class="post-meta">
@@ -1301,8 +989,8 @@ lo
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-12T21:35:21+08:00">
-                2018-12-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-18T21:56:58+08:00">
+                2017-12-18
               </time>
             
 
@@ -1324,8 +1012,8 @@ lo
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/cocos2dx/" itemprop="url" rel="index">
+                    <span itemprop="name">cocos2dx</span>
                   </a>
                 </span>
 
@@ -1342,8 +1030,8 @@ lo
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/12/lua错误跟踪/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/12/lua错误跟踪/" itemprop="commentCount"></span>
+                <a href="/2017/12/18/cocos2dx是如何绘制图片的/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/12/18/cocos2dx是如何绘制图片的/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1373,13 +1061,12 @@ lo
       
         
           
-          pcall() xpcall()  debug.traceback() debug.debug() assert()
-错误
-Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要尽可能的防止错误的发生，Lua经常作为扩展语言嵌入在别的应用中，所以不能当错误发生时简单的崩溃或者退
+          cocos2dx绘制单个图片的渲染命令是QUAD_COMMAND,通过分析这个命令可以学习opengl es是如何处理图片渲染的.
+关于VAO和VBO顶点数组对象（Vertex Array Object  即VAO）是一个包含多个顶点缓冲区对象（Vertex Buffer Object， 即 VBO
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/12/12/lua错误跟踪/#more" rel="contents">
+            <a class="btn" href="/2017/12/18/cocos2dx是如何绘制图片的/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1430,7 +1117,7 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/12/lua用法2/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/12/17/cocos2dx渲染架构/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -1449,7 +1136,7 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/12/12/lua用法2/" itemprop="url">lua用法2</a></h1>
+                <a class="post-title-link" href="/2017/12/17/cocos2dx渲染架构/" itemprop="url">cocos2dx源码分析-渲染架构</a></h1>
         
 
         <div class="post-meta">
@@ -1461,8 +1148,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-12T21:33:40+08:00">
-                2018-12-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-17T20:13:14+08:00">
+                2017-12-17
               </time>
             
 
@@ -1484,8 +1171,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/cocos2dx/" itemprop="url" rel="index">
+                    <span itemprop="name">cocos2dx</span>
                   </a>
                 </span>
 
@@ -1502,8 +1189,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/12/lua用法2/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/12/lua用法2/" itemprop="commentCount"></span>
+                <a href="/2017/12/17/cocos2dx渲染架构/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/12/17/cocos2dx渲染架构/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1533,12 +1220,11 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
       
         
           
-          loadstring load从给定的字符串得到块(函数)。lua5.3使用load()替换loadstring(). 
-一般如下用法：assert(loadstring(script))()f = loadstring(&quot;a = 1&quot;)语义上相当于：f = loadstring
+          2dx的时代UI树便利和渲染是没有分开的，遍历UI树的时候就渲染.3dx版本为了分离了ui树的遍历和渲染，先遍历生成渲染命令发到渲染队列，之后遍历渲染命令队列开始渲染.这样做的好处是渲染命令可以重用，单独的渲染可以做优化例如自动批绘制.本篇首先介绍cocos2D-X 3.x版本的渲染结构，之后会深入
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/12/12/lua用法2/#more" rel="contents">
+            <a class="btn" href="/2017/12/17/cocos2dx渲染架构/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1589,7 +1275,7 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/12/lua版本变化/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/12/17/tolua原理/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -1608,7 +1294,7 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/12/12/lua版本变化/" itemprop="url">lua版本变化</a></h1>
+                <a class="post-title-link" href="/2017/12/17/tolua原理/" itemprop="url">tolua原理</a></h1>
         
 
         <div class="post-meta">
@@ -1620,8 +1306,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-12T21:31:21+08:00">
-                2018-12-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-17T11:03:17+08:00">
+                2017-12-17
               </time>
             
 
@@ -1661,8 +1347,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/12/lua版本变化/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/12/lua版本变化/" itemprop="commentCount"></span>
+                <a href="/2017/12/17/tolua原理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/12/17/tolua原理/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1692,14 +1378,13 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
       
         
           
-          从 Lua 5.1 迁移到 5.2
-5.2中抛弃module，建议使用require进行加载， 可能是考虑到Module定义对全局表的污染
+          tolua++如何将c++对象导入到lua里？lua如何能够访问c++对象成员？创建一个 userdata ，存放 C/C++ 对象指针，然后给 userdata 添加元表，用index 和newindex 元方法映射 C/C++ 中的对象方法。
 
-在5.1版本，可以理解为每个chunk都具有自己的环境表，然后通过setfenv/getfenv进行设置和操作。Lua5.2开始取消了环境表的概念，取消set
+c++层新建一个元表作为类型（通过tolua_us
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/12/12/lua版本变化/#more" rel="contents">
+            <a class="btn" href="/2017/12/17/tolua原理/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1750,7 +1435,7 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/12/lua迭代器/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/01/07/自动批绘制的条件/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -1769,7 +1454,7 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/12/12/lua迭代器/" itemprop="url">lua迭代器</a></h1>
+                <a class="post-title-link" href="/2017/01/07/自动批绘制的条件/" itemprop="url">cocos2dx自动批绘制的条件</a></h1>
         
 
         <div class="post-meta">
@@ -1781,8 +1466,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-12T21:28:22+08:00">
-                2018-12-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-07T18:56:49+08:00">
+                2017-01-07
               </time>
             
 
@@ -1804,8 +1489,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/cocos2dx/" itemprop="url" rel="index">
+                    <span itemprop="name">cocos2dx</span>
                   </a>
                 </span>
 
@@ -1822,8 +1507,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/12/lua迭代器/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/12/lua迭代器/" itemprop="commentCount"></span>
+                <a href="/2017/01/07/自动批绘制的条件/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/01/07/自动批绘制的条件/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1853,11 +1538,13 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
       
         
           
-          前言迭代器就是一种可以遍历一种集合中所有元素的机制，在Lua中，通常将迭代器表示为函数。每调用一次函数，就返回集合中的“下一个”元素。每个迭代器都需要在每次成功调用之后保存一些状态，这样才能知道它所在的位置及如何走到下一个位置，通过之前博文的总结，闭包对于这样的任务提供了极佳的支持。现在我们就用代码
+          为什么必须要相同纹理、相同混合函数、相同shader？要满足Auto-batching，就必须有这三个条件，这是为什么呢？
+我们回到之前的代码，在调用节点的draw函数时，调用了QuadCommand的init函数：
+ void Sprite::draw(Renderer *renderer, co
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/12/12/lua迭代器/#more" rel="contents">
+            <a class="btn" href="/2017/01/07/自动批绘制的条件/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1908,7 +1595,7 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/12/lua热更新/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/01/07/Ref机制/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -1927,7 +1614,7 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/12/12/lua热更新/" itemprop="url">lua热更新</a></h1>
+                <a class="post-title-link" href="/2017/01/07/Ref机制/" itemprop="url">cocos2dx 引用计数机制</a></h1>
         
 
         <div class="post-meta">
@@ -1939,8 +1626,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-12T20:43:17+08:00">
-                2018-12-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-07T18:49:23+08:00">
+                2017-01-07
               </time>
             
 
@@ -1962,8 +1649,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/cocos2dx/" itemprop="url" rel="index">
+                    <span itemprop="name">cocos2dx</span>
                   </a>
                 </span>
 
@@ -1980,8 +1667,8 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/12/lua热更新/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/12/lua热更新/" itemprop="commentCount"></span>
+                <a href="/2017/01/07/Ref机制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/01/07/Ref机制/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -2011,14 +1698,14 @@ Errare humanum est（拉丁谚语：犯错是人的本性）。所以我们要�
       
         
           
-          单纯热更新Lua热更新最简单粗暴的热更新就是将package.loaded[modelname]的值置为nil，强制重新加载：
-function reload_module(module_name)
-    package.loaded[modulename] = nil
-    require(m
+          autorelease和release的区别  release是立即释放引用计数，如果到达0，对象被销毁。 
+  autorelease是延迟释放，是为了更好管理内存产生的。
+关于Ref一个Ref对象new之后，引用计数为1，retain（）执行+1,release()执行-1;
+autorelea
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/12/12/lua热更新/#more" rel="contents">
+            <a class="btn" href="/2017/01/07/Ref机制/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2069,7 +1756,7 @@ function reload_module(module_name)
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/12/12/lua支持init64/">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/01/07/dispatcher机制/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sunfeng">
@@ -2088,7 +1775,7 @@ function reload_module(module_name)
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/12/12/lua支持init64/" itemprop="url">lua支持init64</a></h1>
+                <a class="post-title-link" href="/2017/01/07/dispatcher机制/" itemprop="url">cocos2dx Event机制</a></h1>
         
 
         <div class="post-meta">
@@ -2100,8 +1787,8 @@ function reload_module(module_name)
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-12T14:01:12+08:00">
-                2018-12-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-07T18:34:51+08:00">
+                2017-01-07
               </time>
             
 
@@ -2123,8 +1810,8 @@ function reload_module(module_name)
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/lua/" itemprop="url" rel="index">
-                    <span itemprop="name">lua</span>
+                  <a href="/categories/cocos2dx/" itemprop="url" rel="index">
+                    <span itemprop="name">cocos2dx</span>
                   </a>
                 </span>
 
@@ -2141,8 +1828,8 @@ function reload_module(module_name)
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/12/12/lua支持init64/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/12/lua支持init64/" itemprop="commentCount"></span>
+                <a href="/2017/01/07/dispatcher机制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/01/07/dispatcher机制/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -2172,11 +1859,339 @@ function reload_module(module_name)
       
         
           
-          lua5.3提供了很多很好的特性例如string.pack unpack这样的好东西，同时还支持ini64.在lua之前的版本中number只有一种类型double.对于init64基本按照int来处理. 对于64位的解决方案有很多种,基本的思路都是使用8byte的string或者lightuser
+          基本机制事件机制类似观察者模式。
+EventListener 事件监听者，封装事件处理代码，包含事件会回调。
+事件包含时间信息。
+EventDispatcher 事件分发者，管理分发事件。
+事件添加机制EventDispatcher中以 listenerId-&gt;EventListenerVec
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/12/12/lua支持init64/#more" rel="contents">
+            <a class="btn" href="/2017/01/07/dispatcher机制/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/01/07/action机制/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sunfeng">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小工知识库">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/01/07/action机制/" itemprop="url">aocos2dx action机制</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-07T18:25:07+08:00">
+                2017-01-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/cocos2dx/" itemprop="url" rel="index">
+                    <span itemprop="name">cocos2dx</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/01/07/action机制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/01/07/action机制/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          依赖scheduler更新机制。
+1.Action它通过在一段时间内对Node元素的某些属性进行插值计算。 
+   然后依赖时间更新去更新属性。依赖step()-&gt;update()
+2.Action的管理是放在ActionManager 的hash表中，通过target作为key action
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/01/07/action机制/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2017/01/07/schedule机制/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sunfeng">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小工知识库">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/01/07/schedule机制/" itemprop="url">cocos2dx schedule机制</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-07T18:15:44+08:00">
+                2017-01-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/cocos2dx/" itemprop="url" rel="index">
+                    <span itemprop="name">cocos2dx</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/01/07/schedule机制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/01/07/schedule机制/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          是cocos2d-x核心的一块，负责调度执行，更新动作等。
+如何计时？Timer保存了调度任务的 时间线 重复次数 事件间隔 延迟等数据。
+每帧更新后Timer做事件累加，根据时间线去触发或者取消更新回调。
+Scheduler有两种添加更新的机制
+自定义更新
+根据target的不同Ref和void,
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/01/07/schedule机制/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
