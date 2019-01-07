@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="stay hungry stay foolish">
+<meta name="description" content="资源管理其实主要涉及lua脚本和图片资源.由于lua资源的gc和lua对c++对象的绑定和cocos2dx的各种缓存加上cocos2dx的autoreleasepool机制，是资源管理工作和内存管理需要同步进行，本文就先说cache然后内存.cocos2dx在创建一个对象的时候是autorelease放入和当前的pool,帧渲染完成之后release一次，对于资源来说就是Sprite关联Textu">
 <meta name="keywords" content="cocos2dx">
 <meta property="og:type" content="article">
 <meta property="og:title" content="cocos2dx资源管理">
 <meta property="og:url" content="https://bytemode.github.io/2019/01/04/cocos2dx资源管理/index.html">
 <meta property="og:site_name" content="小工知识库">
-<meta property="og:description" content="stay hungry stay foolish">
+<meta property="og:description" content="资源管理其实主要涉及lua脚本和图片资源.由于lua资源的gc和lua对c++对象的绑定和cocos2dx的各种缓存加上cocos2dx的autoreleasepool机制，是资源管理工作和内存管理需要同步进行，本文就先说cache然后内存.cocos2dx在创建一个对象的时候是autorelease放入和当前的pool,帧渲染完成之后release一次，对于资源来说就是Sprite关联Textu">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-01-05T09:13:49.068Z">
+<meta property="og:updated_time" content="2019-01-07T08:01:13.473Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="cocos2dx资源管理">
-<meta name="twitter:description" content="stay hungry stay foolish">
+<meta name="twitter:description" content="资源管理其实主要涉及lua脚本和图片资源.由于lua资源的gc和lua对c++对象的绑定和cocos2dx的各种缓存加上cocos2dx的autoreleasepool机制，是资源管理工作和内存管理需要同步进行，本文就先说cache然后内存.cocos2dx在创建一个对象的时候是autorelease放入和当前的pool,帧渲染完成之后release一次，对于资源来说就是Sprite关联Textu">
 
 
 
@@ -416,7 +416,18 @@
       
 
       
-        
+        <p>资源管理其实主要涉及lua脚本和图片资源.由于lua资源的gc和lua对c++对象的绑定和cocos2dx的各种缓存加上cocos2dx的autoreleasepool机制，是资源管理工作和内存管理需要同步进行，本文就先说cache然后内存.<br>cocos2dx在创建一个对象的时候是autorelease放入和当前的pool,帧渲染完成之后release一次，对于资源来说就是Sprite关联Texture2D关联Image.然后对于plist来说还有一个蛋疼的spriteframe.</p>
+<h4 id="TextureCache"><a href="#TextureCache" class="headerlink" title="TextureCache"></a>TextureCache</h4><p>TextureCache纹理缓存。缓存的是加载到内存中的纹理资源。它到底有什么用呢？我先描述一个现象吧：假设游戏中有个界面用到的图片非常多，，第一次点进这界面时速度非常慢（因为要加载绘制很多图片），可第二次点击却一下子就进去了。这是为什么呢？原来Cocos2dx的渲染机制是可以重复使用同一份纹理在不同的场合进行绘制，从而达到重复使用，降低内存和GPU运算资源的消耗与开销。<br>第一次使用一个是先将图片加载进TextureCache缓存中，下一步是绘制图片，从而将其显示在场景中。<br>第二次使用，因为之前已经被放入TextureCache中，所以这里只需从缓存中找到这张图片，然后将其绘制出来就可以。</p>
+<h4 id="SpriteFrameCache"><a href="#SpriteFrameCache" class="headerlink" title="SpriteFrameCache"></a>SpriteFrameCache</h4><p>缓存的是精灵帧，是纹理指定区域的矩形块。各精灵帧都在同一纹理中，通过切换不同的框帧来显示出不同的图案。<br>缓存就是SpriteFrame的缓存。跟TextureCache功能一样，不过跟TextureCache不同的是，如果内存池中不存在要查找的图片，它会提示找不到，而不会去本地加载图片。</p>
+<h4 id="AnimationCache"><a href="#AnimationCache" class="headerlink" title="AnimationCache"></a>AnimationCache</h4><p>动画的缓存。对于精灵动画，每次创建时都需要加载精灵帧，然后按顺序添加到数组，再用Animation读取数组创建动画。这是一个非常烦琐的计算过程。而对于使用频率高的动画，例如角色的走动、跳舞等，可以将其加入到AnimationCache中，每次使用都从这个缓存中调用，这样可以有效的降低创建动画的巨大消耗。</p>
+<h4 id="原理："><a href="#原理：" class="headerlink" title="原理："></a>原理：</h4><ul>
+<li>TextureCache<br>原理是存在一个map,文理名字对应Texture2D对象。std::unordered_map&lt;std::string, Texture2D*&gt; _textures。</li>
+<li>SpriteFrameCache<br>原理存在一个map,存储精灵帧的名字和精灵帧对象。Map&lt;std::string, SpriteFrame*&gt; _spriteFrames。</li>
+<li>AnimationCache<br>原理存在一个map保存动画数据的名字和动画数据对象。Map&lt;std::string, Animation*&gt; _animations。</li>
+</ul>
+<h4 id="资源管理"><a href="#资源管理" class="headerlink" title="资源管理"></a>资源管理</h4><p>图片资源管理就是管理这些个cache，安全起见在合适的地方是需要清除动画缓存-&gt;精灵帧缓存-&gt;纹理缓存这样的顺序.如果引用出现问题，及时你removeunused这些都是不管用的.</p>
+<h4 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h4><p>在源码分析中会详细讲解cocos的引用计数机制和智能指针</p>
+
       
     </div>
     
@@ -542,8 +553,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -640,6 +660,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#TextureCache"><span class="nav-number">1.</span> <span class="nav-text">TextureCache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SpriteFrameCache"><span class="nav-number">2.</span> <span class="nav-text">SpriteFrameCache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AnimationCache"><span class="nav-number">3.</span> <span class="nav-text">AnimationCache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#原理："><span class="nav-number">4.</span> <span class="nav-text">原理：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#资源管理"><span class="nav-number">5.</span> <span class="nav-text">资源管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#内存管理"><span class="nav-number">6.</span> <span class="nav-text">内存管理</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

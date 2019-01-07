@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="stay hungry stay foolish">
+<meta name="description" content="最好的对多分辨率支持的方案是不处理分辨率，应用程序按照一个预定义的分辨率进行设计，低阶游戏引擎统一处理分辨率的缩放，这个预设的分辨率就是设计分辨率. 设计分辨率缩放策略setDesignResolutionSize可以设置设计分辨率和缩放策略，目前的缩放策略主要有 EXACT_FIT: 充满屏幕设计分辨率直接缩放为屏幕分辨率，会变形 NO_BORDER: 充满屏幕，较宽的部分被裁切，设计分辨率是等">
 <meta name="keywords" content="cocos2dx">
 <meta property="og:type" content="article">
 <meta property="og:title" content="cocos2d分辨率适配">
 <meta property="og:url" content="https://bytemode.github.io/2019/01/04/cocos2d分辨率适配/index.html">
 <meta property="og:site_name" content="小工知识库">
-<meta property="og:description" content="stay hungry stay foolish">
+<meta property="og:description" content="最好的对多分辨率支持的方案是不处理分辨率，应用程序按照一个预定义的分辨率进行设计，低阶游戏引擎统一处理分辨率的缩放，这个预设的分辨率就是设计分辨率. 设计分辨率缩放策略setDesignResolutionSize可以设置设计分辨率和缩放策略，目前的缩放策略主要有 EXACT_FIT: 充满屏幕设计分辨率直接缩放为屏幕分辨率，会变形 NO_BORDER: 充满屏幕，较宽的部分被裁切，设计分辨率是等">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-01-05T09:14:58.008Z">
+<meta property="og:updated_time" content="2019-01-07T08:50:01.453Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="cocos2d分辨率适配">
-<meta name="twitter:description" content="stay hungry stay foolish">
+<meta name="twitter:description" content="最好的对多分辨率支持的方案是不处理分辨率，应用程序按照一个预定义的分辨率进行设计，低阶游戏引擎统一处理分辨率的缩放，这个预设的分辨率就是设计分辨率. 设计分辨率缩放策略setDesignResolutionSize可以设置设计分辨率和缩放策略，目前的缩放策略主要有 EXACT_FIT: 充满屏幕设计分辨率直接缩放为屏幕分辨率，会变形 NO_BORDER: 充满屏幕，较宽的部分被裁切，设计分辨率是等">
 
 
 
@@ -416,7 +416,25 @@
       
 
       
-        
+        <p>最好的对多分辨率支持的方案是不处理分辨率，应用程序按照一个预定义的分辨率进行设计，低阶游戏引擎统一处理分辨率的缩放，这个预设的分辨率就是设计分辨率.</p>
+<h4 id="设计分辨率"><a href="#设计分辨率" class="headerlink" title="设计分辨率"></a>设计分辨率</h4><h5 id="缩放策略"><a href="#缩放策略" class="headerlink" title="缩放策略"></a>缩放策略</h5><p><code>setDesignResolutionSize</code>可以设置设计分辨率和缩放策略，目前的缩放策略主要有</p>
+<pre><code>EXACT_FIT: 充满屏幕设计分辨率直接缩放为屏幕分辨率，会变形
+NO_BORDER: 充满屏幕，较宽的部分被裁切，设计分辨率是等比缩放
+SHOW_ALL:等比缩放，以较宽的一边缩放，会出现黑边
+FIXED_HEIGHT:固定高度宽度等比缩放，充满屏幕，不会裁切
+FIXED_WIDTH：固定宽度高度等比缩放，充满屏幕，不会裁切
+</code></pre><p>建议使用的是FIXED_XXX可以根据游戏类型进行选择，同时在界面编辑的时候使用左边也要做选择，在cocos studio中设置百分比、固定文职或者距离边距多少都有影响需要小心处理</p>
+<h5 id="常见变量"><a href="#常见变量" class="headerlink" title="常见变量"></a>常见变量</h5><ul>
+<li>getWinSizeL OpenGl视口在转化到设计分辨率下的尺寸，表示绘制区域</li>
+<li>getVisibleSize OpenGl视口在转化到设计分辨率下的尺寸屏幕可见区域的部分</li>
+<li>getVisibleOrigin 表示可见区域原点在绘制区域中的位置</li>
+</ul>
+<h5 id="视口设置"><a href="#视口设置" class="headerlink" title="视口设置"></a>视口设置</h5><p><code>setDesignResolutionSize</code>的调用导致了 视口、透视矩阵和观察点被重新设置</p>
+<h5 id="什么时候缩放"><a href="#什么时候缩放" class="headerlink" title="什么时候缩放"></a>什么时候缩放</h5><p>由设计分辨率到实际的屏幕分辨率的缩放是什么时候执行的？其实没有执行这个操作.<br><strong>cocos2dx使用设计分辨率来设置投影矩阵和观察点</strong>，并没有将其缩放到屏幕实际分辨率，而只有视口设置为实际分辨率。透视矩阵定义的长宽比和视口窗宽比是相等的。<br><strong>程序中每个顶点使用设计分辨率下的坐标来定义坐标值，且被当做顶点属性发送给顶点着色器，顶点着色器使用设计分辨率下的模型视图变换矩阵对顶点进行坐标变化。顶点着色器输出的归一化坐标，图元组装阶段归一化坐标转换为屏幕坐标.</strong><br>视椎体定义的远近平面和视口的长宽比例相等，归一话的坐标被完全投影到是视口上.</p>
+<h4 id="资源分辨率"><a href="#资源分辨率" class="headerlink" title="资源分辨率"></a>资源分辨率</h4><p>资源分辨率用来对同一个设计分辨率使用不同的分辨率资源进行缩放，如此针对不同分辨率设备使用接近的分辨率资源</p>
+<h5 id="资源分辨率的设置"><a href="#资源分辨率的设置" class="headerlink" title="资源分辨率的设置"></a>资源分辨率的设置</h5><p>通过setFactor设置资源分辨率的缩放因子，设置缩放因子后所有的资源很好都会被缩放,cocos2dx使用setSearchPaths设置搜索路径来切换对应不同分辨率的资源使用</p>
+<h5 id="缩放时机"><a href="#缩放时机" class="headerlink" title="缩放时机"></a>缩放时机</h5><p>sprite的顶点数据依赖contentsize，contentsize依赖于实际纹理大小，缩放时机就是在getContentSize, contextsize是将实际的像素分辨率转化为设计分辨率在进行缩放. 绘制纹理的时候使用的是归一化的uv不需要知道纹理实际大小</p>
+
       
     </div>
     
@@ -538,8 +556,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -636,6 +663,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#设计分辨率"><span class="nav-number">1.</span> <span class="nav-text">设计分辨率</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#缩放策略"><span class="nav-number">1.1.</span> <span class="nav-text">缩放策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#常见变量"><span class="nav-number">1.2.</span> <span class="nav-text">常见变量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#视口设置"><span class="nav-number">1.3.</span> <span class="nav-text">视口设置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#什么时候缩放"><span class="nav-number">1.4.</span> <span class="nav-text">什么时候缩放</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#资源分辨率"><span class="nav-number">2.</span> <span class="nav-text">资源分辨率</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#资源分辨率的设置"><span class="nav-number">2.1.</span> <span class="nav-text">资源分辨率的设置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#缩放时机"><span class="nav-number">2.2.</span> <span class="nav-text">缩放时机</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

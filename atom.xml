@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://bytemode.github.io/"/>
-  <updated>2019-01-05T09:14:58.008Z</updated>
+  <updated>2019-01-07T08:50:01.453Z</updated>
   <id>https://bytemode.github.io/</id>
   
   <author>
@@ -21,9 +21,17 @@
     <link href="https://bytemode.github.io/2019/01/04/cocos2d%E5%88%86%E8%BE%A8%E7%8E%87%E9%80%82%E9%85%8D/"/>
     <id>https://bytemode.github.io/2019/01/04/cocos2d分辨率适配/</id>
     <published>2019-01-04T10:56:53.000Z</published>
-    <updated>2019-01-05T09:14:58.008Z</updated>
+    <updated>2019-01-07T08:50:01.453Z</updated>
+    
+    <content type="html"><![CDATA[<p>最好的对多分辨率支持的方案是不处理分辨率，应用程序按照一个预定义的分辨率进行设计，低阶游戏引擎统一处理分辨率的缩放，这个预设的分辨率就是设计分辨率.</p><h4 id="设计分辨率"><a href="#设计分辨率" class="headerlink" title="设计分辨率"></a>设计分辨率</h4><h5 id="缩放策略"><a href="#缩放策略" class="headerlink" title="缩放策略"></a>缩放策略</h5><p><code>setDesignResolutionSize</code>可以设置设计分辨率和缩放策略，目前的缩放策略主要有</p><pre><code>EXACT_FIT: 充满屏幕设计分辨率直接缩放为屏幕分辨率，会变形NO_BORDER: 充满屏幕，较宽的部分被裁切，设计分辨率是等比缩放SHOW_ALL:等比缩放，以较宽的一边缩放，会出现黑边FIXED_HEIGHT:固定高度宽度等比缩放，充满屏幕，不会裁切FIXED_WIDTH：固定宽度高度等比缩放，充满屏幕，不会裁切</code></pre><p>建议使用的是FIXED_XXX可以根据游戏类型进行选择，同时在界面编辑的时候使用左边也要做选择，在cocos studio中设置百分比、固定文职或者距离边距多少都有影响需要小心处理</p><h5 id="常见变量"><a href="#常见变量" class="headerlink" title="常见变量"></a>常见变量</h5><ul><li>getWinSizeL OpenGl视口在转化到设计分辨率下的尺寸，表示绘制区域</li><li>getVisibleSize OpenGl视口在转化到设计分辨率下的尺寸屏幕可见区域的部分</li><li>getVisibleOrigin 表示可见区域原点在绘制区域中的位置</li></ul><h5 id="视口设置"><a href="#视口设置" class="headerlink" title="视口设置"></a>视口设置</h5><p><code>setDesignResolutionSize</code>的调用导致了 视口、透视矩阵和观察点被重新设置</p><h5 id="什么时候缩放"><a href="#什么时候缩放" class="headerlink" title="什么时候缩放"></a>什么时候缩放</h5><p>由设计分辨率到实际的屏幕分辨率的缩放是什么时候执行的？其实没有执行这个操作.<br><strong>cocos2dx使用设计分辨率来设置投影矩阵和观察点</strong>，并没有将其缩放到屏幕实际分辨率，而只有视口设置为实际分辨率。透视矩阵定义的长宽比和视口窗宽比是相等的。<br><strong>程序中每个顶点使用设计分辨率下的坐标来定义坐标值，且被当做顶点属性发送给顶点着色器，顶点着色器使用设计分辨率下的模型视图变换矩阵对顶点进行坐标变化。顶点着色器输出的归一化坐标，图元组装阶段归一化坐标转换为屏幕坐标.</strong><br>视椎体定义的远近平面和视口的长宽比例相等，归一话的坐标被完全投影到是视口上.</p><h4 id="资源分辨率"><a href="#资源分辨率" class="headerlink" title="资源分辨率"></a>资源分辨率</h4><p>资源分辨率用来对同一个设计分辨率使用不同的分辨率资源进行缩放，如此针对不同分辨率设备使用接近的分辨率资源</p><h5 id="资源分辨率的设置"><a href="#资源分辨率的设置" class="headerlink" title="资源分辨率的设置"></a>资源分辨率的设置</h5><p>通过setFactor设置资源分辨率的缩放因子，设置缩放因子后所有的资源很好都会被缩放,cocos2dx使用setSearchPaths设置搜索路径来切换对应不同分辨率的资源使用</p><h5 id="缩放时机"><a href="#缩放时机" class="headerlink" title="缩放时机"></a>缩放时机</h5><p>sprite的顶点数据依赖contentsize，contentsize依赖于实际纹理大小，缩放时机就是在getContentSize, contextsize是将实际的像素分辨率转化为设计分辨率在进行缩放. 绘制纹理的时候使用的是归一化的uv不需要知道纹理实际大小</p>]]></content>
     
     <summary type="html">
+    
+      
+      
+        &lt;p&gt;最好的对多分辨率支持的方案是不处理分辨率，应用程序按照一个预定义的分辨率进行设计，低阶游戏引擎统一处理分辨率的缩放，这个预设的分辨率就是设计分辨率.&lt;/p&gt;
+&lt;h4 id=&quot;设计分辨率&quot;&gt;&lt;a href=&quot;#设计分辨率&quot; class=&quot;headerlink&quot; title=&quot;
+      
     
     </summary>
     
@@ -39,7 +47,7 @@
     <link href="https://bytemode.github.io/2019/01/04/cocos2dx%E6%8E%A5%E5%85%A5sdk%E6%96%B9%E6%A1%88/"/>
     <id>https://bytemode.github.io/2019/01/04/cocos2dx接入sdk方案/</id>
     <published>2019-01-04T10:55:46.000Z</published>
-    <updated>2019-01-05T09:14:46.427Z</updated>
+    <updated>2019-01-07T09:19:29.487Z</updated>
     
     <summary type="html">
     
@@ -57,9 +65,18 @@
     <link href="https://bytemode.github.io/2019/01/04/cocos2dx%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9D%97/"/>
     <id>https://bytemode.github.io/2019/01/04/cocos2dx网络模块/</id>
     <published>2019-01-04T10:55:15.000Z</published>
-    <updated>2019-01-05T09:14:17.539Z</updated>
+    <updated>2019-01-07T09:17:28.377Z</updated>
+    
+    <content type="html"><![CDATA[<p>cocos2dx除了curllib和websocket其他的没有封装好用的网络库，尤其是使用socket的时候得自己分装网络层。网络层有哪些东西呢或者说我们要连接服务器收发数据需要怎样的流程？</p><p>####### 自己造轮子</p><h6 id="关于socket"><a href="#关于socket" class="headerlink" title="关于socket"></a>关于socket</h6><p>首先是socket还好是跨平台支持，至于connect receive send就不说了，至于select epoll poll这些是服务端的东西.</p><p>创建socket connect之后就是手法数据了当然之前我们得定义好数据专属的协议使用json pb还是直接传byte.收到数据之后我们需要的是解析数据，解析之前得是完整的包吧需要处理粘包问题,解析之后当然是处理了，根据预定义的消息id或者名字分发到逻辑层进行处理.</p><h6 id="消息通信格式"><a href="#消息通信格式" class="headerlink" title="消息通信格式"></a>消息通信格式</h6><p>通常的消息格式是：长度+消息内容</p><p>消息内容：消息id+消息结构体</p><h6 id="消息编码"><a href="#消息编码" class="headerlink" title="消息编码"></a>消息编码</h6><p>使用pb或者json或者是使用struct</p><h6 id="消息接受"><a href="#消息接受" class="headerlink" title="消息接受"></a>消息接受</h6><p>开启一个读线程receive消息并且把消息放入消息缓冲区，然后读取消息缓冲区中完整的消息，需要读出长度信息在进行分别处理可能涉及多次receive.完整的消息结构字后放入消息队列，然后通过schedule将消息发送到cocos的逻辑层进行分发处理</p><h6 id="消息发送"><a href="#消息发送" class="headerlink" title="消息发送"></a>消息发送</h6><p>开启一个发送线程，逻辑层将消息编码后交给发送线程发送线程组装数据，加上长度信息然后发送给socket,这里需要队列，因为发送失败需要再次发送</p><h6 id="读线程"><a href="#读线程" class="headerlink" title="读线程"></a>读线程</h6><p>receive消息，解析消息。具体的消息结构最好在逻辑层解析</p><h6 id="写线程"><a href="#写线程" class="headerlink" title="写线程"></a>写线程</h6><p>处理发送操作涉及重发</p><h6 id="心跳包"><a href="#心跳包" class="headerlink" title="心跳包"></a>心跳包</h6><p>这个主要是看是否离线</p><h4 id="现成的轮子"><a href="#现成的轮子" class="headerlink" title="现成的轮子"></a>现成的轮子</h4><p>现成的轮子有很多，分门别类的介绍，例如有mqtt,kcp,sprotop,pbc,lpack,struct，bjson等</p><p><a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>:bytemode/cocos2dx-socket.git</p><p><a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>:bytemode/skynet_multithread_client_socket.git</p><p><a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>:bytemode/sproto.git</p><p><a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>:bytemode/pbc.git</p><p><a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>:LuaDist/lpack.git</p>]]></content>
     
     <summary type="html">
+    
+      
+      
+        &lt;p&gt;cocos2dx除了curllib和websocket其他的没有封装好用的网络库，尤其是使用socket的时候得自己分装网络层。网络层有哪些东西呢或者说我们要连接服务器收发数据需要怎样的流程？&lt;/p&gt;
+&lt;p&gt;####### 自己造轮子&lt;/p&gt;
+&lt;h6 id=&quot;关于socke
+      
     
     </summary>
     
@@ -75,9 +92,17 @@
     <link href="https://bytemode.github.io/2019/01/04/cocos2dx%E7%83%AD%E6%9B%B4%E6%96%B0%E6%9C%BA%E5%88%B6/"/>
     <id>https://bytemode.github.io/2019/01/04/cocos2dx热更新机制/</id>
     <published>2019-01-04T10:55:04.000Z</published>
-    <updated>2019-01-05T09:14:30.582Z</updated>
+    <updated>2019-01-07T07:41:17.029Z</updated>
+    
+    <content type="html"><![CDATA[<p>游戏脚本资源配置的更新，可以在游戏启动的时候，或者在游戏内更新。cocos2dx更新需要注意的是Lua文件的重新加载问题和纹理的重新加载的问题，纹理的加载需要注意合图文件的plist重新加载.游戏内更新需要注意的是更多需要小心处理精灵帧缓存纹理缓存和动画缓存</p><h4 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h4><p>热更新实现了项目资源和脚本文件的动态更新。当工程有新的改动时，用户无需重新下载完整的安装包，而是通过对比本地与最新的版本信息，仅下载有改动的文件到本地，完成版本的更新。cocos2dx3.10前版本存在问题后续经过改善基本没有问题。</p><h4 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h4><p>工程的资源和脚本文件存放分2个地方，一个是安装目录，一个是数据目录，当app安装完后，安装目录则不再可写，此后所有的更新文件统一存放到数据目录当中，APP调用文件时，也优先搜索数据目录的文件，当数据目录中找不到文件时，再到安装目录中搜索。</p><p>配置文件分2种，project.manifest和version.manifest。服务器和客户端都存有备份，服务器存放着最新的版本配置文件，版本号最高，客户端每次启动前都会将服务器版本文件下载下来，并和本地配置文件对行对比，如果不是最新版本，则下载并安装补丁包。配置文件内容都是Json对象，且结构一样，只是version.manifest只存储了版本信息，project.manifest存储了版本信息和补丁信息。</p><p>project.manifest文件结构如下：</p><pre><code>{     &quot;packageUrl&quot; :&quot;xxxxx&quot;,     &quot;remoteManifestUrl&quot; :&quot;xxxxx/project.manifest&quot;,     &quot;remoteVersionUrl&quot; :&quot;xxxxx/version.manifest&quot;,     &quot;minVersion&quot;:&quot;1.0.0.0&quot;,     &quot;version&quot; : &quot;1.0.0.1&quot;,     &quot;assets&quot; : {            &quot;images.zip&quot; : {&quot;md5&quot; : &quot;xxxxxx&quot;,&quot;compressed&quot; : true }     },     &quot;searchPaths&quot; :[&quot;res&quot;,&quot;src&quot;]}</code></pre><ul><li>packageUrl表示服务器下载目录的根目录</li><li>remoteManifestUrl字段表示project.manifest文件的下载url</li><li>remoteVersionUrl字段表示version.manifest的下载url</li><li>minVersion 表示支持更新的最低版本，低于该版本则提示重新下载安装包。version字段表示工程的当前版本（如果配置文件是服务器上的，表示服务器的当前版本，如果是客户端的，则表示客户端的当前版本）</li><li>Assets字段表示要更新的资源列表，p1.zip为补丁包名（包全路径为xxxxx/p1.zip），md5字段为该补丁包的唯一标识，compressed表示下载完后是否需解压。</li><li>searchPaths表示要添加的搜索路径（。</li><li>Version.manifest文件结构与上同，但是没有assets字段。</li></ul><h4 id="更新流程"><a href="#更新流程" class="headerlink" title="更新流程"></a>更新流程</h4><ol><li><p>构造AssetsManagerEx对象<br>绑定下载成功、失败、进度的回调函数<br>设置下载文件的存放路径<br>加载本地project.manifest文件，若失败，则抛出消息ERROR_NO_LOCAL_MANIFEST，结束。</p></li><li><p>下载version.manifest启动更新</p></li></ol><p>下载version.manifest文件，若成功goto 3，否则下载project.manifest，若成功goto3，否则抛出ERROR_DOWNLOAD_MANIFEST，结束。</p><ol start="3"><li><p>版本比较<br>加载下载的配置文件并与本地project.manifest版本号进行对比，<br>若版本相同，则抛出消息ALREADY_UP_TO_DATE，结束。<br>若版本低于可更新版本号，则抛出NONUPDATABLE_VERSION，提示下载完整安装包，结束。<br>否则下载project.manifest加载下载的配置文件并与本地project.manifest版本号进行对比，<br>若版本相同，则抛出消息ALREADY_UP_TO_DATE，结束。<br>若版本低于可更新版本号，则抛出NONUPDATABLE_VERSION，提示下载完整安装包.</p></li><li><p>下载补丁包<br>清空下载记录，下载失败记录，解压记录<br>查看是否有未完成的下载记录，有则继续逐个下载（通过查看.temp文件）<br>获取本地assets和服务器asset差异列表，根据补丁包名：<br>a.如果本地有，服务器没有，则删除，<br>b.如果本地有，服务器也有，但md5不同，刚更新,<br>c.如果服务器有，本地没有，则添加</p></li><li><p>解压删除<br>依次解压列表中的文件。删除补丁包。结束。</p></li></ol><h4 id="流程图如下所示"><a href="#流程图如下所示" class="headerlink" title="流程图如下所示"></a>流程图如下所示</h4><p><img src="https://img-blog.csdnimg.cn/20190107150910349.png" alt="assetmanagerex"></p><h4 id="热更新时机"><a href="#热更新时机" class="headerlink" title="热更新时机"></a>热更新时机</h4><p>热更新一般在进入游戏之前也就是登录模块之后，也有放在登录模块之前.<br>需要确定好那些文件可以热更尤其是在执行热更新时有些已经加载的lua文件，再次require的时候不会重新加载，更新主要有两种情况，第一种是游戏启动更新，第二种是游戏内更新.</p><h5 id="游戏启动更新"><a href="#游戏启动更新" class="headerlink" title="游戏启动更新"></a>游戏启动更新</h5><p>全局基础的更新，此时需要注意框架层是否更新本次是否立即生效，更新之后可能需要对一些lua文件和游戏纹理资源配置资源重新加载，在重新加载纹理的时候需要尤其你注意</p><h4 id="游戏内更新"><a href="#游戏内更新" class="headerlink" title="游戏内更新"></a>游戏内更新</h4><p>对于有些游戏需要在游戏内下载子游戏包，此时需要做的是，每次退出子游戏需要全部清理掉纹理和lua资源，负责返回更新会导致更新不立即生效的问题</p>]]></content>
     
     <summary type="html">
+    
+      
+      
+        &lt;p&gt;游戏脚本资源配置的更新，可以在游戏启动的时候，或者在游戏内更新。cocos2dx更新需要注意的是Lua文件的重新加载问题和纹理的重新加载的问题，纹理的加载需要注意合图文件的plist重新加载.游戏内更新需要注意的是更多需要小心处理精灵帧缓存纹理缓存和动画缓存&lt;/p&gt;
+&lt;h4
+      
     
     </summary>
     
@@ -93,9 +118,16 @@
     <link href="https://bytemode.github.io/2019/01/04/cocos2dx%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/"/>
     <id>https://bytemode.github.io/2019/01/04/cocos2dx资源管理/</id>
     <published>2019-01-04T10:54:51.000Z</published>
-    <updated>2019-01-05T09:13:49.068Z</updated>
+    <updated>2019-01-07T08:01:13.473Z</updated>
+    
+    <content type="html"><![CDATA[<p>资源管理其实主要涉及lua脚本和图片资源.由于lua资源的gc和lua对c++对象的绑定和cocos2dx的各种缓存加上cocos2dx的autoreleasepool机制，是资源管理工作和内存管理需要同步进行，本文就先说cache然后内存.<br>cocos2dx在创建一个对象的时候是autorelease放入和当前的pool,帧渲染完成之后release一次，对于资源来说就是Sprite关联Texture2D关联Image.然后对于plist来说还有一个蛋疼的spriteframe.</p><h4 id="TextureCache"><a href="#TextureCache" class="headerlink" title="TextureCache"></a>TextureCache</h4><p>TextureCache纹理缓存。缓存的是加载到内存中的纹理资源。它到底有什么用呢？我先描述一个现象吧：假设游戏中有个界面用到的图片非常多，，第一次点进这界面时速度非常慢（因为要加载绘制很多图片），可第二次点击却一下子就进去了。这是为什么呢？原来Cocos2dx的渲染机制是可以重复使用同一份纹理在不同的场合进行绘制，从而达到重复使用，降低内存和GPU运算资源的消耗与开销。<br>第一次使用一个是先将图片加载进TextureCache缓存中，下一步是绘制图片，从而将其显示在场景中。<br>第二次使用，因为之前已经被放入TextureCache中，所以这里只需从缓存中找到这张图片，然后将其绘制出来就可以。</p><h4 id="SpriteFrameCache"><a href="#SpriteFrameCache" class="headerlink" title="SpriteFrameCache"></a>SpriteFrameCache</h4><p>缓存的是精灵帧，是纹理指定区域的矩形块。各精灵帧都在同一纹理中，通过切换不同的框帧来显示出不同的图案。<br>缓存就是SpriteFrame的缓存。跟TextureCache功能一样，不过跟TextureCache不同的是，如果内存池中不存在要查找的图片，它会提示找不到，而不会去本地加载图片。</p><h4 id="AnimationCache"><a href="#AnimationCache" class="headerlink" title="AnimationCache"></a>AnimationCache</h4><p>动画的缓存。对于精灵动画，每次创建时都需要加载精灵帧，然后按顺序添加到数组，再用Animation读取数组创建动画。这是一个非常烦琐的计算过程。而对于使用频率高的动画，例如角色的走动、跳舞等，可以将其加入到AnimationCache中，每次使用都从这个缓存中调用，这样可以有效的降低创建动画的巨大消耗。</p><h4 id="原理："><a href="#原理：" class="headerlink" title="原理："></a>原理：</h4><ul><li>TextureCache<br>原理是存在一个map,文理名字对应Texture2D对象。std::unordered_map&lt;std::string, Texture2D*&gt; _textures。</li><li>SpriteFrameCache<br>原理存在一个map,存储精灵帧的名字和精灵帧对象。Map&lt;std::string, SpriteFrame*&gt; _spriteFrames。</li><li>AnimationCache<br>原理存在一个map保存动画数据的名字和动画数据对象。Map&lt;std::string, Animation*&gt; _animations。</li></ul><h4 id="资源管理"><a href="#资源管理" class="headerlink" title="资源管理"></a>资源管理</h4><p>图片资源管理就是管理这些个cache，安全起见在合适的地方是需要清除动画缓存-&gt;精灵帧缓存-&gt;纹理缓存这样的顺序.如果引用出现问题，及时你removeunused这些都是不管用的.</p><h4 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h4><p>在源码分析中会详细讲解cocos的引用计数机制和智能指针</p>]]></content>
     
     <summary type="html">
+    
+      
+      
+        &lt;p&gt;资源管理其实主要涉及lua脚本和图片资源.由于lua资源的gc和lua对c++对象的绑定和cocos2dx的各种缓存加上cocos2dx的autoreleasepool机制，是资源管理工作和内存管理需要同步进行，本文就先说cache然后内存.&lt;br&gt;cocos2dx在创建一
+      
     
     </summary>
     

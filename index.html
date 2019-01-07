@@ -420,8 +420,10 @@
       
         
           
-          
-          
+          最好的对多分辨率支持的方案是不处理分辨率，应用程序按照一个预定义的分辨率进行设计，低阶游戏引擎统一处理分辨率的缩放，这个预设的分辨率就是设计分辨率.
+设计分辨率缩放策略setDesignResolutionSize可以设置设计分辨率和缩放策略，目前的缩放策略主要有
+EXACT_FIT: 充满屏幕设计
+          ...
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/01/04/cocos2d分辨率适配/#more" rel="contents">
@@ -736,8 +738,10 @@
       
         
           
-          
-          
+          cocos2dx除了curllib和websocket其他的没有封装好用的网络库，尤其是使用socket的时候得自己分装网络层。网络层有哪些东西呢或者说我们要连接服务器收发数据需要怎样的流程？
+####### 自己造轮子
+关于socket首先是socket还好是跨平台支持，至于connect rec
+          ...
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/01/04/cocos2dx网络模块/#more" rel="contents">
@@ -894,8 +898,9 @@
       
         
           
-          
-          
+          游戏脚本资源配置的更新，可以在游戏启动的时候，或者在游戏内更新。cocos2dx更新需要注意的是Lua文件的重新加载问题和纹理的重新加载的问题，纹理的加载需要注意合图文件的plist重新加载.游戏内更新需要注意的是更多需要小心处理精灵帧缓存纹理缓存和动画缓存
+基本原理热更新实现了项目资源和脚本文件的
+          ...
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/01/04/cocos2dx热更新机制/#more" rel="contents">
@@ -1052,8 +1057,8 @@
       
         
           
-          
-          
+          资源管理其实主要涉及lua脚本和图片资源.由于lua资源的gc和lua对c++对象的绑定和cocos2dx的各种缓存加上cocos2dx的autoreleasepool机制，是资源管理工作和内存管理需要同步进行，本文就先说cache然后内存.cocos2dx在创建一个对象的时候是autoreleas
+          ...
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/01/04/cocos2dx资源管理/#more" rel="contents">

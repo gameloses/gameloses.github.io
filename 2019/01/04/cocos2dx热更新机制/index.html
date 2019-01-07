@@ -81,18 +81,20 @@
 
 
 
-<meta name="description" content="stay hungry stay foolish">
+<meta name="description" content="游戏脚本资源配置的更新，可以在游戏启动的时候，或者在游戏内更新。cocos2dx更新需要注意的是Lua文件的重新加载问题和纹理的重新加载的问题，纹理的加载需要注意合图文件的plist重新加载.游戏内更新需要注意的是更多需要小心处理精灵帧缓存纹理缓存和动画缓存 基本原理热更新实现了项目资源和脚本文件的动态更新。当工程有新的改动时，用户无需重新下载完整的安装包，而是通过对比本地与最新的版本信息，仅下载">
 <meta name="keywords" content="cocos2dx">
 <meta property="og:type" content="article">
 <meta property="og:title" content="cocos2dx热更新机制">
 <meta property="og:url" content="https://bytemode.github.io/2019/01/04/cocos2dx热更新机制/index.html">
 <meta property="og:site_name" content="小工知识库">
-<meta property="og:description" content="stay hungry stay foolish">
+<meta property="og:description" content="游戏脚本资源配置的更新，可以在游戏启动的时候，或者在游戏内更新。cocos2dx更新需要注意的是Lua文件的重新加载问题和纹理的重新加载的问题，纹理的加载需要注意合图文件的plist重新加载.游戏内更新需要注意的是更多需要小心处理精灵帧缓存纹理缓存和动画缓存 基本原理热更新实现了项目资源和脚本文件的动态更新。当工程有新的改动时，用户无需重新下载完整的安装包，而是通过对比本地与最新的版本信息，仅下载">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-01-05T09:14:30.582Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190107150910349.png">
+<meta property="og:updated_time" content="2019-01-07T07:41:17.029Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="cocos2dx热更新机制">
-<meta name="twitter:description" content="stay hungry stay foolish">
+<meta name="twitter:description" content="游戏脚本资源配置的更新，可以在游戏启动的时候，或者在游戏内更新。cocos2dx更新需要注意的是Lua文件的重新加载问题和纹理的重新加载的问题，纹理的加载需要注意合图文件的plist重新加载.游戏内更新需要注意的是更多需要小心处理精灵帧缓存纹理缓存和动画缓存 基本原理热更新实现了项目资源和脚本文件的动态更新。当工程有新的改动时，用户无需重新下载完整的安装包，而是通过对比本地与最新的版本信息，仅下载">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20190107150910349.png">
 
 
 
@@ -416,7 +418,52 @@
       
 
       
-        
+        <p>游戏脚本资源配置的更新，可以在游戏启动的时候，或者在游戏内更新。cocos2dx更新需要注意的是Lua文件的重新加载问题和纹理的重新加载的问题，纹理的加载需要注意合图文件的plist重新加载.游戏内更新需要注意的是更多需要小心处理精灵帧缓存纹理缓存和动画缓存</p>
+<h4 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h4><p>热更新实现了项目资源和脚本文件的动态更新。当工程有新的改动时，用户无需重新下载完整的安装包，而是通过对比本地与最新的版本信息，仅下载有改动的文件到本地，完成版本的更新。cocos2dx3.10前版本存在问题后续经过改善基本没有问题。</p>
+<h4 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h4><p>工程的资源和脚本文件存放分2个地方，一个是安装目录，一个是数据目录，当app安装完后，安装目录则不再可写，此后所有的更新文件统一存放到数据目录当中，APP调用文件时，也优先搜索数据目录的文件，当数据目录中找不到文件时，再到安装目录中搜索。</p>
+<p>配置文件分2种，project.manifest和version.manifest。服务器和客户端都存有备份，服务器存放着最新的版本配置文件，版本号最高，客户端每次启动前都会将服务器版本文件下载下来，并和本地配置文件对行对比，如果不是最新版本，则下载并安装补丁包。配置文件内容都是Json对象，且结构一样，只是version.manifest只存储了版本信息，project.manifest存储了版本信息和补丁信息。</p>
+<p>project.manifest文件结构如下：</p>
+<pre><code>{
+     &quot;packageUrl&quot; :&quot;xxxxx&quot;,
+     &quot;remoteManifestUrl&quot; :&quot;xxxxx/project.manifest&quot;,
+     &quot;remoteVersionUrl&quot; :&quot;xxxxx/version.manifest&quot;,
+     &quot;minVersion&quot;:&quot;1.0.0.0&quot;,
+     &quot;version&quot; : &quot;1.0.0.1&quot;,
+     &quot;assets&quot; : {
+            &quot;images.zip&quot; : {&quot;md5&quot; : &quot;xxxxxx&quot;,&quot;compressed&quot; : true }
+     },
+
+     &quot;searchPaths&quot; :[&quot;res&quot;,&quot;src&quot;]
+}
+</code></pre><ul>
+<li>packageUrl表示服务器下载目录的根目录</li>
+<li>remoteManifestUrl字段表示project.manifest文件的下载url</li>
+<li>remoteVersionUrl字段表示version.manifest的下载url</li>
+<li>minVersion 表示支持更新的最低版本，低于该版本则提示重新下载安装包。version字段表示工程的当前版本（如果配置文件是服务器上的，表示服务器的当前版本，如果是客户端的，则表示客户端的当前版本）</li>
+<li>Assets字段表示要更新的资源列表，p1.zip为补丁包名（包全路径为xxxxx/p1.zip），md5字段为该补丁包的唯一标识，compressed表示下载完后是否需解压。</li>
+<li>searchPaths表示要添加的搜索路径（。</li>
+<li>Version.manifest文件结构与上同，但是没有assets字段。</li>
+</ul>
+<h4 id="更新流程"><a href="#更新流程" class="headerlink" title="更新流程"></a>更新流程</h4><ol>
+<li><p>构造AssetsManagerEx对象<br>绑定下载成功、失败、进度的回调函数<br>设置下载文件的存放路径<br>加载本地project.manifest文件，若失败，则抛出消息ERROR_NO_LOCAL_MANIFEST，结束。</p>
+</li>
+<li><p>下载version.manifest启动更新</p>
+</li>
+</ol>
+<p>下载version.manifest文件，若成功goto 3，否则下载project.manifest，若成功goto3，否则抛出ERROR_DOWNLOAD_MANIFEST，结束。</p>
+<ol start="3">
+<li><p>版本比较<br>加载下载的配置文件并与本地project.manifest版本号进行对比，<br>若版本相同，则抛出消息ALREADY_UP_TO_DATE，结束。<br>若版本低于可更新版本号，则抛出NONUPDATABLE_VERSION，提示下载完整安装包，结束。<br>否则下载project.manifest加载下载的配置文件并与本地project.manifest版本号进行对比，<br>若版本相同，则抛出消息ALREADY_UP_TO_DATE，结束。<br>若版本低于可更新版本号，则抛出NONUPDATABLE_VERSION，提示下载完整安装包.</p>
+</li>
+<li><p>下载补丁包<br>清空下载记录，下载失败记录，解压记录<br>查看是否有未完成的下载记录，有则继续逐个下载（通过查看.temp文件）<br>获取本地assets和服务器asset差异列表，根据补丁包名：<br>a.如果本地有，服务器没有，则删除，<br>b.如果本地有，服务器也有，但md5不同，刚更新,<br>c.如果服务器有，本地没有，则添加</p>
+</li>
+<li><p>解压删除<br>依次解压列表中的文件。删除补丁包。结束。</p>
+</li>
+</ol>
+<h4 id="流程图如下所示"><a href="#流程图如下所示" class="headerlink" title="流程图如下所示"></a>流程图如下所示</h4><p><img src="https://img-blog.csdnimg.cn/20190107150910349.png" alt="assetmanagerex"></p>
+<h4 id="热更新时机"><a href="#热更新时机" class="headerlink" title="热更新时机"></a>热更新时机</h4><p>热更新一般在进入游戏之前也就是登录模块之后，也有放在登录模块之前.<br>需要确定好那些文件可以热更尤其是在执行热更新时有些已经加载的lua文件，再次require的时候不会重新加载，更新主要有两种情况，第一种是游戏启动更新，第二种是游戏内更新.</p>
+<h5 id="游戏启动更新"><a href="#游戏启动更新" class="headerlink" title="游戏启动更新"></a>游戏启动更新</h5><p>全局基础的更新，此时需要注意框架层是否更新本次是否立即生效，更新之后可能需要对一些lua文件和游戏纹理资源配置资源重新加载，在重新加载纹理的时候需要尤其你注意</p>
+<h4 id="游戏内更新"><a href="#游戏内更新" class="headerlink" title="游戏内更新"></a>游戏内更新</h4><p>对于有些游戏需要在游戏内下载子游戏包，此时需要做的是，每次退出子游戏需要全部清理掉纹理和lua资源，负责返回更新会导致更新不立即生效的问题</p>
+
       
     </div>
     
@@ -542,8 +589,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -640,6 +696,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#基本原理"><span class="nav-number">1.</span> <span class="nav-text">基本原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#具体实现"><span class="nav-number">2.</span> <span class="nav-text">具体实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#更新流程"><span class="nav-number">3.</span> <span class="nav-text">更新流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#流程图如下所示"><span class="nav-number">4.</span> <span class="nav-text">流程图如下所示</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#热更新时机"><span class="nav-number">5.</span> <span class="nav-text">热更新时机</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#游戏启动更新"><span class="nav-number">5.1.</span> <span class="nav-text">游戏启动更新</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#游戏内更新"><span class="nav-number">6.</span> <span class="nav-text">游戏内更新</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
