@@ -1,7 +1,7 @@
 ---
 title: cocos2dx Event机制
 comments: true
-date: 2019-01-07 18:34:51
+date: 2017-01-07 18:34:51
 tags:
 - cocos2dx
 categories:
