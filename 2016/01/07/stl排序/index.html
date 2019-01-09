@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="stl,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="小工知识库" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="STL的sort()算法，数据量大时采用Quick Sort，分段递归排序，一旦分段后的数据量小于某个门槛，为避免Quick Sort的递归调用带来过大的额外负荷，就改用Insertion Sort。如果递归层次过深，还会改用Heap Sort。本文先分别介绍这个三个Sort，再整合分析STL sort算法(以上三种算法的综合) – Introspective Sorting(内省式排序)。 In">
+<meta name="keywords" content="stl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="stl排序">
+<meta property="og:url" content="https://bytemode.github.io/2016/01/07/stl排序/index.html">
+<meta property="og:site_name" content="小工知识库">
+<meta property="og:description" content="STL的sort()算法，数据量大时采用Quick Sort，分段递归排序，一旦分段后的数据量小于某个门槛，为避免Quick Sort的递归调用带来过大的额外负荷，就改用Insertion Sort。如果递归层次过深，还会改用Heap Sort。本文先分别介绍这个三个Sort，再整合分析STL sort算法(以上三种算法的综合) – Introspective Sorting(内省式排序)。 In">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9">
+<meta property="og:image" content="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9">
+<meta property="og:image" content="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9">
+<meta property="og:image" content="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9">
+<meta property="og:image" content="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9">
+<meta property="og:image" content="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9">
+<meta property="og:image" content="http://note.youdao.com/src/5768FCF2B1724017A348D9623F6BA4F0">
+<meta property="og:updated_time" content="2019-01-07T11:54:09.843Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="stl排序">
+<meta name="twitter:description" content="STL的sort()算法，数据量大时采用Quick Sort，分段递归排序，一旦分段后的数据量小于某个门槛，为避免Quick Sort的递归调用带来过大的额外负荷，就改用Insertion Sort。如果递归层次过深，还会改用Heap Sort。本文先分别介绍这个三个Sort，再整合分析STL sort算法(以上三种算法的综合) – Introspective Sorting(内省式排序)。 In">
+<meta name="twitter:image" content="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bytemode.github.io/2016/01/07/stl排序/">
+
+
+
+
+
+  <title>stl排序 | 小工知识库</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小工知识库</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">coding wiki</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-golang">
+          <a href="/golang/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            golang
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-cocos">
+          <a href="/cocos2dx/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            cocos
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2016/01/07/stl排序/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sunfeng">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小工知识库">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">stl排序</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-07T19:53:21+08:00">
+                2016-01-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/stl/" itemprop="url" rel="index">
+                    <span itemprop="name">stl</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/01/07/stl排序/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2016/01/07/stl排序/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>STL的sort()算法，数据量大时采用Quick Sort，分段递归排序，一旦分段后的数据量小于某个门槛，为避免Quick Sort的递归调用带来过大的额外负荷，就改用Insertion Sort。如果递归层次过深，还会改用Heap Sort。本文先分别介绍这个三个Sort，再整合分析STL sort算法(以上三种算法的综合) – Introspective Sorting(内省式排序)。</p>
+<h4 id="Insertion-Sort"><a href="#Insertion-Sort" class="headerlink" title="Insertion Sort"></a>Insertion Sort</h4><p>Insertion Sort是《算法导论》一开始就讨论的算法。它的基本原理是：将初始序列的第一个元素作为一个有序序列，然后将剩下的N-1个元素按关键字大小依次插入序列，并一直保持有序。这个算法的复杂度为O(N^2)，最好情况下时间复杂度为O(N)。在数据量很少时，尤其还是在序列“几近排序但尚未完成”时，有着很不错的效果。</p>
+<p><img src="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9" alt="img"></p>
+<p>Insertion Sort</p>
+<p>void InsterSort(int a[], int n)</p>
+<p>{</p>
+<p>​    for (int i = 1; i &lt; n; ++i)</p>
+<p>​    {</p>
+<p>​        int temp = a[i];</p>
+<p>​        int j = i - 1;</p>
+<p>​        for (; j &gt;= 0 &amp;&amp; a[j] &gt; temp; –j)</p>
+<p>​        {</p>
+<p>​            a[j + 1] = a[j];</p>
+<p>​        }</p>
+<p>​        a[j + 1] = temp;</p>
+<p>​    }</p>
+<p>}</p>
+<p>上述函数之所以命名为unguarded_x是因为，一般的Insertion Sort在内循环原本需要做两次判断，判断是否相邻两元素是”逆转对“，同时也判断循环的行进是否超过边界。但由于上述所示的源代码会导致最小值必然在内循环子区间的边缘，所以两个判断可合为一个判断，所以称为unguarded_。省下一个判断操作，在大数据量的情况下，影响还是可观的。</p>
+<p>二、Quick Sort</p>
+<p>Quick Sort是目前已知最快的排序法，平均复杂度为O(NlogN)，可是最坏情况下将达O(N^2)。</p>
+<p>Quick Sort算法可以叙述如下。假设S代表将被处理的序列：</p>
+<p>1、如果S的元素个数为0或1，结束。</p>
+<p>2、取S中的任何一个元素，当做枢轴(pivot) v。</p>
+<p>3、将S分割为L、R两段，使L内的每一个元素都小于或等于v，R内的每一个元素都大于或等于v。</p>
+<p>4、对L、R递归执行Quick Sort。</p>
+<p>Median-of-Three（三点中值）</p>
+<p>因为任何元素都可以当做枢轴(pivot)，为了避免元素输入时不够随机带来的恶化效应，最理想最稳当的方式就是取整个序列的投、尾、中央三个元素的中值(median)作为枢轴。这种做法称为median-of-three partitioning。</p>
+<p><img src="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9" alt="img"></p>
+<p>Quick Sort</p>
+<p>void quickSort(int *a, int low, int hight)</p>
+<p>{</p>
+<p>​    if (low &lt; hight)</p>
+<p>​    {</p>
+<p>​        int povit = partition(a, low, hight);</p>
+<p>​        quickSort(a, low, povit - 1);</p>
+<p>​        quickSort(a, povit + 1, hight);</p>
+<p>​    }</p>
+<p>}</p>
+<p>Partitioning（分割）</p>
+<p>分割方法有很多，以下叙述既简单又有良好成效的做法。令first向尾移动，last向头移动。当<em>first大于或等于pivot时停下来，当</em>last小于或等于pivot时也停下来，然后检验两个迭代器是否交错。未交错则元素互相，然后各自调整一个位置，再继续相同行为。若交错，则以此时first为轴将序列分为左右两半，左边值都小于或等于pivot，右边都大于等于pivot</p>
+<p><img src="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9" alt="img"></p>
+<p>Partitioning</p>
+<p>int partition(int *a, int low, int hight) //分割算法</p>
+<p>{</p>
+<p>​    int povit = a[low];</p>
+<p>​    while (low &lt; hight)</p>
+<p>​    {</p>
+<p>​        while (low &lt; hight &amp;&amp; a[hight] &gt;= povit) //高位开始寻找小数 放在低位</p>
+<p>​        {</p>
+<p>​            –hight;</p>
+<p>​        }</p>
+<p>​        a[low] = a[hight];</p>
+<p>​        while (low &lt; hight &amp;&amp; a[low] &lt;= povit) //低位开始寻找大数 放在高位</p>
+<p>​        {</p>
+<p>​            ++low;</p>
+<p>​        }</p>
+<p>​        a[hight] = a[low];</p>
+<p>​    }</p>
+<p>​    a[low] = povit; //设置轴</p>
+<p>​    return low;</p>
+<p>}</p>
+<p>三、Heap Sort</p>
+<p>STL中有一个partial_sort()算法。</p>
+<p><img src="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9" alt="img"></p>
+<p>Heap Sort</p>
+<p>partial_sort的任务是找出middle-first个最小元素，因此，首先界定出区间[first,middle)，并利用make_heap()将它组织成一个max-heap，然后就可以讲[middle,last)中的每一个元素拿来与max-heap的最大值比较(max-heap的最大值就在第一个元素)；如果小于该最大值，就互换位置并重新保持max-heap的状态。如此一来，当我们走遍整个[middle,last)时，较大的元素都已经被抽离出[first,middle)，这时候再以sort_heap()将[first,middle)做一次排序。</p>
+<p>由于篇幅有限，本文不再阐述堆的具体实现，建议海量Google。</p>
+<p>四、IntroSort</p>
+<p>不当的枢轴选择，导致不当的分割，导致Quick Sort恶化为O(N^2)。David R. Musser于1996年提出一种混合式排序算法，Introspective Sorting。其行为在大部分情况下几乎与 median-of-3 Quick Sort完全相同。但是当分割行为(partitioning)有恶化为二次行为倾向时，能自我侦测，转而改用Heap Sort，使效率维持在O(NlogN)，又比一开始就使用Heap Sort来得好。大部分STL的sort内部其实就是用的IntroSort。</p>
+<p><img src="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9" alt="img"></p>
+<p>Intro Sort</p>
+<p>函数一开始就判断序列大小，通过个数检验之后，再检测分割层次，若分割层次超过指定值，就改用partial_sort()，即Heap sort。都通过了这些校验之后，便进入与Quick Sort完全相同的程序。</p>
+<p>当<strong>introsort_loop()结束，[first,last)内有多个“元素个数少于或等于”16的子序列，每个序列有相当程序的排序，但尚未完全排序（因为元素个数一旦小于 </strong>stl_threshold，就被中止了）。回到母函数，再进入__final_insertion_sort()：</p>
+<p><img src="http://note.youdao.com/src/458492E1915E4AE9BF7022DBE1496EC9" alt="img"></p>
+<p>View Code</p>
+<p>必须要看清楚的是，<strong>final_insertion_sort()之前，经过</strong>introsort_loop()的整个序列可以看成是一个个元素个数小于或等于16的子序列(注意子序列长度是不等的)，且这些子序列不但内部有相当程度排序，且更重要的是以子序列与子序列之间也是“递增”的，意思是前一个子序列中的元素都是小于后一个子序列中的元素的，所以这个时候运用insertion_sort()，效率可是相当高的。</p>
+<p>/—————————————华丽的分割线————————————–/</p>
+<p>关于IntroSort的测试。</p>
+<p>细看__introsort_loop()，是不是觉得他的快排的写法很怪，为什么不能直接这样写呢？</p>
+<p>if (last - first &gt; <strong>stl_threshold){        // &gt; 16 … … </strong>introsort_loop(cut,last,value_type(first), depth_limit); __introsort_loop(first,cut,value_type(first), depth_limit);</p>
+<p>于是，我做了一次测试，结果如下图：</p>
+<p><img src="http://note.youdao.com/src/5768FCF2B1724017A348D9623F6BA4F0" alt="img"></p>
+<p>测试结果发现，如果不像STL中那么写，其实在数组还比较小时，还快那么一丁点，</p>
+<p>并且即使数组变大，在一百万条记录时也只快0.3秒，唔。。也许STL更注重于大型数据吧，</p>
+<p>不过像他那么写，实在是牺牲了代码的可读性。</p>
+<p>为什么是Insertion Sort，而不是Bubble Sort。</p>
+<p>选择排序(Selection sort)，插入排序(Insertion Sort)，冒泡排序(Bubble Sort)。这三个排序是初学者必须知道的三个基本排序方式，且他们速度都不快 – O(N^2)。选择排序就不说了，最好情况复杂度也得O(N^2)，且还是个不稳定的排序算法，直接淘汰。</p>
+<p>可冒泡排序和插入排序相比较呢？</p>
+<p>首先，他们都是稳定的排序算法，且最好情况下都是O(N^2)。那么我就来对他们的比较次数和移动元素次数做一次对比（最好情况下），如下：</p>
+<p>插入排序：比较次数N-1，移动元素次数2N-1。</p>
+<p>冒泡排序：比较次数N-1，无需移动元素。(注：我所说的冒泡排序在最基本的冒泡排序基础上还利用了一下旗帜的方式，即寻访完序列未发生数据交换时则表示排序已完成，无需再进行之后的比较与交换动作）</p>
+<p>那么，这样看来冒泡岂不是是更快，我可以把上述的<strong>final_insertion_sort()函数改成一个</strong>final_bubble_sort()，把每个子序列分别进行冒泡排序，岂不是更好？</p>
+<p>事实上，具体实现时，我才发现这个想法错了，因为写这么一个<strong>final_bubble_sort()，我没有办法确定每个子序列的大小，可我还是不甘心呐，就把bubble_sort()插在</strong>introsort_loop()最后，这样确实是每个子序列都用bubble_sort()又排序了一次，可是测试结果太惨了，由此可以看书Bubble Sort在“几近排序但尚未完成”的情况下是没多少改进作用的。</p>
+<p>为什么不直接用Heap Sort</p>
+<p>堆排序将所有的数据建成一个堆，最大的数据在堆顶，它不需要递归或者多维的暂存数组。算法最优最差都是O(NlogN)，不像快排，如果你人品够差还能恶化到O(N^2)。当数据量非常大时（百万数据），因为快排是使用递归设计算法的，还可能发出堆栈溢出错误呢。</p>
+<p>那么为什么不直接用Heap Sort？或者说给一个最低元素阈值（__stl_threshold)时也给一个最大元素阈值（100W），即当元素数目超过这个值时，直接用Heap Sort，避免堆栈溢出呢？</p>
+<p>对于第一个问题，我测试了一下，发现直接用Heap Sort，有时还没有Quick Sort快呢，查阅《算法导论》发现，原来虽然Quick和Heap的时间复杂性是一样的，但堆排序的常熟因子还是大些的，并且堆排序过程中重组堆其实也不是个省时的事。</p>
+<p>VS2010版STL中的sort竟比我自己写的快这么多？</p>
+<p>首先，上文实现的这个Introsort是参照SGI STL写的，于是，我斗胆在VS2010中拿他与std:sort比了比快慢。于是就随机产生两个百万数据的vector用来测试。结果发现，VS中sort的速度竟是我的10倍以上的效率。顿时对微软萌生敬意，可是当我仔细翻看源码时…..</p>
+<p>原来，microsoft的sort并没有比sgi的sort快。只是在排序vector时，microsoft把vector的本质数据“萃取”出来了。</p>
+<p>即，取消了vector在++时的边界检查语句，把vector::iterator当指针一般使用。所以才在对vector排序时会比我自己写的introsort算法快那么多呢。</p>
+<p>void heapAdjust(int* a, int s, int len) //s 为要调整的堆的根序号 len为树最后一个节点的序号</p>
+<p>{</p>
+<p>​    int root = a[s];</p>
+<p>​    for (int i = 2 <em> s; i &lt; len; i </em>= 2)</p>
+<p>​    {</p>
+<p>​        if (i &lt; len &amp;&amp; a[i] &lt; a[i +1]) //存在右孩子 记录s的孩子中最大</p>
+<p>​        {</p>
+<p>​            i++;</p>
+<p>​        }</p>
+<p>​        if (root &gt; a[i]) //最大孩子小与root 以为大根堆</p>
+<p>​        {</p>
+<p>​            break;</p>
+<p>​        }</p>
+<p>​        a[s] = a[i]; //大孩子调整为根</p>
+<p>​        s = i;       //记录交换后孩子的位置  继续需找孩子i的孩子中最大的放到s处</p>
+<p>​    }</p>
+<p>​    a[s] = root;     //将root放在堆中合适的位置处</p>
+<p>}</p>
+<p>void heapSort(int *a, int len)</p>
+<p>{</p>
+<p>​    //整个树建大顶堆 len/2为最后一个堆的根序号</p>
+<p>​    for (int i = len / 2; i &gt; 0; –i)</p>
+<p>​    {</p>
+<p>​        heapAdjust(a, i, len);</p>
+<p>​    }</p>
+<p>​    //交换堆顶和最后一个元素 建堆</p>
+<p>​    for (int j = len; j &gt; 0; –j)</p>
+<p>​    {</p>
+<p>​        a[0] = a[1]; //a[1]为顶</p>
+<p>​        a[1] = a[j];</p>
+<p>​        a[j] = a[0];</p>
+<p>​        heapAdjust(a, 1, j-1); //将剩余的元素建堆</p>
+<p>​    }</p>
+<p>}</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/WechatIMG73.jpg" alt="sunfeng 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/WechatIMG74.jpg" alt="sunfeng 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/stl/" rel="tag"># stl</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/01/01/openglGLSL/" rel="prev" title="opengl GLSL">
+                opengl GLSL <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="sunfeng">
+            
+              <p class="site-author-name" itemprop="name">sunfeng</p>
+              <p class="site-description motion-element" itemprop="description">stay hungry stay foolish</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/bytemode" target="_blank" title="github">
+                      
+                        <i class="fa fa-fw fa-github"></i>github</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:sunfeng45@163.com" target="_blank" title="email">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>email</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://blog.csdn.net/blogsun" target="_blank" title="csdn">
+                      
+                        <i class="fa fa-fw fa-csdn"></i>csdn</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.cnblogs.com/bytemode" target="_blank" title="cnblogs">
+                      
+                        <i class="fa fa-fw fa-cnblogs"></i>cnblogs</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Insertion-Sort"><span class="nav-number">1.</span> <span class="nav-text">Insertion Sort</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2013 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">stephen.sun</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'BQ4UGsgJKS9xQ9AJz8mWuMNS-gzGzoHsz',
+        appKey: '6xMqIauHFPgEPXAGQTFLojxr',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

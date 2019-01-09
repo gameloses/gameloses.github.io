@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://bytemode.github.io/"/>
-  <updated>2018-12-27T08:12:07.826Z</updated>
+  <updated>2019-01-09T11:28:14.415Z</updated>
   <id>https://bytemode.github.io/</id>
   
   <author>
@@ -15,6 +15,139 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>cocos2dx中使用JPG图和只带Alpha的PNG图合成渲染</title>
+    <link href="https://bytemode.github.io/2019/01/09/cocos2dx%E4%B8%AD%E4%BD%BF%E7%94%A8JPG%E5%9B%BE%E5%92%8C%E5%8F%AA%E5%B8%A6Alpha%E7%9A%84PNG%E5%9B%BE%E5%90%88%E6%88%90%E6%B8%B2%E6%9F%93/"/>
+    <id>https://bytemode.github.io/2019/01/09/cocos2dx中使用JPG图和只带Alpha的PNG图合成渲染/</id>
+    <published>2019-01-09T11:19:04.000Z</published>
+    <updated>2019-01-09T11:28:14.415Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p>将带Alpha通道的PNG图片分拆成RGB和Alpha分别保存，其中保存RGB的这张图把它转换成JPG格式的文件，保存Alpha图片的就用PNG格式的。原理是JPG格式的压缩率比较的高可以减小图片的大小，但是它没有Alpha，而Alpha数据单独拎出来一般比较小，所以直接用PNG格式来保存。问题是怎样分拆PNG图片，又怎样在程序中怎样将两张图片的数据合并起来以达到和直接用一张带Alpha的PNG图渲染出来是一样的效果。</p><h3 id="拆分"><a href="#拆分" class="headerlink" title="拆分"></a>拆分</h3><p>将PNG图片分拆，也就是将一张PNG图片生成出一张带RGB的JPG+一张带Alpha的PNG，我使用的工具是imagemagick。这里以bg.png为例:　　　　</p><ul><li><p>首先ImageMagick工具提取出Alpha通道，(命令: convert bg.png -channel A -alpha extract bgAlpha.png)　　　　</p></li><li><p>然后在将bg.png转成JPG格式 输出为bg.jpg。jpg格式已经不包含Alpha通道，而且jpg的压缩率比较高（这是采用这种方法可以减小图片大小的根本所在）。(convert bg.png bg.jpg)</p></li><li><p>这样就得到了bg.jpg 和bgAlpha.png,这两张图片就是我们需要的资源。这样转换之后bg.jpg+bgAlpha.png的大小大概比bg.png的 小2~3倍</p></li></ul><h4 id="合并"><a href="#合并" class="headerlink" title="合并"></a>合并</h4><p>由于在win，Android平台采用的JPG和PNG解析库和IOS上的不同，所以在程序中要分别处理，这里介绍下在IOS上的方法(win和Android平台解析参照CCImage的_initWithJpgData和_initWithPngData 方法,合并和IOS的平台类似,不同地方文中会指出), 这个方法添加在CCImage.mm 文件中即可使用</p><pre><code>bool CCImage::initWithRgbAndAlpha(const char * jpgFilePath, const char * pngFilePath) {     bool bRet = false;    do {         // 获得JPG文件的数据         unsigned long nSizeJpg = 0;         unsigned char* pBufferJpg = CCFileUtils::sharedFileUtils()-&gt;getFileData(                                         CCFileUtils::sharedFileUtils()-&gt;fullPathForFilename(jpgFilePath).c_str(),                                         &quot;rb&quot;,                                         &amp;nSizeJpg);         // 保证JPG文件数据必须是存在的         if (pBufferJpg == NULL &amp;&amp; nSizeJpg &lt;= 0) {return true;}         // 获得Alpha文件的数据         unsigned long nSizePng = 0;         unsigned char* pBufferPng = CCFileUtils::sharedFileUtils()-&gt;getFileData(                                         CCFileUtils::sharedFileUtils()-&gt;fullPathForFilename(pngFilePath).c_str(),                                         &quot;rb&quot;,                                         &amp;nSizePng);         tImageInfo jpgInfo = {0};         jpgInfo.hasShadow = false;         jpgInfo.hasStroke = false;         // 利用CCImage原有的方法解析JPG         bRet = _initWithData(pBufferJpg, nSizeJpg, &amp;jpgInfo);         unsigned char* jpgData = jpgInfo.data;          if (!bRet) {return false;}         tImageInfo pngInfo = {0};         pngInfo.hasShadow = false;         pngInfo.hasStroke = false;         //利用CCImage原有的方法解析Alpha文件           bRet = _initWithData(pBufferPng, nSizePng, &amp;pngInfo);         unsigned char* pngData = pngInfo.data;         if (!bRet) {return false;}         unsigned short jpgHeight = (short)jpgInfo.height;         unsigned short jpgWidth = (short)jpgInfo.width;         int jpgDataLen = jpgHeight * jpgWidth;         int pngIndex = 0;         int jpgIndex = 0;         m_pData = new unsigned char[jpgHeight * jpgWidth * 4];         unsigned int *tmpData = (unsigned int *)m_pData;         // 合并两个文件的数据         for(int i = 0; i &lt; jpgDataLen; i++)         { // 这个宏和CC_RGB_PREMULTIPLY_ALPHA是一样，作用是将R,G,B 三个颜色值分别乘Alpha值得到合并的R,G,B值,              *tmpData++ = CC_RGB_PREMULTIPLY_ALPHA_IOS(                                 jpgData[jpgIndex], // R                                 jpgData[jpgIndex + 1], // G                                 jpgData[jpgIndex + 2], // B                                 pngData[pngIndex]);  //A             // 两张图片在解析之后都为32位了，所以+4 (Android或者win上 不带Alpha通道的png文件和jpg文件解析之后是24位的，这是主要区别的地方)             jpgIndex += 4;             pngIndex += 4;         }         m_nHeight = (short)jpgInfo.height;         m_nWidth = (short)jpgInfo.width;         m_nBitsPerComponent = jpgInfo.bitsPerComponent;         m_bPreMulti = true;         m_bHasAlpha = true;         CC_SAFE_DELETE_ARRAY(pBufferPng);         CC_SAFE_DELETE_ARRAY(pBufferJpg);         CC_SAFE_DELETE_ARRAY(jpgData);         CC_SAFE_DELETE_ARRAY(pngData);         bRet = true;     } while (0);     return bRet;}</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;原理&quot;&gt;&lt;a href=&quot;#原理&quot; class=&quot;headerlink&quot; title=&quot;原理&quot;&gt;&lt;/a&gt;原理&lt;/h4&gt;&lt;p&gt;将带Alpha通道的PNG图片分拆成RGB和Alpha分别保存，其中保存RGB的这张图把它转换成JPG格式的文件，保存Alpha图片的就用P
+      
+    
+    </summary>
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
+    
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>cocos2dx水面shader</title>
+    <link href="https://bytemode.github.io/2019/01/09/cocos2dx-shader-%E6%B0%B4%E9%9D%A2/"/>
+    <id>https://bytemode.github.io/2019/01/09/cocos2dx-shader-水面/</id>
+    <published>2019-01-09T10:36:38.000Z</published>
+    <updated>2019-01-09T10:41:23.813Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p>原理还是采用2D模拟方法 利用法线贴图模拟光照 简单的实现了一下水面折射效果以及简单的UV动画</p><h4 id="片段着色器"><a href="#片段着色器" class="headerlink" title="片段着色器"></a>片段着色器</h4><p>片段Shader，因为顶点Shader我们用的是Cocos自带的ccPositionTextureColor_noMVP_vert</p><pre><code>//将法线贴图映射至普通的Sprite之上 简单的实现了一下水面的折射效果以及简单的normal UV动画varying vec4 v_fragmentColor;  varying vec2 v_texCoord;  uniform sampler2D u_normalMap; vec3 waveNormal(vec2 p) {      ``vec3 normal = texture2D(u_normalMap, p).xyz;      ``normal = -1.0 + normal * 2.0;      ``return` `normalize(normal);  }  void` `main() {      ``float` `timeFactor = 0.1;      ``float` `offsetFactor = 0.5;      ``float` `refractionFactor = 0.7;      ``// simple UV animation      ``vec3 normal = waveNormal(v_texCoord + vec2(CC_Time.y * timeFactor, CC_Time.x * timeFactor));      ``// simple calculate refraction UV offset      ``vec2 p = -1 + 2 * v_texCoord;      ``vec3 eyePos = vec3(0, 0, 10); ``//眼睛位置 位于中心点正上方      ``vec3 inVec = normalize(vec3(p, 0) - eyePos);      ``vec3 refractVec = refract(inVec, normal, refractionFactor);  ``//根据入射向量，法线，折射系数计算折射向量    ``vec2 v_texCoordN = v_texCoord;    ``v_texCoordN += refractVec.xy * offsetFactor;        ``//v_texCoordN.x -= CC_Time.y*timeFactor *0.6; //移动水面贴图，可选    ``gl_FragColor = texture2D(CC_Texture0, v_texCoordN);  } </code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;原理&quot;&gt;&lt;a href=&quot;#原理&quot; class=&quot;headerlink&quot; title=&quot;原理&quot;&gt;&lt;/a&gt;原理&lt;/h4&gt;&lt;p&gt;原理还是采用2D模拟方法 利用法线贴图模拟光照 简单的实现了一下水面折射效果以及简单的UV动画&lt;/p&gt;
+&lt;h4 id=&quot;片段着色器&quot;&gt;&lt;a 
+      
+    
+    </summary>
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
+    
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ecs框架</title>
+    <link href="https://bytemode.github.io/2019/01/08/ecs%E6%A1%86%E6%9E%B6/"/>
+    <id>https://bytemode.github.io/2019/01/08/ecs框架/</id>
+    <published>2019-01-08T10:47:43.000Z</published>
+    <updated>2019-01-08T10:55:37.580Z</updated>
+    
+    <content type="html"><![CDATA[<p>ECS即Entity-Component-System，实体-组件系统的意思，是一套游戏层的架构，是基于属性的游戏架构.出现很早，随着《守望先锋》架构设计与网络同步 – GDC2017 而进入大众视野，unity2018版本直接内置了ecs,同时新起来的开源游戏引擎CLEngine也内置了ecs。google开源的<a href="https://github.com/sschmid/Entitas-CSharp/wiki也是一套ecs框架" target="_blank" rel="noopener">https://github.com/sschmid/Entitas-CSharp/wiki也是一套ecs框架</a></p><h4 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h4><table><thead><tr><th>Entity</th><th>代表一个独立的个体。</th></tr></thead><tbody><tr><td>Component</td><td>一个个体某方面的数据，以及它与游戏世界的交互方法。</td></tr><tr><td>System</td><td>持续地对Entity上与System对应的Component进行处理，每个System都有独立的线程。</td></tr></tbody></table><p><strong>示例</strong></p><hr><p>假设我们有一个绘制函数，这个绘制函数就是一个System，它去会遍历所有带有physical和visible组件的entity，然后利用提供的信息来绘制。</p><p>visible组件内包含有“entity看起来应该是什么样”的信息，而physical组件提供绘制的位置。</p><p>再以碰撞检测为例子。System会遍历所有拥有物理Component的entity，然后对碰撞进行检测并在需要的时候产生对应的事件。</p><p><strong>ECS系统与传统OOP的区别</strong></p><hr><p>在OOP系统中，对象的状态是封装到个体中的，对象会提供一些手段来间接操作这些状态（代码大全：抽象数据类型）。</p><p>这样的系统其实并没有什么问题，但从游戏开发的角度来讲，当你把一切都封装好并良构之后，游戏设计师突然表示他需要一项和之前完全不一样的功能，而一般灾难都是从这里开始的。</p><p>我们现在知道ECS系统的特征是将状态（由Component提供）与行为（由System系统）进行分离，而Component之间是独立的，我们完全可以通过单独添加新的Component和System来添加新的功能而不修改任何代码，而这也是设计模式中策略模式的思想。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;ECS即Entity-Component-System，实体-组件系统的意思，是一套游戏层的架构，是基于属性的游戏架构.出现很早，随着《守望先锋》架构设计与网络同步 – GDC2017 而进入大众视野，unity2018版本直接内置了ecs,同时新起来的开源游戏引擎CLEn
+      
+    
+    </summary>
+    
+      <category term="架构" scheme="https://bytemode.github.io/categories/%E6%9E%B6%E6%9E%84/"/>
+    
+    
+      <category term="架构" scheme="https://bytemode.github.io/tags/%E6%9E%B6%E6%9E%84/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>stl常用技巧</title>
+    <link href="https://bytemode.github.io/2019/01/07/stl%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C/"/>
+    <id>https://bytemode.github.io/2019/01/07/stl常用操作/</id>
+    <published>2019-01-07T11:15:35.000Z</published>
+    <updated>2019-01-07T11:18:12.143Z</updated>
+    
+    <content type="html"><![CDATA[<ol><li>删除第n个元素</li></ol><p>比如：vector vecID; 中保存了m个ID，这时要删除第n个ID。</p><p>遍历是一个方法；即vector::itertor it = vecID.begin()； 然后++it n次。</p><p>更好的方法是：vector::itertor it = vecID.begin() + n； vector的迭代器直接支持这种偏移。</p><p>然后用vecID.erase(it)方法 删除该元素。</p><ol start="2"><li>去除一个容器中有特定值的所有对象</li></ol><ul><li><p>如果容器是vector、string或deque，使用erase-remove惯用法，例如</p><p>c.erase(remove(c.begin(), c.end(), 1963),c.end());</p></li></ul><ul><li><p>如果容器是list，使用list.remove</p><p> // 当c是list时，remove成员函数是去除特定值的元素的最佳方法</p><p> c.remove(1963);</p></li></ul><ul><li><p>如果容器是标准关联容器，使用它的erase成员函数，例如：</p><p> // 当c是标准关联容器时，erase成员函数是去除特定值的元素的最佳方法</p><p> c.erase(1963);</p></li></ul><ol start="3"><li><p>去除一个容器中满足一个特定判定式的所有对象</p><p>bool badValue(int x);   // 函数定义：返回x是否是“bad”</p><p>如果容器是vector、string或deque，使用erase-remove_if惯用法：</p><p>// 当c是vector、string或deque时这是去掉badValue返回真的对象的最佳方法</p><p>c.erase(remove_if(c.begin(), c.end(), badValue),c.end());</p><p>如果容器是list，使用list.remove_if：</p><p>//当c是list时这是去掉badValue返回真的对象的最佳方法</p><p>c.remove_if(badValue);</p><p>如果容器是标准关联容器，使用remove_copy_if和swap。</p><p>如果需要写一个循环遍历容器元素erase，注意iterator的递增逻辑</p><p>// 错误代码：当容器的一个元素被删时，指向那个元素的所有迭代器都失效了</p><p>AssocContainer<int> c;</int></p><p>// 不要这么做！</p></li></ol><pre><code> for (AssocContainer&lt;int&gt;::iterator i = c.begin(); i!= c.end(); ++i {                                              if (badValue(*i))    {        c.erase(i);    }}</code></pre><p> // 正确代码：</p><pre><code> AssocContainer&lt;int&gt; c; // for循环的第三部分是空的，i在后面自增。 for (AssocContainer&lt;int&gt;::iterator i = c.begin(); i != c.end();) {    if (badValue(*i))    {        i = c.erase(i); //仅适用序列容器，关联容器用c.erase(i++); 因关联容器erase 返回void，    }    else    {        ++i;    }}</code></pre><ol start="4"><li>压缩多余的vector空间。</li></ol><pre><code>   std::vector&lt;int&gt; vec(5);  //capacity=5   vec.reserve(100);         //capacity=100   vec.reserve(10);          //capacity=100   std::vector&lt;int&gt; temp(vec);  //temp的capacity=5  （拷贝构造函数的功能）　　   temp.swap(vec);              //temp的capacity=100，vec的capacity回复为5 （swap的功能）　　   temp.clear();   //temp功成身退   std::vector&lt;int&gt;  (vec).swap(vec); </code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;ol&gt;
+&lt;li&gt;删除第n个元素&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;比如：vector vecID; 中保存了m个ID，这时要删除第n个ID。&lt;/p&gt;
+&lt;p&gt;遍历是一个方法；即vector::itertor it = vecID.begin()； 然后++it n次。&lt;/p&gt;
+&lt;p&gt;更
+      
+    
+    </summary>
+    
+      <category term="stl" scheme="https://bytemode.github.io/categories/stl/"/>
+    
+    
+      <category term="stl" scheme="https://bytemode.github.io/tags/stl/"/>
+    
+      <category term="c++" scheme="https://bytemode.github.io/tags/c/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>cocos2dx灰度shader</title>
+    <link href="https://bytemode.github.io/2018/12/31/cocos2dx-shader-%E7%81%B0%E5%BA%A6/"/>
+    <id>https://bytemode.github.io/2018/12/31/cocos2dx-shader-灰度/</id>
+    <published>2018-12-31T09:57:11.000Z</published>
+    <updated>2019-01-09T11:13:33.840Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="灰度shader"><a href="#灰度shader" class="headerlink" title="灰度shader"></a>灰度shader</h3><p>最近在学习shader，就把cocos2d-x 3.x版本中的很简单也很常用的灰度shader拿出来学习一下。</p><pre><code>#ifdef GL_ESprecision mediump float; // ES版本的精度限定符，精度变低后可以提高效率#endifvarying vec4 v_fragmentColor;varying vec2 v_texCoord;void main(void)     vec4 c = texture2D(CC_Texture0, v_texCoord);     gl_FragColor.xyz = vec3(0.2126*c.r + 0.7152*c.g + 0.0722*c.b);     gl_FragColor.w = c.w;}</code></pre><h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><p><code>precision mediump float</code>是open es特有的精度限定符，原本的浮点数精度是<code>double</code>，opengl es为了提高渲染效率，限定精度为<code>float</code>类型。</p><p><code>v_fragmentColor</code>是从顶点着色器设置的颜色经过光栅化阶段的线性插值后传给片段着色器的颜色。</p><p><code>v_texCoord</code>同样是经过线性插值而来的纹理坐标。</p><p>下面是顶点着色器的代码：</p><pre><code>const char* ccPositionTextureColor_noMVP_vert = STRINGIFY(attribute vec4 a_position;attribute vec2 a_texCoord;attribute vec4 a_color;\n#ifdef GL_ES\nvarying lowp vec4 v_fragmentColor;varying mediump vec2 v_texCoord;\n#else\nvarying vec4 v_fragmentColor;varying vec2 v_texCoord;\n#endif\n    void main()    {        gl_Position = CC_PMatrix * a_position;        v_fragmentColor = a_color;        v_texCoord = a_texCoord;    });</code></pre><p><code>CC_Texture0</code>是一个采样器，在load shader的时候，引擎会预先把这些<code>uniform</code>变量给加载进来。<br>下面这部分代码就是引擎预先加载进来的<code>uniform</code>变量：</p><pre><code>static const char * COCOS2D_SHADER_UNIFORMS =        &quot;uniform mat4 CC_PMatrix;\n&quot;        &quot;uniform mat4 CC_MVMatrix;\n&quot;        &quot;uniform mat4 CC_MVPMatrix;\n&quot;        &quot;uniform mat3 CC_NormalMatrix;\n&quot;        &quot;uniform vec4 CC_Time;\n&quot;        &quot;uniform vec4 CC_SinTime;\n&quot;        &quot;uniform vec4 CC_CosTime;\n&quot;        &quot;uniform vec4 CC_Random01;\n&quot;        &quot;uniform sampler2D CC_Texture0;\n&quot;        &quot;uniform sampler2D CC_Texture1;\n&quot;        &quot;uniform sampler2D CC_Texture2;\n&quot;        &quot;uniform sampler2D CC_Texture3;\n&quot;        &quot;//CC INCLUDES END\n\n&quot;;</code></pre><p>这些变量在shader里面如果没有用到的话，会被引擎给优化掉。</p><p><code>texture2D()</code>是shader的内建方法，作用是从<code>CC_Texture0</code>采样器中进行纹理采样，得到当前片段的颜色值。</p><p><code>gl_FragColor</code>是shader的内建变量，表示当前片段的颜色，代码中是把从采样器中拿到的颜色值进行一个变灰处理后，最后得到的颜色值再赋值给<code>gl_FragColor</code>。<code>gl_FragColor</code>就是最终的颜色。</p><p>这个shader很简单，就是改变了一下rgb的值。<code>0.2126</code>，<code>0.7152</code>，<code>0.0722</code>这几个系数据说是根据人眼对rgb这三种基本颜色识别的强弱算出来的。</p><h3 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h3><p>在cocos2dx 3.x版本中sprite变灰的代码例子：</p><pre><code>auto sprite = Sprite::create(&quot;HelloWorld.png&quot;);sprite-&gt;setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE));</code></pre><p>效果如下图所示：</p><p><img src="https://img-blog.csdnimg.cn/20190109181721144.png" alt="灰度shader"></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;灰度shader&quot;&gt;&lt;a href=&quot;#灰度shader&quot; class=&quot;headerlink&quot; title=&quot;灰度shader&quot;&gt;&lt;/a&gt;灰度shader&lt;/h3&gt;&lt;p&gt;最近在学习shader，就把cocos2d-x 3.x版本中的很简单也很常用的灰度shade
+      
+    
+    </summary>
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/categories/cocos2dx/"/>
+    
+    
+      <category term="cocos2dx" scheme="https://bytemode.github.io/tags/cocos2dx/"/>
+    
+  </entry>
   
   <entry>
     <title>lua闭包</title>
@@ -145,7 +278,7 @@
     <link href="https://bytemode.github.io/2018/12/15/lua%E6%A0%88/"/>
     <id>https://bytemode.github.io/2018/12/15/lua栈/</id>
     <published>2018-12-15T06:56:54.000Z</published>
-    <updated>2018-12-27T08:12:07.824Z</updated>
+    <updated>2019-01-07T11:11:49.737Z</updated>
     
     <content type="html"><![CDATA[<p>既然Lua虚拟机模拟的是CPU的运作,那么Lua栈模拟的就是内存的角色.在Lua内部,参数的传递是通过Lua栈,同时Lua与C等外部进行交互的时候也是使用的栈.,先关注的是Lua栈的分配,管理和相关的数据结构.</p><p>lua虚拟机在初始化创建lua_State结构体时,会走到stack_init函数中,这个函数主要就是对Lua栈和CallInfo数组的初始化:</p><pre><code>static void stack_init (lua_State *L1, lua_State *L) {  /* initialize CallInfo array */  L1-&gt;base_ci = luaM_newvector(L, BASIC_CI_SIZE, CallInfo);  L1-&gt;ci = L1-&gt;base_ci;  L1-&gt;size_ci = BASIC_CI_SIZE;  L1-&gt;end_ci = L1-&gt;base_ci + L1-&gt;size_ci - 1;  /* initialize stack array */  L1-&gt;stack = luaM_newvector(L, BASIC_STACK_SIZE + EXTRA_STACK, TValue);  L1-&gt;stacksize = BASIC_STACK_SIZE + EXTRA_STACK;  L1-&gt;top = L1-&gt;stack;  L1-&gt;stack_last = L1-&gt;stack+(L1-&gt;stacksize - EXTRA_STACK)-1;  /* initialize first ci */  L1-&gt;ci-&gt;func = L1-&gt;top;  setnilvalue(L1-&gt;top++);  /* `function&#39; entry for this `ci&#39; */  L1-&gt;base = L1-&gt;ci-&gt;base = L1-&gt;top;  L1-&gt;ci-&gt;top = L1-&gt;top + LUA_MINSTACK;}</code></pre><p>可以看到的是,初始化了两个数组,分别保存Lua栈和CallInfo结构体数组.<br>其中,与Lua栈相关的lua_State结构体成员变量有base,stack,top,lastfree,stack保存的是数组的初始位置,base会根据每次函数调用的情况发生变化,top指针指向的是当前第一个可用的栈位置,每次向栈中增加/删减元素都要对应的增减top指针,lastfee指针指向的书Lua栈的最后位置.</p><p>CallInfo结构体,是每次有函数调用时都会去初始化的一个结构体,它的成员变量中,也有top,base指针,同样的是指向Lua栈的位置,所不同的是,它关注的仅是函数调用时的相关位置.从代码中可以看出,CallInfo数组是有限制的,换言之,在Lua中的嵌套函数调用层次也是有限制,不能超过一定数量.<br><img src="https://img2018.cnblogs.com/blog/1560953/201812/1560953-20181215144229849-16830691.png" alt=""></p><p>首先看f_parser函数:</p><pre><code>static void f_parser (lua_State *L, void *ud) {  int i;  Proto *tf;  Closure *cl;  struct SParser *p = cast(struct SParser *, ud);  int c = luaZ_lookahead(p-&gt;z);  luaC_checkGC(L);  tf = ((c == LUA_SIGNATURE[0]) ? luaU_undump : luaY_parser)(L, p-&gt;z,                                                             &amp;p-&gt;buff, p-&gt;name);  cl = luaF_newLclosure(L, tf-&gt;nups, hvalue(gt(L)));  cl-&gt;l.p = tf;  for (i = 0; i &lt; tf-&gt;nups; i++)  /* initialize eventual upvalues */    cl-&gt;l.upvals[i] = luaF_newupval(L);  setclvalue(L, L-&gt;top, cl);  incr_top(L);}</code></pre><p>f_parser函数的最后两句,将分析完毕之后的结构Closure指针压入了Lua栈.</p><p>再来看luaD_precall函数,这里为将代码放入Lua虚拟机中执行准备了相关数据,我们只截取其中的一部分来看:</p><pre><code>int luaD_precall (lua_State *L, StkId func, int nresults) {  ….  if (!cl-&gt;isC) {  /* Lua function? prepare its call */    CallInfo *ci;    StkId st, base;    Proto *p = cl-&gt;p;// 1) 根据函数的参数类型,计算出该CallInfo的base指针位置    if (!p-&gt;is_vararg) {  /* no varargs? */      base = func + 1;      if (L-&gt;top &gt; base + p-&gt;numparams)        L-&gt;top = base + p-&gt;numparams;    }    else {  /* vararg function */      int nargs = cast_int(L-&gt;top - func) - 1;      base = adjust_varargs(L, p, nargs);      func = restorestack(L, funcr);  /* previous call may change the stack */}// 2) 分配一个新的CallInfo结构体,用于保存此次函数调用的相关信息:top,base指针,func函数    ci = inc_ci(L);  /* now `enter&#39; new function */    ci-&gt;func = func;    L-&gt;base = ci-&gt;base = base;    ci-&gt;top = L-&gt;base + p-&gt;maxstacksize;    lua_assert(ci-&gt;top &lt;= L-&gt;stack_last);    // 3) LuaState的PC指针指向函数原型的代码数组    L-&gt;savedpc = p-&gt;code;  /* starting point */    // …..    return PCRLUA;  }</code></pre><p>到这一步,跟某次具体的Lua代码执行相关的代码(保存在Proto的code数组中)和执行时所需环境(Lua栈),就已经准备完毕了.后面就是进入Lua虚拟机的主循环中解释执行代码了.</p>]]></content>
     
@@ -382,134 +515,6 @@
       
       
         &lt;h1 id=&quot;loadstring-load&quot;&gt;&lt;a href=&quot;#loadstring-load&quot; class=&quot;headerlink&quot; title=&quot;loadstring load&quot;&gt;&lt;/a&gt;loadstring load&lt;/h1&gt;&lt;p&gt;从给定的字符串得到块(函数)。lua
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua版本变化</title>
-    <link href="https://bytemode.github.io/2018/12/12/lua%E7%89%88%E6%9C%AC%E5%8F%98%E5%8C%96/"/>
-    <id>https://bytemode.github.io/2018/12/12/lua版本变化/</id>
-    <published>2018-12-12T13:31:21.000Z</published>
-    <updated>2018-12-12T14:47:58.254Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="从-Lua-5-1-迁移到-5-2"><a href="#从-Lua-5-1-迁移到-5-2" class="headerlink" title="从 Lua 5.1 迁移到 5.2"></a>从 Lua 5.1 迁移到 5.2</h4><ul><li><p>5.2中抛弃module，建议使用require进行加载， 可能是考虑到Module定义对全局表的污染</p></li><li><p>在5.1版本，可以理解为每个<a href="https://www.lua.org/pil/1.1.html" target="_blank" rel="noopener">chunk</a>都具有自己的环境表，然后通过setfenv/getfenv进行设置和操作。Lua5.2开始取消了环境表的概念，取消setfenv/getfenv方法，增加了_Env来管理。</p></li><li><p>_G 和 _Env*</p></li></ul><p>_G 是放在注册表LUA_RIDX_GLOBALS中，初始化时核心的库都放在_G中；_Env 是chunk闭包的第一个upvalue，load时默认为_G, 然后后面定义的变量都会在编译时加上_ENV.前缀，以此传递下去，当然也可以修改</p><ul><li>全局注册表</li></ul><p>在5.2中已经移除了LUA_GLOBALSINDEX,去而带之的是注册表。5.2以后中上面两个函数都是使用的注册标中的LUA_RIDX_GLOBAS伪索引（索引注册表的全局环境）。处理 lua和C交互API的时候需要注意</p><ul><li>luaL_register</li></ul><p>Lua5.2 以后取消了这个接口，不过可以通过luaL_setfunc方法看来实现</p><p>#undef luaL_register #define luaL_register(L,n,f) \     { if ((n) == NULL) luaL_setfuncs(L,f,0); else luaL_newlib(L,f); } #endif</p><h4 id="从-Lua-5-2-迁移到-5-3"><a href="#从-Lua-5-2-迁移到-5-3" class="headerlink" title="从 Lua 5.2 迁移到 5.3"></a>从 Lua 5.2 迁移到 5.3</h4><ul><li>整数 (默认 64 位)，32 位整数的官方支持</li><li>位操作符</li><li>基本的 utf-8 支持</li><li>值的打包及解包函数</li><li>整数除法</li><li>ipairs 以及表处理库都会考虑元方法</li><li>新函数 string.pack</li><li>新函数 string.unpack</li><li>新函数 string.packsize</li></ul>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h4 id=&quot;从-Lua-5-1-迁移到-5-2&quot;&gt;&lt;a href=&quot;#从-Lua-5-1-迁移到-5-2&quot; class=&quot;headerlink&quot; title=&quot;从 Lua 5.1 迁移到 5.2&quot;&gt;&lt;/a&gt;从 Lua 5.1 迁移到 5.2&lt;/h4&gt;&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;5
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua迭代器</title>
-    <link href="https://bytemode.github.io/2018/12/12/lua%E8%BF%AD%E4%BB%A3%E5%99%A8/"/>
-    <id>https://bytemode.github.io/2018/12/12/lua迭代器/</id>
-    <published>2018-12-12T13:28:22.000Z</published>
-    <updated>2018-12-12T13:29:38.051Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>迭代器就是一种可以遍历一种集合中所有元素的机制，在Lua中，通常将迭代器表示为函数。每调用一次函数，就返回集合中的“下一个”元素。每个迭代器都需要在每次成功调用之后保存一些状态，这样才能知道它所在的位置及如何走到下一个位置，通过之前博文的总结，闭包对于这样的任务提供了极佳的支持。现在我们就用代码来实现一个简单的迭代器。</p><pre><code>function values(tb)     local i = 0     return function ()          i = i + 1          return tb[i]     endendlocal testTb = {10, 20, 30}for value in values(testTb) do     print(value)end</code></pre><p>这就是一个最简单的迭代器，使用闭包来完成整个任务；这只是一个简单的例子，接下来，再看看泛型for的语义。</p><h4 id="泛型for的语义"><a href="#泛型for的语义" class="headerlink" title="泛型for的语义"></a>泛型for的语义</h4><p>泛型for比较复杂，它在循环过程内保存了迭代器函数。它实际上保存着3个值：一个迭代器函数、一个恒定状态和一个控制变量。接下来，分别进行总结。<br>泛型for的语法如下：</p><pre><code>for &lt;var-list&gt; in &lt;exp-list&gt; do     &lt;body&gt;end</code></pre><p>其中，<var-list>是一个或多个变量名的列表，以逗号分隔；<exp-list>是一个或多个表达式的列表，同样以逗号分隔。通常表达式列表只有一个元素，即一句对迭代器函数的调用。例如：</exp-list></var-list></p><p>for k, v in pairs(t) do print(k, v) end<br>for做的第一件事就是对in后面的表达式求值，这些表达式应该返回3个值供for保存：迭代器函数、恒定状态和控制变量的初值。这里和多重赋值是一样的，只有最后一个表达式才会产生多个结果，并且只会保留前3个值，多余的值会被丢弃；而不够的话，就以nil补足。</p><p>在初始化完成以后，for会以恒定状态和控制变量来调用迭代器函数。然后for将迭代器函数的返回值赋予变量列表中的变量。如果第一个返回值为nil，那么循环就终止，否则，for执行它的循环体，随后再次调用迭代器函数，并重复这个过程。在前言部分的代码中，只是返回了迭代器函数，并没有返回恒定状态和控制变量。下面通过代码来说明这个问题，比如：</p><pre><code>for var_1, ..., var_n in &lt;explist&gt; do &lt;block&gt; end -- 就等价于以下代码：do     local _f, _s, _var = &lt;explist&gt;    -- 返回迭代器函数、恒定状态和控制变量的初值     while true do          local var_1, ..., var_n = _f(_s, _var)          _var = var_1          if _var == nil then break end          &lt;block&gt;          end     endend</code></pre><h4 id="无状态的迭代器"><a href="#无状态的迭代器" class="headerlink" title="无状态的迭代器"></a>无状态的迭代器</h4><p>所谓“无状态的迭代器”，就是一种自身不保存任何状态的迭代器。因此，我们可以在多个循环中使用同一个无状态的迭代器，避免创建新的闭包的开销。</p><p>在每次迭代中，for循环都会用恒定状态和控制变量来调用迭代器函数。一个无状态的迭代器可以根据这两个值来为下次迭代生成下一个元素。这类迭代器的代表就是ipairs。它可以用来迭代一个数组的所有元素。如下述演示代码：</p><pre><code>local aTb = {&quot;One&quot;, &quot;Two&quot;, &quot;Three&quot;}for i, v in ipairs(aTb) do     print(i, v)end</code></pre><p>在这里，迭代器状态就是需要遍历的table（一个恒定状态，它不会在循环中改变）及当前的索引值（控制变量）。我们可以使用Lua代码来实现ipairs，大概就如下代码：</p><pre><code>local function iter(a, i)     i = i + 1     local v = a[i]     if v then          return i, v     endendfunction ipairs(a)     return iter, a, 0end</code></pre><p>函数pairs与ipairs类似，也是用于遍历一个table中的所有元素。不同的是，它的迭代器函数是Lua中的一个基本函next。</p><pre><code>function pairs(a)     return next, t, nilend</code></pre><p>在调用next(t, k)时，k是table t的一个key。此调用会以table中的任意次序返回一组值：此table的下一个key，及这个key所对应的值。而调用next(t, nil)时，返回table的第一组值。若没有下一组值时，next返回nil。所以，我们也可以使用next来判断一个table是否为空。</p><p>对于大家经常迷惑的ipairs和pairs的区别，在这里就能看的一清二楚了，ipairs只能用于遍历index是整型的table，同时，由于ipairs返回的控制变量初值为0，这就决定了，ipairs只能访问index从1开始的key和value；ipairs不能返回nil，当key对应的值为nil时，就直接终止遍历；而pairs则没有要求。关于ipairs和pairs的具体差异，请参考这篇博文：点这里。</p><p>当然了，有了无状态的迭代器，就有了有状态的迭代器了，有状态的迭代器就是专门用一个table来保存状态；在无状态的迭代器中，我们每一次都是迭代一个table，这个table就是一个无状态的table，它不会再遍历的过程中发生变化，而有状态的迭代器，则会在遍历的过程中对迭代的table进行变更，迭代的table的状态也随之发生了变化。这里不做详细的总结。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h4 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h4&gt;&lt;p&gt;迭代器就是一种可以遍历一种集合中所有元素的机制，在Lua中，通常将迭代器表示为函数。每调用一次函数，就返回集合中的“下一个”元素。每个迭代器
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua热更新</title>
-    <link href="https://bytemode.github.io/2018/12/12/lua%E7%83%AD%E6%9B%B4%E6%96%B0/"/>
-    <id>https://bytemode.github.io/2018/12/12/lua热更新/</id>
-    <published>2018-12-12T12:43:17.000Z</published>
-    <updated>2018-12-12T13:22:02.159Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="单纯热更新"><a href="#单纯热更新" class="headerlink" title="单纯热更新"></a>单纯热更新</h4><p>Lua热更新<br>最简单粗暴的热更新就是将package.loaded[modelname]的值置为nil，强制重新加载：</p><pre><code>function reload_module(module_name)    package.loaded[modulename] = nil    require(modulename)end</code></pre><p>这样做虽然能完成热更，但问题是已经引用了该模块的地方不会得到更新， 因此我们需要将引用该模块的地方的值也做对应的更新。</p><pre><code>function reload_module(module_name)    local old_module = _G[module_name]    package.loaded[module_name] = nil    require (module_name)    local new_module = _G[module_name]    for k, v in pairs(new_module) do      old_module[k] = v    end    package.loaded[module_name] = old_moduleend</code></pre><h3 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h3><blockquote><p>在生产环境上，总有可能出现不可预知的Bug，而通常修改好Bug仅仅又修改几句，停机维护的成本又太高，对于游戏来说，通常每个服就是单独的进程，也做不到像分布式环境下，关掉一部分机器，先升级一部分，再升级另一部分的无缝升级。这时候如果有热更就可以迅速的把Bug修复方案通过热更新进行修复，不会对用户任何的影响。例如：</p></blockquote><blockquote><ol><li>业务逻辑有Bug</li><li>配置的数据有误</li><li>需求发生变更</li></ol></blockquote><h3 id="热更新的原则"><a href="#热更新的原则" class="headerlink" title="热更新的原则"></a>热更新的原则</h3><p>1、热更新不破坏原有数据</p><blockquote><p>热更新更新的基本内容就是更新服务的逻辑，通常只是逻辑发生变化，但原有的值并不能被改变，例如：</p></blockquote><pre><code>local a = 1function get_a()    return aend</code></pre><p>此时，我们调用get_a()返回是的1，我们将热更成</p><pre><code>local a = 2function get_a()    print(&quot;get_a function&quot;)    return aend</code></pre><p>此时我们改变了a的初始值，但我们并不知道之前服务a的值是不是被重新赋过值，假设热更前a的值仍然为1，那么我们热更后调用get_a()返回的应该是1，而不应受新的初始值影响，而且同能打印出了”get_a function”，这时候则认为热更正常。</p><p>2、不为热更新写更多的代码</p><blockquote><p>热更新可以通过很多种方法实现，比如说模块为了支持数据不变的特性，需要在模块里额外写一些代码来记录旧值，热更新之后再把旧值copy过来，或者用一些特殊的语法来支撑。这种方法将会对项目增加很多的负担，而且一旦发生意料之外的Bug，热更系统几乎处于半瘫痪状态。应该来说，代码原本该怎么实现就怎么实现，对于99%的lua代码都是支持的，不需要修改来迎合热更新。通常热更新不改变原有变量值的类型。</p></blockquote><h3 id="热更新的实现，代码适用于5-2以上"><a href="#热更新的实现，代码适用于5-2以上" class="headerlink" title="热更新的实现，代码适用于5.2以上"></a>热更新的实现，代码适用于5.2以上</h3><h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><blockquote><p>利用_ENV环境，在加载的时候把数据加载到_ENV下，然后再通过对比的方式修改_G底下的值，从而实现热更新，函数</p></blockquote><pre><code>function hotfix(chunk, check_name)</code></pre><p>定义env的table，并为env设置_G访问权限，然后调用load实现把数据重新加载进来</p><pre><code>local env = {}setmetatable(env, { __index = _G })local _ENV = envlocal f, err = load(chunk, check_name,  &#39;t&#39;, env)assert(f,err)local ok, err = pcall(f)assert(ok,err)</code></pre><p>此时env我们可以得到新函数有变更的部分，我们替换的为可见变量，也就是可直接访问的变量</p><pre><code>for name,value in pairs(env) do    local g_value = _G[name]    if type(g_value) ~= type(value) then        _G[name] = value    elseif type(value) == &#39;function&#39; then        update_func(value, g_value, name, &#39;G&#39;..&#39;  &#39;)        _G[name] = value    elseif type(value) == &#39;table&#39; then        update_table(value, g_value, name, &#39;G&#39;..&#39;  &#39;)    endend</code></pre><blockquote><p>通过env当前的值和_G当前的值进行对比</p></blockquote><blockquote><ol><li>如果类型不同我们直接覆盖原值，此时value不为nil，不会出现原则被覆盖成nil的情况</li><li>如果当前值为函数，我们进行函数的upvalue值比对</li></ol></blockquote><pre><code>function update_func(env_f, g_f, name, deep)    --取得原值所有的upvalue，保存起来    local old_upvalue_map = {}    for i = 1, math.huge do        local name, value = debug.getupvalue(g_f, i)        if not name then break end        old_upvalue_map[name] = value    end    --遍历所有新的upvalue，根据名字和原值对比，如果原值不存在则进行跳过，如果为其它值则进行遍历env类似的步骤    for i = 1, math.huge do        local name, value = debug.getupvalue(env_f, i)        if not name then break end        local old_value = old_upvalue_map[name]        if old_value then            if type(old_value) ~= type(value) then                debug.setupvalue(env_f, i, old_value)            elseif type(old_value) == &#39;function&#39; then                update_func(value, old_value, name, deep..&#39;  &#39;..name..&#39;  &#39;)            elseif type(old_value) == &#39;table&#39; then                update_table(value, old_value, name, deep..&#39;  &#39;..name..&#39;  &#39;)                debug.setupvalue(env_f, i, old_value)            else                debug.setupvalue(env_f, i, old_value)            end        end    endend</code></pre><blockquote><ol><li>如果当前值为table，我们遍历table值进行对比</li></ol></blockquote><pre><code>local protection = {    setmetatable = true,    pairs = true,    ipairs = true,    next = true,    require = true,    _ENV = true,}--防止重复的table替换，造成死循环local visited_sig = {}function update_table(env_t, g_t, name, deep)    --对某些关键函数不进行比对    if protection[env_t] or protection[g_t] then return end    --如果原值与当前值内存一致，值一样不进行对比    if env_t == g_t then return end    local signature = tostring(g_t)..tostring(env_t)    if visited_sig[signature] then return end    visited_sig[signature] = true    --遍历对比值，如进行遍历env类似的步骤    for name, value in pairs(env_t) do        local old_value = g_t[name]        if type(value) == type(old_value) then            if type(value) == &#39;function&#39; then                update_func(value, old_value, name, deep..&#39;  &#39;..name..&#39;  &#39;)                g_t[name] = value            elseif type(value) == &#39;table&#39; then                update_table(value, old_value, name, deep..&#39;  &#39;..name..&#39;  &#39;)            end        else            g_t[name] = value        end    end    --遍历table的元表，进行对比    local old_meta = debug.getmetatable(g_t)    local new_meta = debug.getmetatable(env_t)    if type(old_meta) == &#39;table&#39; and type(new_meta) == &#39;table&#39; then        update_table(new_meta, old_meta, name..&#39;s Meta&#39;, deep..&#39;  &#39;..name..&#39;s Meta&#39;..&#39;  &#39; )    endend</code></pre><h4 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h4><p>1、可以调用hotfix_file对整个文件进行热更</p><pre><code>function hotfix_file(name)    local file_str    local fp = io.open(name)    if fp then        io.input(name)        file_str = io.read(&#39;*all&#39;)        io.close(fp)    end    if not file_str then        return -1    end    return hotfix(file_str, name)end</code></pre><p>2、可以通过hotfix进行代码的更新</p><pre><code>function hotfix(chunk, check_name)</code></pre><h4 id="关于坑"><a href="#关于坑" class="headerlink" title="关于坑"></a>关于坑</h4><blockquote><p>这里有一个注意事项，lua的module模块，如：</p></blockquote><pre><code>module(&quot;AA&quot;, package.seeall)</code></pre><p>当我们加载lua模块的时候，这时候这个模块信息并不像初始化全局代码一样，就算提前设置了package.loaded[“AA”] = nil, 也不会出现在env中同时也不会调用_G的__newindex函数，也就是说env[“AA”]为空，故这种写法无法进行热更新，所以通常模块的写法改成如下</p><pre><code>--定义模块AAAA = {}--相当于package.seeallsetmetatable(AA, {__index = _G})--环境隔离local _ENV = AA</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h4 id=&quot;单纯热更新&quot;&gt;&lt;a href=&quot;#单纯热更新&quot; class=&quot;headerlink&quot; title=&quot;单纯热更新&quot;&gt;&lt;/a&gt;单纯热更新&lt;/h4&gt;&lt;p&gt;Lua热更新&lt;br&gt;最简单粗暴的热更新就是将package.loaded[modelname]的值置为nil，强制重
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua支持init64</title>
-    <link href="https://bytemode.github.io/2018/12/12/lua%E6%94%AF%E6%8C%81init64/"/>
-    <id>https://bytemode.github.io/2018/12/12/lua支持init64/</id>
-    <published>2018-12-12T06:01:12.000Z</published>
-    <updated>2018-12-12T06:34:19.956Z</updated>
-    
-    <content type="html"><![CDATA[<p>lua5.3提供了很多很好的特性例如string.pack unpack这样的好东西，同时还支持ini64.在lua之前的版本中number只有一种类型double.对于init64基本按照int来处理. 对于64位的解决方案有很多种,基本的思路都是使用8byte的string或者lightuserdata或者userdata修改元表来实现.</p><h4 id="luajit使用userdata重载元表运算符实现"><a href="#luajit使用userdata重载元表运算符实现" class="headerlink" title="luajit使用userdata重载元表运算符实现"></a>luajit使用userdata重载元表运算符实现</h4><p>在 luajit 中,是定义了一个 userdata 并重载其运算符完成的。用 <code>ffi.cast(&quot;int64_t&quot;,0)</code> 来构造一个 64bit 的 0 .userdata的做法存在额外开销问题，当 64bit 的 cdata 做 table 的 key 的时候，相同值的 int64 并不是同一个 key .</p><h4 id="lightuserdata-设置-metatable实现"><a href="#lightuserdata-设置-metatable实现" class="headerlink" title="lightuserdata 设置 metatable实现"></a>lightuserdata 设置 metatable实现</h4><p>用 lightuserdata 无损失的表示一个 int64 ,lightuserdata是一个轻量级的cdata,通过给 lightuserdata 设置 metatable ，我们可以重载它的数据运算。存在的问题:比较一个 int64 和普通的 lua number 是否相等时，lua 不能隐式的做转换。目前使用这个方案的实现的已经有了,github上有<a href="https://github.com/bytemode/lua-int64.git这个库是云风大神实现的" target="_blank" rel="noopener">https://github.com/bytemode/lua-int64.git这个库是云风大神实现的</a>.</p><p>这个库只提供了一个显式的 api ，即构造一个 int64 数字。可以从 lua number 构造，也支持从一个 8 字节宽的小头的字符串来构造。实际在内存储存的是一个 lightuserdata 即一个 64bit 指针（所以这个库不适用于 32 位平台）。你也可以通过 C 接口 <code>lua_pushlightuserdata</code> 来把一个 64bit 整数压入堆栈。把 int64 转换为普通的 lua number 借用了 # 操作符。</p><pre><code>#include &lt;lua.h&gt;#include &lt;lauxlib.h&gt;#include &lt;stdint.h&gt;#include &lt;math.h&gt;#include &lt;stdlib.h&gt;#include &lt;stdbool.h&gt;static int64_t_int64(lua_State *L, int index) {    int type = lua_type(L,index);    int64_t n = 0;    switch(type) {    case LUA_TNUMBER: {        lua_Number d = lua_tonumber(L,index);        n = (int64_t)d;        break;    }    case LUA_TSTRING: {        size_t len = 0;        const uint8_t * str = (const uint8_t *)lua_tolstring(L, index, &amp;len);        if (len&gt;8) {            return luaL_error(L, &quot;The string (length = %d) is not an int64 string&quot;, len);        }        int i = 0;        uint64_t n64 = 0;        for (i=0;i&lt;(int)len;i++) {            n64 |= (uint64_t)str[i] &lt;&lt; (i*8);        }        n = (int64_t)n64;        break;    }    case LUA_TLIGHTUSERDATA: {        void * p = lua_touserdata(L,index);        n = (intptr_t)p;        break;    }    default:        return luaL_error(L, &quot;argument %d error type %s&quot;, index, lua_typename(L,type));    }    return n;}static inline void_pushint64(lua_State *L, int64_t n) {    void * p = (void *)(intptr_t)n;    lua_pushlightuserdata(L,p);}static intint64_add(lua_State *L) {    int64_t a = _int64(L,1);    int64_t b = _int64(L,2);    _pushint64(L, a+b);    return 1;}static intint64_sub(lua_State *L) {    int64_t a = _int64(L,1);    int64_t b = _int64(L,2);    _pushint64(L, a-b);    return 1;}static intint64_mul(lua_State *L) {    int64_t a = _int64(L,1);    int64_t b = _int64(L,2);    _pushint64(L, a * b);    return 1;}static intint64_div(lua_State *L) {    int64_t a = _int64(L,1);    int64_t b = _int64(L,2);    if (b == 0) {        return luaL_error(L, &quot;div by zero&quot;);    }    _pushint64(L, a / b);    return 1;}static intint64_mod(lua_State *L) {    int64_t a = _int64(L,1);    int64_t b = _int64(L,2);    if (b == 0) {        return luaL_error(L, &quot;mod by zero&quot;);    }    _pushint64(L, a % b);    return 1;}static int64_t_pow64(int64_t a, int64_t b) {    if (b == 1) {        return a;    }    int64_t a2 = a * a;    if (b % 2 == 1) {        return _pow64(a2, b/2) * a;    } else {        return _pow64(a2, b/2);    }}static intint64_pow(lua_State *L) {    int64_t a = _int64(L,1);    int64_t b = _int64(L,2);    int64_t p;    if (b &gt; 0) {        p = _pow64(a,b);    } else if (b == 0) {        p = 1;    } else {        return luaL_error(L, &quot;pow by nagtive number %d&quot;,(int)b);    }     _pushint64(L, p);    return 1;}static intint64_unm(lua_State *L) {    int64_t a = _int64(L,1);    _pushint64(L, -a);    return 1;}static intint64_new(lua_State *L) {    int top = lua_gettop(L);    int64_t n;    switch(top) {        case 0 :             lua_pushlightuserdata(L,NULL);            break;        case 1 :            n = _int64(L,1);            _pushint64(L,n);            break;        default: {            int base = luaL_checkinteger(L,2);            if (base &lt; 2) {                luaL_error(L, &quot;base must be &gt;= 2&quot;);            }            const char * str = luaL_checkstring(L, 1);            n = strtoll(str, NULL, base);            _pushint64(L,n);            break;        }    }    return 1;}static intint64_eq(lua_State *L) {    int64_t a = _int64(L,1);    int64_t b = _int64(L,2);    printf(&quot;%s %s\n&quot;,lua_typename(L,1),lua_typename(L,2));    printf(&quot;%ld %ld\n&quot;,a,b);    lua_pushboolean(L,a == b);    return 1;}static intint64_lt(lua_State *L) {    int64_t a = _int64(L,1);    int64_t b = _int64(L,2);    lua_pushboolean(L,a &lt; b);    return 1;}static intint64_le(lua_State *L) {    int64_t a = _int64(L,1);    int64_t b = _int64(L,2);    lua_pushboolean(L,a &lt;= b);    return 1;}static intint64_len(lua_State *L) {    int64_t a = _int64(L,1);    lua_pushnumber(L,(lua_Number)a);    return 1;}static inttostring(lua_State *L) {    static char hex[16] = &quot;0123456789ABCDEF&quot;;    uintptr_t n = (uintptr_t)lua_touserdata(L,1);    if (lua_gettop(L) == 1) {        luaL_Buffer b;        luaL_buffinitsize(L , &amp;b , 28);        luaL_addstring(&amp;b, &quot;int64: 0x&quot;);        int i;        bool strip = true;        for (i=15;i&gt;=0;i--) {            int c = (n &gt;&gt; (i*4)) &amp; 0xf;            if (strip &amp;&amp; c ==0) {                continue;            }            strip = false;            luaL_addchar(&amp;b, hex[c]);        }        if (strip) {            luaL_addchar(&amp;b , &#39;0&#39;);        }        luaL_pushresult(&amp;b);    } else {        int base = luaL_checkinteger(L,2);        int shift , mask;        switch(base) {        case 0: {            unsigned char buffer[8];            int i;            for (i=0;i&lt;8;i++) {                buffer[i] = (n &gt;&gt; (i*8)) &amp; 0xff;            }            lua_pushlstring(L,(const char *)buffer, 8);            return 1;            }        case 10: {            int64_t dec = (int64_t)n;            luaL_Buffer b;            luaL_buffinitsize(L , &amp;b , 28);            if (dec&lt;0) {                luaL_addchar(&amp;b, &#39;-&#39;);                dec = -dec;            }            int buffer[32];            int i;            for (i=0;i&lt;32;i++) {                buffer[i] = dec%10;                dec /= 10;                if (dec == 0)                    break;            }            while (i&gt;=0) {                luaL_addchar(&amp;b, hex[buffer[i]]);                --i;            }            luaL_pushresult(&amp;b);            return 1;        }        case 2:            shift = 1;            mask = 1;            break;        case 8:            shift = 3;            mask = 7;            break;        case 16:            shift = 4;            mask = 0xf;            break;        default:            luaL_error(L, &quot;Unsupport base %d&quot;,base);            break;        }        int i;        char buffer[64];        for (i=0;i&lt;64;i+=shift) {            buffer[i/shift] = hex[(n&gt;&gt;(64-shift-i)) &amp; mask];        }        lua_pushlstring(L, buffer, 64 / shift);    }    return 1;}static voidmake_mt(lua_State *L) {    luaL_Reg lib[] = {        { &quot;__add&quot;, int64_add },        { &quot;__sub&quot;, int64_sub },        { &quot;__mul&quot;, int64_mul },        { &quot;__div&quot;, int64_div },        { &quot;__mod&quot;, int64_mod },        { &quot;__unm&quot;, int64_unm },        { &quot;__pow&quot;, int64_pow },        { &quot;__eq&quot;, int64_eq },        { &quot;__lt&quot;, int64_lt },        { &quot;__le&quot;, int64_le },        { &quot;__len&quot;, int64_len },        { &quot;__tostring&quot;, tostring },        { NULL, NULL },    };    luaL_newlib(L,lib);}intluaopen_int64(lua_State *L) {    if (sizeof(intptr_t)!=sizeof(int64_t)) {        return luaL_error(L, &quot;Only support 64bit architecture&quot;);    }    lua_pushlightuserdata(L,NULL);    make_mt(L);    lua_setmetatable(L,-2);    lua_pop(L,1);    lua_newtable(L);    lua_pushcfunction(L, int64_new);    lua_setfield(L, -2, &quot;new&quot;);    lua_pushcfunction(L, tostring);    lua_setfield(L, -2, &quot;tostring&quot;);    return 1;}</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;lua5.3提供了很多很好的特性例如string.pack unpack这样的好东西，同时还支持ini64.在lua之前的版本中number只有一种类型double.对于init64基本按照int来处理. 对于64位的解决方案有很多种,基本的思路都是使用8byte的stri
-      
-    
-    </summary>
-    
-      <category term="lua" scheme="https://bytemode.github.io/categories/lua/"/>
-    
-    
-      <category term="lua" scheme="https://bytemode.github.io/tags/lua/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>lua类的实现</title>
-    <link href="https://bytemode.github.io/2018/12/11/lua%E7%B1%BB%E7%9A%84%E5%AE%9E%E7%8E%B0/"/>
-    <id>https://bytemode.github.io/2018/12/11/lua类的实现/</id>
-    <published>2018-12-11T10:10:12.000Z</published>
-    <updated>2018-12-11T10:44:21.077Z</updated>
-    
-    <content type="html"><![CDATA[<p>子类在定义时复制所有基类的方法，在实例化时将该类作为metatable的__index赋值给实例。这就是cocos2dx里面的lua class的实现。</p><pre><code>function class(classname, super)​     local cls = {}​     if super then --复制基类方法​        cls = {}​        for k,v in pairs(super) do cls[k] = v end​        cls.super = super​    else​        cls = {ctor = function() end}​    end​    cls.__cname = classname​    cls.__index = cls​    function cls.new(...) --实例化​        local instance = setmetatable({}, cls)​        instance.class = cls​        instance:ctor(...)​        return instance​    end​    return clsend</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;子类在定义时复制所有基类的方法，在实例化时将该类作为metatable的__index赋值给实例。这就是cocos2dx里面的lua class的实现。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;function class(classname, super)
-​     local 
       
     
     </summary>

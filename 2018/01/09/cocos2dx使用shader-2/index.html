@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="cocos2dx,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="小工知识库" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="Cocos2dx的Shader架构Cocos2dx的Shader由GLProgram、GLProgramState、GLProgramCache、GLProgramStateCache组成。GLProgram是Cocos2dx对Program的封装，一般提供一些静态方法，被多个节点复用。而GLProgramState是对GLProgram的封装，提供更加便捷的操作接口，内部记录了Uniform和A">
+<meta name="keywords" content="cocos2dx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cocos2dx使用shader-2">
+<meta property="og:url" content="https://bytemode.github.io/2018/01/09/cocos2dx使用shader-2/index.html">
+<meta property="og:site_name" content="小工知识库">
+<meta property="og:description" content="Cocos2dx的Shader架构Cocos2dx的Shader由GLProgram、GLProgramState、GLProgramCache、GLProgramStateCache组成。GLProgram是Cocos2dx对Program的封装，一般提供一些静态方法，被多个节点复用。而GLProgramState是对GLProgram的封装，提供更加便捷的操作接口，内部记录了Uniform和A">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-01-09T12:01:24.134Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="cocos2dx使用shader-2">
+<meta name="twitter:description" content="Cocos2dx的Shader架构Cocos2dx的Shader由GLProgram、GLProgramState、GLProgramCache、GLProgramStateCache组成。GLProgram是Cocos2dx对Program的封装，一般提供一些静态方法，被多个节点复用。而GLProgramState是对GLProgram的封装，提供更加便捷的操作接口，内部记录了Uniform和A">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bytemode.github.io/2018/01/09/cocos2dx使用shader-2/">
+
+
+
+
+
+  <title>cocos2dx使用shader-2 | 小工知识库</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小工知识库</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">coding wiki</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-golang">
+          <a href="/golang/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            golang
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-cocos">
+          <a href="/cocos2dx/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            cocos
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bytemode.github.io/2018/01/09/cocos2dx使用shader-2/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sunfeng">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小工知识库">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">cocos2dx使用shader-2</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-09T19:34:42+08:00">
+                2018-01-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/cocos2dx/" itemprop="url" rel="index">
+                    <span itemprop="name">cocos2dx</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/09/cocos2dx使用shader-2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/01/09/cocos2dx使用shader-2/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="Cocos2dx的Shader架构"><a href="#Cocos2dx的Shader架构" class="headerlink" title="Cocos2dx的Shader架构"></a>Cocos2dx的Shader架构</h4><p>Cocos2dx的Shader由GLProgram、GLProgramState、GLProgramCache、GLProgramStateCache组成。<br>GLProgram是Cocos2dx对Program的封装，一般提供一些静态方法，被多个节点复用。而GLProgramState是对GLProgram的封装，提供更加便捷的操作接口，内部记录了Uniform和Attribute，可以看作一个动态的对象。GLProgram和GLProgramState可以对比理解类和对象的区别。<br>它们分别对应的xxCache类顾名思义用来做缓冲的，如Cocos2dx中所有内置Shader的名字，就在GLProgramCache的loadDefaultGLProgram()方法中，将所有内置的Shader都创建了出来并缓存。</p>
+<h4 id="Cocos2dx内置Shader规则"><a href="#Cocos2dx内置Shader规则" class="headerlink" title="Cocos2dx内置Shader规则"></a>Cocos2dx内置Shader规则</h4><p>看看Cocos2dx对Shader是怎么封装的，它与一般OpenGL编写的Shader脚本不同。<br>首先是GLProgram的compileShader()方法中，编译Shader前使用了precision关键字来设定数值的精度。总共有低精度lowp、中精度mediump、高精度highp可以选择，可以为浮点数或整数指定精度，精度越高效果越好，但消耗也越大。另外，顶点着色器支持的精度要比片段着色器高，片段着色器的highp精度的支持对于显卡而言，是可选的。<br>然后，它还会在Shader脚本前定义一系列Uniform变量。这些都是Cocos2dx内置的Uniform，在Shader中可以直接使用。</p>
+<pre><code>bool GLProgram::compileShader(GLuint* shader, GLenum type, const GLchar* source, const std::string&amp; convertedDefines)
+{
+    GLint status;
+
+    if (!source)
+    {
+        return false;
+    }
+
+    const GLchar *sources[] = {
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WINRT
+        (type == GL_VERTEX_SHADER ? &quot;precision mediump float;\n precision mediump int;\n&quot; : &quot;precision mediump float;\n precision mediump int;\n&quot;),
+#elif (CC_TARGET_PLATFORM != CC_PLATFORM_WIN32 &amp;&amp; CC_TARGET_PLATFORM != CC_PLATFORM_LINUX &amp;&amp; CC_TARGET_PLATFORM != CC_PLATFORM_MAC)
+        (type == GL_VERTEX_SHADER ? &quot;precision highp float;\n precision highp int;\n&quot; : &quot;precision mediump float;\n precision mediump int;\n&quot;),
+#endif
+        COCOS2D_SHADER_UNIFORMS,
+        convertedDefines.c_str(),
+        source};
+
+    *shader = glCreateShader(type);
+    glShaderSource(*shader, sizeof(sources)/sizeof(*sources), sources, nullptr);
+    glCompileShader(*shader);
+
+    glGetShaderiv(*shader, GL_COMPILE_STATUS, &amp;status);
+
+    if (! status)
+    {
+        GLsizei length;
+        glGetShaderiv(*shader, GL_SHADER_SOURCE_LENGTH, &amp;length);
+        GLchar* src = (GLchar *)malloc(sizeof(GLchar) * length);
+
+        glGetShaderSource(*shader, length, nullptr, src);
+        CCLOG(&quot;cocos2d: ERROR: Failed to compile shader:\n%s&quot;, src);
+
+        if (type == GL_VERTEX_SHADER)
+        {
+            CCLOG(&quot;cocos2d: %s&quot;, getVertexShaderLog().c_str());
+        }
+        else
+        {
+            CCLOG(&quot;cocos2d: %s&quot;, getFragmentShaderLog().c_str());
+        }
+        free(src);
+
+        return false;
+    }
+
+    return (status == GL_TRUE);
+}
+
+static const char * COCOS2D_SHADER_UNIFORMS =
+        &quot;uniform mat4 CC_PMatrix;\n&quot;
+        &quot;uniform mat4 CC_MVMatrix;\n&quot;
+        &quot;uniform mat4 CC_MVPMatrix;\n&quot;
+        &quot;uniform mat3 CC_NormalMatrix;\n&quot;
+        &quot;uniform vec4 CC_Time;\n&quot;
+        &quot;uniform vec4 CC_SinTime;\n&quot;
+        &quot;uniform vec4 CC_CosTime;\n&quot;
+        &quot;uniform vec4 CC_Random01;\n&quot;
+        &quot;uniform sampler2D CC_Texture0;\n&quot;
+        &quot;uniform sampler2D CC_Texture1;\n&quot;
+        &quot;uniform sampler2D CC_Texture2;\n&quot;
+        &quot;uniform sampler2D CC_Texture3;\n&quot;
+        &quot;//CC INCLUDES END\n\n&quot;;
+</code></pre><p>在初始化GLProgram时，Cocos2dx会自动根据Shader是否使用了相应的Uniform变量来初始化_flags成员变量相对应的属性。在编译Shader时，GLSL的编译器会自动将没有使用到的Uniform移除(用glGetUniformLocation()方法判断，返回-1就是没有使用)。</p>
+<pre><code>void GLProgram::updateUniforms()
+{
+​    _builtInUniforms[UNIFORM_AMBIENT_COLOR] = glGetUniformLocation(_program, UNIFORM_NAME_AMBIENT_COLOR);
+​    _builtInUniforms[UNIFORM_P_MATRIX] = glGetUniformLocation(_program, UNIFORM_NAME_P_MATRIX);
+​    _builtInUniforms[UNIFORM_MV_MATRIX] = glGetUniformLocation(_program, UNIFORM_NAME_MV_MATRIX);
+​    _builtInUniforms[UNIFORM_MVP_MATRIX] = glGetUniformLocation(_program, UNIFORM_NAME_MVP_MATRIX);
+​    _builtInUniforms[UNIFORM_NORMAL_MATRIX] = glGetUniformLocation(_program, UNIFORM_NAME_NORMAL_MATRIX);
+    _builtInUniforms[UNIFORM_TIME] = glGetUniformLocation(_program, UNIFORM_NAME_TIME);
+    _builtInUniforms[UNIFORM_SIN_TIME] = glGetUniformLocation(_program, UNIFORM_NAME_SIN_TIME);
+    _builtInUniforms[UNIFORM_COS_TIME] = glGetUniformLocation(_program, UNIFORM_NAME_COS_TIME);
+
+    _builtInUniforms[UNIFORM_RANDOM01] = glGetUniformLocation(_program, UNIFORM_NAME_RANDOM01);
+
+    _builtInUniforms[UNIFORM_SAMPLER0] = glGetUniformLocation(_program, UNIFORM_NAME_SAMPLER0);
+    _builtInUniforms[UNIFORM_SAMPLER1] = glGetUniformLocation(_program, UNIFORM_NAME_SAMPLER1);
+    _builtInUniforms[UNIFORM_SAMPLER2] = glGetUniformLocation(_program, UNIFORM_NAME_SAMPLER2);
+    _builtInUniforms[UNIFORM_SAMPLER3] = glGetUniformLocation(_program, UNIFORM_NAME_SAMPLER3);
+
+    _flags.usesP = _builtInUniforms[UNIFORM_P_MATRIX] != -1;
+    _flags.usesMV = _builtInUniforms[UNIFORM_MV_MATRIX] != -1;
+    _flags.usesMVP = _builtInUniforms[UNIFORM_MVP_MATRIX] != -1;
+    _flags.usesNormal = _builtInUniforms[UNIFORM_NORMAL_MATRIX] != -1;
+    _flags.usesTime = (
+                       _builtInUniforms[UNIFORM_TIME] != -1 ||
+                       _builtInUniforms[UNIFORM_SIN_TIME] != -1 ||
+                       _builtInUniforms[UNIFORM_COS_TIME] != -1
+                       );
+    _flags.usesRandom = _builtInUniforms[UNIFORM_RANDOM01] != -1;
+
+    this-&gt;use();
+
+    // Since sample most probably won&#39;t change, set it to 0,1,2,3 now.
+    if(_builtInUniforms[UNIFORM_SAMPLER0] != -1)
+       setUniformLocationWith1i(_builtInUniforms[UNIFORM_SAMPLER0], 0);
+    if(_builtInUniforms[UNIFORM_SAMPLER1] != -1)
+        setUniformLocationWith1i(_builtInUniforms[UNIFORM_SAMPLER1], 1);
+    if(_builtInUniforms[UNIFORM_SAMPLER2] != -1)
+        setUniformLocationWith1i(_builtInUniforms[UNIFORM_SAMPLER2], 2);
+    if(_builtInUniforms[UNIFORM_SAMPLER3] != -1)
+        setUniformLocationWith1i(_builtInUniforms[UNIFORM_SAMPLER3], 3);
+}
+</code></pre><h4 id="这些Uniform是什么时候被设置的呢？它们的值又是多少呢？"><a href="#这些Uniform是什么时候被设置的呢？它们的值又是多少呢？" class="headerlink" title="这些Uniform是什么时候被设置的呢？它们的值又是多少呢？"></a>这些Uniform是什么时候被设置的呢？它们的值又是多少呢？</h4><p>如果是纹理Uniform，在一开始就会被设置为固定的值，上面源码中也可以看到，同时可以使用4个纹理，在渲染的时候，Cocos2dx会将纹理绑定到指定的纹理采样器中，我们在Shader脚本中可以访问这些采样器，而采样器对应的纹理，由Cocos2dx调用OpenGL的glBindTexture()等方法绑定，因此这个Uniform的值不需要我们设置。<br>而其它的如矩阵、时间、法线、随机数等Uniform，是在运行的时候动态设置的，这些属性是实时变化的，在程序运行时，Cocos2dx会每帧调用setUniformsForBuiltins()自动设置它们。</p>
+<pre><code>void GLProgram::setUniformsForBuiltins(const Mat4 &amp;matrixMV)
+{
+​    const auto&amp; matrixP = _director-&gt;getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION)
+    if (_flags.usesP) setUniformLocationWithMatrix4fv(_builtInUniforms[UNIFORM_P_MATRIX], matrixP.m, 1);
+    if (_flags.usesMV) setUniformLocationWithMatrix4fv(_builtInUniforms[UNIFORM_MV_MATRIX], matrixMV.m, 1);
+
+    if (_flags.usesMVP)
+    {
+        Mat4 matrixMVP = matrixP * matrixMV;
+        setUniformLocationWithMatrix4fv(_builtInUniforms[UNIFORM_MVP_MATRIX], matrixMVP.m, 1);
+    }
+    if (_flags.usesNormal)
+    {
+        Mat4 mvInverse = matrixMV;
+        mvInverse.m[12] = mvInverse.m[13] = mvInverse.m[14] = 0.0f;
+        mvInverse.inverse();
+        mvInverse.transpose();
+        GLfloat normalMat[9];
+        normalMat[0] = mvInverse.m[0];normalMat[1] = mvInverse.m[1];normalMat[2] = mvInverse.m[2];
+        normalMat[3] = mvInverse.m[4];normalMat[4] = mvInverse.m[5];normalMat[5] = mvInverse.m[6];
+        normalMat[6] = mvInverse.m[8];normalMat[7] = mvInverse.m[9];normalMat[8] = mvInverse.m[10];
+        setUniformLocationWithMatrix3fv(_builtInUniforms[UNIFORM_NORMAL_MATRIX], normalMat, 1);
+    }
+
+    if (_flags.usesTime) {
+        // This doesn&#39;t give the most accurate global time value.
+        // Cocos2D doesn&#39;t store a high precision time value, so this will have to do.
+        // Getting Mach time per frame per shader using time could be extremely expensive.
+        float time = _director-&gt;getTotalFrames() * _director-&gt;getAnimationInterval();
+
+        setUniformLocationWith4f(_builtInUniforms[GLProgram::UNIFORM_TIME], time/10.0, time, time*2, time*4);
+        setUniformLocationWith4f(_builtInUniforms[GLProgram::UNIFORM_SIN_TIME], time/8.0, time/4.0, time/2.0, sinf(time));
+        setUniformLocationWith4f(_builtInUniforms[GLProgram::UNIFORM_COS_TIME], time/8.0, time/4.0, time/2.0, cosf(time));
+    }
+
+    if (_flags.usesRandom)
+        setUniformLocationWith4f(_builtInUniforms[GLProgram::UNIFORM_RANDOM01], CCRANDOM_0_1(), CCRANDOM_0_1(), CCRANDOM_0_1(), CCRANDOM_0_1());
+}
+</code></pre><h4 id="除了以上内置的Uniform外，Cocos2dx还内置了一些Attribute，"><a href="#除了以上内置的Uniform外，Cocos2dx还内置了一些Attribute，" class="headerlink" title="除了以上内置的Uniform外，Cocos2dx还内置了一些Attribute，"></a>除了以上内置的Uniform外，Cocos2dx还内置了一些Attribute，</h4><p>但这些变量是需要在Shader脚本中手动输入的，主要是颜色、坐标、纹理坐标、法线等常用属性。它们被定义在CCGLProgram.cpp中，在Renderer进行渲染时，会调用glVertexAttribPointer()设置它们。</p>
+<pre><code>// Attribute names
+const char* GLProgram::ATTRIBUTE_NAME_COLOR = &quot;a_color&quot;;
+const char* GLProgram::ATTRIBUTE_NAME_POSITION = &quot;a_position&quot;;
+const char* GLProgram::ATTRIBUTE_NAME_TEX_COORD = &quot;a_texCoord&quot;;
+const char* GLProgram::ATTRIBUTE_NAME_TEX_COORD1 = &quot;a_texCoord1&quot;;
+const char* GLProgram::ATTRIBUTE_NAME_TEX_COORD2 = &quot;a_texCoord2&quot;;
+const char* GLProgram::ATTRIBUTE_NAME_TEX_COORD3 = &quot;a_texCoord3&quot;;
+const char* GLProgram::ATTRIBUTE_NAME_NORMAL = &quot;a_normal&quot;;
+const char* GLProgram::ATTRIBUTE_NAME_BLEND_WEIGHT = &quot;a_blendWeight&quot;;
+const char* GLProgram::ATTRIBUTE_NAME_BLEND_INDEX = &quot;a_blendIndex&quot;;
+const char* GLProgram::ATTRIBUTE_NAME_TANGENT = &quot;a_tangent&quot;;
+const char* GLProgram::ATTRIBUTE_NAME_BINORMAL = &quot;a_binormal&quot;;
+
+整个Cocos2dx的Shader不同的规则大体就是这样了，主要是内置了一系列的变量，由引擎自动设置值，我们可以在自己Shader中直接使用。
+
+Cocos2dx中使用Shader示例
+我们就编写一个常用的灰化Shader来演示下Cocos2dx中使用Shader的流程。
+
+灰化原理：灰白图片的特征就是每个像素的RGB三个分量的值均相等，值越高颜色越白，反之颜色越黑。常用的算法有3种，平均值、最大值和加权平均值。
+
+首先，我们得分别编写顶点Shader和片段Shader：
+
+//顶点Shader
+attribute vec4 a_position;   //位置(内置)
+attribute vec2 a_texCoord;   //纹理坐标(内置)
+varying vec2 v_texCoord;     //自定义易变变量(写入值)
+void main()
+{
+    gl_Position = CC_PMatrix * a_position;
+    v_texCoord = a_texCoord;
+
+//片段着色器
+//使用加权平均值算RGB分量，即给每个分量指定一个比例，指定比例没有写死，通过一个Uniform变量来设置
+varying vec2 v_texCoord;    //接收顶点着色器传递的值(接收值)
+uniform vec4 u_grayParam;   //指定rgb颜色分量的比例
+void main()
+{
+    vec4 texColor = texture2D(CC_Texture0, v_texCoord);
+    texColor.rgb = texColor.r * u_grayParam.r + texColor.g * u_grayParam.g + texColor.b * u_grayParam.b;
+    gl_FragColor = texColor;
+
+分别命名为gray.vert和gray.frag保存到磁盘。 
+好，脚本写完了，下面来看看怎么使用：
+
+#include &quot;renderer/CCGLProgramStateCache.h&quot;
+//置灰接口
+void grayNode(Node* node)
+{
+    //对应xxCache的运用，先成缓存中找，不需要每次都重新创建
+    GLProgram* program = GLProgramCache::getInstance()-&gt;getGLProgram(&quot;MyGrayShader&quot;);
+    if(nullptr == program)
+    {
+        //本地磁盘加载shader创建program,还一种字符串的形式效率要高createWithByteArrays()
+        program = GLProgram::createWithFilenames(&quot;gray.vert&quot;, &quot;gray.frag&quot;);
+        //将GLProgram对象缓存到Cache中
+        GLProgramCache::getInstance()-&gt;addGLProgram(program, &quot;MyGrayShader&quot;);
+    }
+    //通过program创建programState,用它来设置上面自定义的Uniform变量的值
+    GLProgramState* programState = GLProgramState::getOrCreateWithGLProgram(program);
+    programState-&gt;setUniformVec4(&quot;u_grayParam&quot;, Vec4(0.2f,0.3f,0.5f,1.0f));
+    //调用node节点的setGLProgramState，以后此节点渲染就会使用这个Shader了
+    node-&gt;setGLProgramState(programState);
+//使用
+auto sprite = Sprite::create(xx.png);
+grayNode(sprite);
+</code></pre><p>至此，Cocos2dx中使用Shader流程就讲完了～<br>最后说下，怎么把置灰的图片再还原回去呢？OpenGL是个状态机的运行机制，所以只需要把设置的Shader还原回去重新设置就行了。这里Sprite对象默认的Shader是GLProgram::SHADER_NAME_POSITION_TEXTRUE_COLOR_NO_MVP，可以通过GLProgramState::getOrCreateWithGLProgramName()传入上面字符串常量来获取它的GLProgramState.</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/WechatIMG73.jpg" alt="sunfeng 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/WechatIMG74.jpg" alt="sunfeng 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cocos2dx/" rel="tag"># cocos2dx</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/09/cocos2dx侵蚀磨砂泵张shader/" rel="next" title="cocos2dx侵蚀膨胀磨砂shader">
+                <i class="fa fa-chevron-left"></i> cocos2dx侵蚀膨胀磨砂shader
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/23/hexo搭建githubblog/" rel="prev" title="github上搭建hexo博客">
+                github上搭建hexo博客 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="sunfeng">
+            
+              <p class="site-author-name" itemprop="name">sunfeng</p>
+              <p class="site-description motion-element" itemprop="description">stay hungry stay foolish</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/bytemode" target="_blank" title="github">
+                      
+                        <i class="fa fa-fw fa-github"></i>github</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:sunfeng45@163.com" target="_blank" title="email">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>email</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://blog.csdn.net/blogsun" target="_blank" title="csdn">
+                      
+                        <i class="fa fa-fw fa-csdn"></i>csdn</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.cnblogs.com/bytemode" target="_blank" title="cnblogs">
+                      
+                        <i class="fa fa-fw fa-cnblogs"></i>cnblogs</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Cocos2dx的Shader架构"><span class="nav-number">1.</span> <span class="nav-text">Cocos2dx的Shader架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cocos2dx内置Shader规则"><span class="nav-number">2.</span> <span class="nav-text">Cocos2dx内置Shader规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这些Uniform是什么时候被设置的呢？它们的值又是多少呢？"><span class="nav-number">3.</span> <span class="nav-text">这些Uniform是什么时候被设置的呢？它们的值又是多少呢？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#除了以上内置的Uniform外，Cocos2dx还内置了一些Attribute，"><span class="nav-number">4.</span> <span class="nav-text">除了以上内置的Uniform外，Cocos2dx还内置了一些Attribute，</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2013 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">stephen.sun</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'BQ4UGsgJKS9xQ9AJz8mWuMNS-gzGzoHsz',
+        appKey: '6xMqIauHFPgEPXAGQTFLojxr',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

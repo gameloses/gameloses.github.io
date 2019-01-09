@@ -2,6 +2,104 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://bytemode.github.io/2018/01/09/cocos2dx%E4%BD%BF%E7%94%A8shader-2/</loc>
+    
+    <lastmod>2019-01-09T12:01:24.134Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2019/01/09/cocos2dx%E4%B8%AD%E4%BD%BF%E7%94%A8JPG%E5%9B%BE%E5%92%8C%E5%8F%AA%E5%B8%A6Alpha%E7%9A%84PNG%E5%9B%BE%E5%90%88%E6%88%90%E6%B8%B2%E6%9F%93/</loc>
+    
+    <lastmod>2019-01-09T11:28:14.415Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/31/cocos2dx-shader-%E7%81%B0%E5%BA%A6/</loc>
+    
+    <lastmod>2019-01-09T11:13:33.840Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/01/09/cocos2dx-shader-%E6%8F%8F%E8%BE%B9/</loc>
+    
+    <lastmod>2019-01-09T11:13:30.039Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/01/09/cocos2dx-shader-%E6%A8%A1%E7%B3%8A/</loc>
+    
+    <lastmod>2019-01-09T11:13:26.912Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/01/09/cocos2dx%E4%B8%AD%E6%AF%92%E5%86%B0%E5%86%BBshader/</loc>
+    
+    <lastmod>2019-01-09T11:13:18.429Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/01/09/cocos2dx%E4%BD%BF%E7%94%A8shader/</loc>
+    
+    <lastmod>2019-01-09T11:13:09.845Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/01/09/cocos2dx%E4%BE%B5%E8%9A%80%E7%A3%A8%E7%A0%82%E6%B3%B5%E5%BC%A0shader/</loc>
+    
+    <lastmod>2019-01-09T11:13:03.218Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2019/01/09/cocos2dx-shader-%E6%B0%B4%E9%9D%A2/</loc>
+    
+    <lastmod>2019-01-09T10:41:23.813Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/01/09/cocos2dx%E6%A9%A1%E7%9A%AE%E6%93%A6/</loc>
+    
+    <lastmod>2019-01-09T09:58:22.831Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2019/01/08/ecs%E6%A1%86%E6%9E%B6/</loc>
+    
+    <lastmod>2019-01-08T10:55:37.580Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2016/01/07/stl%E6%8E%92%E5%BA%8F/</loc>
+    
+    <lastmod>2019-01-07T11:54:09.843Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2019/01/07/stl%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C/</loc>
+    
+    <lastmod>2019-01-07T11:18:12.143Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E6%A0%88/</loc>
+    
+    <lastmod>2019-01-07T11:11:49.737Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://bytemode.github.io/2017/12/17/cocos2dx%E6%B8%B2%E6%9F%93%E6%9E%B6%E6%9E%84/</loc>
     
     <lastmod>2019-01-07T11:11:39.169Z</lastmod>
@@ -212,14 +310,14 @@
   </url>
   
   <url>
-    <loc>https://bytemode.github.io/2018/12/15/lua%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A6%82%E8%BF%B0/</loc>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E8%A1%A8%E7%B1%BB%E5%9E%8B/</loc>
     
     <lastmod>2018-12-27T08:12:07.825Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://bytemode.github.io/2018/12/15/lua%E8%A1%A8%E7%B1%BB%E5%9E%8B/</loc>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A6%82%E8%BF%B0/</loc>
     
     <lastmod>2018-12-27T08:12:07.825Z</lastmod>
     
@@ -233,16 +331,16 @@
   </url>
   
   <url>
-    <loc>https://bytemode.github.io/2018/12/15/lua%E6%A0%88/</loc>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E5%8D%8F%E7%A8%8B/</loc>
     
     <lastmod>2018-12-27T08:12:07.824Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://bytemode.github.io/2018/12/15/lua%E5%8D%8F%E7%A8%8B/</loc>
+    <loc>https://bytemode.github.io/2018/12/15/lua%E5%87%BD%E6%95%B0%E5%AE%9A%E4%B9%89/</loc>
     
-    <lastmod>2018-12-27T08:12:07.824Z</lastmod>
+    <lastmod>2018-12-27T08:12:07.823Z</lastmod>
     
   </url>
   
@@ -255,13 +353,6 @@
   
   <url>
     <loc>https://bytemode.github.io/2018/12/15/LUA%E7%9A%84%E9%80%9A%E7%94%A8%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/</loc>
-    
-    <lastmod>2018-12-27T08:12:07.823Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://bytemode.github.io/2018/12/15/lua%E5%87%BD%E6%95%B0%E5%AE%9A%E4%B9%89/</loc>
     
     <lastmod>2018-12-27T08:12:07.823Z</lastmod>
     
