@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://bytemode.github.io/2019/01/08/ecs%E6%A1%86%E6%9E%B6/</loc>
+    
+    <lastmod>2019-01-09T12:19:43.733Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://bytemode.github.io/2018/01/09/cocos2dx%E4%BD%BF%E7%94%A8shader-2/</loc>
     
     <lastmod>2019-01-09T12:01:24.134Z</lastmod>
@@ -68,13 +75,6 @@
     <loc>https://bytemode.github.io/2018/01/09/cocos2dx%E6%A9%A1%E7%9A%AE%E6%93%A6/</loc>
     
     <lastmod>2019-01-09T09:58:22.831Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://bytemode.github.io/2019/01/08/ecs%E6%A1%86%E6%9E%B6/</loc>
-    
-    <lastmod>2019-01-08T10:55:37.580Z</lastmod>
     
   </url>
   

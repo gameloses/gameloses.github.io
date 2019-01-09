@@ -89,7 +89,7 @@
 <meta property="og:site_name" content="小工知识库">
 <meta property="og:description" content="ECS即Entity-Component-System，实体-组件系统的意思，是一套游戏层的架构，是基于属性的游戏架构.出现很早，随着《守望先锋》架构设计与网络同步 – GDC2017 而进入大众视野，unity2018版本直接内置了ecs,同时新起来的开源游戏引擎CLEngine也内置了ecs。google开源的https://github.com/sschmid/Entitas-CSharp/">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-01-08T10:55:37.580Z">
+<meta property="og:updated_time" content="2019-01-09T12:19:43.733Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ecs框架">
 <meta name="twitter:description" content="ECS即Entity-Component-System，实体-组件系统的意思，是一套游戏层的架构，是基于属性的游戏架构.出现很早，随着《守望先锋》架构设计与网络同步 – GDC2017 而进入大众视野，unity2018版本直接内置了ecs,同时新起来的开源游戏引擎CLEngine也内置了ecs。google开源的https://github.com/sschmid/Entitas-CSharp/">
@@ -431,20 +431,67 @@
 </tr>
 <tr>
 <td>System</td>
-<td>持续地对Entity上与System对应的Component进行处理，每个System都有独立的线程。</td>
+<td>持续地对Entity上与System对应的Component进行处理，每个System都有独立的更新</td>
 </tr>
 </tbody>
 </table>
-<p><strong>示例</strong></p>
-<hr>
-<p>假设我们有一个绘制函数，这个绘制函数就是一个System，它去会遍历所有带有physical和visible组件的entity，然后利用提供的信息来绘制。</p>
-<p>visible组件内包含有“entity看起来应该是什么样”的信息，而physical组件提供绘制的位置。</p>
-<p>再以碰撞检测为例子。System会遍历所有拥有物理Component的entity，然后对碰撞进行检测并在需要的时候产生对应的事件。</p>
-<p><strong>ECS系统与传统OOP的区别</strong></p>
-<hr>
-<p>在OOP系统中，对象的状态是封装到个体中的，对象会提供一些手段来间接操作这些状态（代码大全：抽象数据类型）。</p>
+<ul>
+<li><p>Entity : 无数据无逻辑，单纯是一个实例，拥有若干Component</p>
+</li>
+<li><p>Component：只有数据没有逻辑，可以被Entity动态添加和移除</p>
+</li>
+<li><p>System：只有逻辑，只关心Component不关心Entity</p>
+</li>
+<li><p>World：缓存所有Entity与Component，并对System进行轮询，负责整个系统的运转</p>
+</li>
+</ul>
+<h4 id="ECS系统与传统OOP的区别"><a href="#ECS系统与传统OOP的区别" class="headerlink" title="ECS系统与传统OOP的区别"></a>ECS系统与传统OOP的区别</h4><p>在OOP系统中，对象的状态是封装到个体中的，对象会提供一些手段来间接操作这些状态（</p>
 <p>这样的系统其实并没有什么问题，但从游戏开发的角度来讲，当你把一切都封装好并良构之后，游戏设计师突然表示他需要一项和之前完全不一样的功能，而一般灾难都是从这里开始的。</p>
 <p>我们现在知道ECS系统的特征是将状态（由Component提供）与行为（由System系统）进行分离，而Component之间是独立的，我们完全可以通过单独添加新的Component和System来添加新的功能而不修改任何代码，而这也是设计模式中策略模式的思想。</p>
+<h4 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h4><h5 id="Entity"><a href="#Entity" class="headerlink" title="Entity"></a>Entity</h5><pre><code>// AddComponent的功能是在world中创建Component并且添加到该Entity的Component集合中。
+public Entity bullet = new Entity(_entityID);
+bullet.AddComponent(new TransformComponent());
+bullet.AddComponent(new MoveComponent());
+</code></pre><h5 id="Component"><a href="#Component" class="headerlink" title="Component"></a>Component</h5><pre><code>class TransformComponent
+｛
+    Vector3 position;
+    Vector3 rotation;
+｝
+class MoveComponent
+｛
+    Vector3 speed;
+｝
+</code></pre><h5 id="System"><a href="#System" class="headerlink" title="System"></a>System</h5><pre><code>class MoveSystem
+｛
+    public void Update(float time)
+    ｛
+        foreach(var movecomponent in movecomponents)
+        ｛
+            // 查找该Entity是否拥有TransformComponent
+            var transformcomponent = movecomponent.sibling(TransformComponent())
+            if(transformcomponent != null)
+                transformcomponent.position += movecomponent.speed * time;
+        ｝
+    ｝
+｝
+</code></pre><ul>
+<li>ECS 模型的结构是非常简洁明晰的，而且由于Component 中只有状态没有逻辑，可以很大的提高 Component 的复用度，以及同类 Component 在内存中是连续分布的，可以很大的提高缓存命中率（关于这点还在想该如何设计数据结构才能达到目的）</li>
+<li>对于System需要使用的（整个 world 中唯一的）状态，遵循 System 中无状态的原则，使用 SingletonComponent 的方式去实现（参考 OW ECS 架构中的 SingletonComponent 部分）</li>
+<li>将共享的 System 函数分解成 Utility ，减少调用，整合调用点</li>
+<li>延迟执行（Deferment）的使用，即先缓存需要执行的状态，在更好的时间点集中调用（这点有很广泛的应用价值）</li>
+</ul>
+<h4 id="例子2"><a href="#例子2" class="headerlink" title="例子2"></a>例子2</h4><p>假设我们有一个绘制函数，这个绘制函数就是一个System，它去会遍历所有带有physical和visible组件的entity，然后利用提供的信息来绘制。</p>
+<p>visible组件内包含有“entity看起来应该是什么样”的信息，而physical组件提供绘制的位置。</p>
+<p>再以碰撞检测为例子。System会遍历所有拥有物理Component的entity，然后对碰撞进行检测并在需要的时候产生对应的事件。</p>
+<h4 id="为Unity设计的ECS系统（Entitas）"><a href="#为Unity设计的ECS系统（Entitas）" class="headerlink" title="为Unity设计的ECS系统（Entitas）"></a>为Unity设计的ECS系统（Entitas）</h4><p>在Unity传统编程中，我们利用MonoBehavior来编写游戏</p>
+<p>核心思想：将数据和行为分开。</p>
+<ul>
+<li>在Unity中，我们将MonoBehavior组件放到GameObject中。但Entity系统中不同，Component被设计为附加到Entity上。</li>
+<li>使用一个pool来包含所有Entity。通过pool我们可以看到所有的entity。</li>
+<li>我们可以对entity进行分组，分组叫做group。之后我们可以通过指定的规则来区分不同的group，</li>
+<li>这个规则叫做matcher，通过matcher可以方便地快速获得指定类型的entity。</li>
+</ul>
+<h4 id="cocos使用ecs"><a href="#cocos使用ecs" class="headerlink" title="cocos使用ecs"></a>cocos使用ecs</h4><p><a href="https://www.cnblogs.com/FuTaimeng/p/5572190.html" target="_blank" rel="noopener">https://www.cnblogs.com/FuTaimeng/p/5572190.html</a></p>
 
       
     </div>
@@ -688,7 +735,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#基本思想"><span class="nav-number">1.</span> <span class="nav-text">基本思想</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#基本思想"><span class="nav-number">1.</span> <span class="nav-text">基本思想</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ECS系统与传统OOP的区别"><span class="nav-number">2.</span> <span class="nav-text">ECS系统与传统OOP的区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实例"><span class="nav-number">3.</span> <span class="nav-text">实例</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Entity"><span class="nav-number">3.1.</span> <span class="nav-text">Entity</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Component"><span class="nav-number">3.2.</span> <span class="nav-text">Component</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#System"><span class="nav-number">3.3.</span> <span class="nav-text">System</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#例子2"><span class="nav-number">4.</span> <span class="nav-text">例子2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为Unity设计的ECS系统（Entitas）"><span class="nav-number">5.</span> <span class="nav-text">为Unity设计的ECS系统（Entitas）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cocos使用ecs"><span class="nav-number">6.</span> <span class="nav-text">cocos使用ecs</span></a></li></ol></div>
             
 
           </div>
